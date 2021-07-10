@@ -1,0 +1,179 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>btc - 分类 - kirito&#39;s blog</title>
+        <link>https://www.kirito41dd.cn/categories/btc/</link>
+        <description>btc - 分类 - kirito&#39;s blog</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Tue, 05 Jan 2021 20:50:00 &#43;0800</lastBuildDate><atom:link href="https://www.kirito41dd.cn/categories/btc/" rel="self" type="application/rss+xml" /><item>
+    <title>比特币钱包推荐</title>
+    <link>https://www.kirito41dd.cn/btc-wallet/</link>
+    <pubDate>Tue, 05 Jan 2021 20:50:00 &#43;0800</pubDate>
+    <author>kirito</author>
+    <guid>https://www.kirito41dd.cn/btc-wallet/</guid>
+    <description><![CDATA[<h2 id="说明">说明</h2>
+<p>推荐下我使用过的钱包，来给你提供建议。</p>
+<h2 id="bitcoin-core">Bitcoin Core</h2>
+<p><a href="" rel=""></a></p>
+<p>关键信息：</p>
+<ul>
+<li>平台：Windows、Linux、MacOS</li>
+<li>获取：<a href="https://bitcoin.org/zh_CN/download" target="_blank" rel="noopener noreffer">https://bitcoin.org/zh_CN/download</a></li>
+<li>源代码：<a href="https://github.com/bitcoin/bitcoin" target="_blank" rel="noopener noreffer">https://github.com/bitcoin/bitcoin</a></li>
+<li>全节点：是</li>
+</ul>
+<p>核心钱包是全节点钱包，意味着你需要同步并存储所有区块数据。截止到2021年，区块数据约350GB，你至少需要保证500GB的存储空间以应对未来的数据增长。虽然全节点能够使区块链更安全，但不建议小白同步。因为如果你的全节点不能以服务的形式存在（通常需要一个公网IP），那么别人并不能主动和你建立链接，意义不大。提供全节点服务以保障区块链安全的使命请交给其他有情怀的专业人士。对于非专业人士（特指不是程序员）操作过于繁琐，不建议使用。</p>
+<p><a href="" rel=""></a></p>
+<p>优点：</p>
+<ul>
+<li>开源，意味着更安全，开发者不受任何人控制。</li>
+<li>支持HD钱包: bip32「分层确定性(Hierarchical Deterministic)钱包」</li>
+<li>有强大的命令行，不过需要大量学习</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>新版本不支持生成1开头的地址（我平时不用的理由</li>
+<li>要时常备份钱包文件（找零机制，外部导入私钥 这些都需要备份才行）</li>
+<li>学习成本高</li>
+</ul>
+<h2 id="electrum">Electrum</h2>
+<p><a href="" rel=""></a></p>
+<p>关键信息：</p>
+<ul>
+<li>平台：Windows、Linux、MacOS、Android（超难看）</li>
+<li>获取：<a href="https://electrum.org" target="_blank" rel="noopener noreffer">https://electrum.org</a></li>
+<li>源代码：<a href="https://github.com/spesmilo/electrum" target="_blank" rel="noopener noreffer">https://github.com/spesmilo/electrum</a></li>
+<li>全节点：否</li>
+</ul>
+<p>Electrum是一个轻节点钱包，你不用同步节点数据，而是由别人提供的服务器来帮你广播、查询交易。这些服务器不会存储你的私钥（也做不到）。你只需要连接一些服务器，就能够安全的完成交易。</p>
+<p><a href="" rel=""></a></p>
+<p>优点：</p>
+<ul>
+<li>使用方便</li>
+<li>支持HD钱包，支持助记词（但不是bip39）</li>
+<li>功能强大，兼容所有地址类型</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>不支持导出bip39助记词，使用的是自定义版本，但可以导入bip39</li>
+<li>只能使用桌面版本，移动端不支持（Android版本做的太垃圾了</li>
+<li>除了上面，我觉得完美</li>
+</ul>
+<h2 id="imtoken">Imtoken</h2>
+<p><a href="" rel=""></a></p>
+<p>关键信息：</p>
+<ul>
+<li>平台：Android、iOS</li>
+<li>获取：谷歌商店、App Store、<a href="https://token.im/?locale=zh" target="_blank" rel="noopener noreffer">https://token.im</a></li>
+<li>部分源代码：<a href="https://github.com/consenlabs/token-core" target="_blank" rel="noopener noreffer">https://github.com/consenlabs/token-core</a></li>
+<li>全节点：否</li>
+</ul>
+<p>Imtoken是一个主打移动端的轻节点钱包，并且支持多币种，能满足日常使用。</p>
+<p></p>
+<p>优点：</p>
+<ul>
+<li>HD钱包，支持导出bip39助记词</li>
+<li>同时支持隔离见证地址和普通地址</li>
+<li>对地址私钥控制方便，可以任意导出</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>多币种钱包（我只需要btc</li>
+<li>有官方的一些推送内容</li>
+<li>夹私货，推销自己的平台币（无奈其他开源移动端功能不够，我目前使用这个</li>
+</ul>
+<h2 id="其他">其他</h2>
+<p>这个网站列出了可信度较高的钱包：<a href="https://bitcoin.org/zh_CN/choose-your-wallet?step=5" target="_blank" rel="noopener noreffer">https://bitcoin.org</a></p>
+<p>桌面端基本用core钱包或Electrum就够了。</p>
+<p>移动端我也用Bither，觉得很不错，比imtoken功能少点，但完全开源更可信。</p>
+<p>其他交易所推出的钱包我就不推荐了，夹私货太多。</p>
+<h2 id="推荐阅读">推荐阅读</h2>
+<ul>
+<li><a href="https://learnblockchain.cn/2018/09/28/hdwallet" target="_blank" rel="noopener noreffer">bip32、bip39、bip44</a></li>
+</ul>
+]]></description>
+</item><item>
+    <title>写给小白的比特币入门</title>
+    <link>https://www.kirito41dd.cn/btc-start/</link>
+    <pubDate>Fri, 04 Dec 2020 21:22:14 &#43;0800</pubDate>
+    <author>kirito</author>
+    <guid>https://www.kirito41dd.cn/btc-start/</guid>
+    <description><![CDATA[<h2 id="说明">说明</h2>
+<p>为了给小白说清：</p>
+<p>私钥 公钥 地址 钱包 交易所 咋获得比特币</p>
+<p>简单粗暴，<strong>不讲原理</strong>，<strong>不讲原理</strong>，<strong>不讲原理</strong></p>
+<h2 id="定理雾">定理(雾</h2>
+<p>说了不讲原理，就当这是定理</p>
+<p><code>私钥</code>  →<code>公钥</code> → <code>地址</code></p>
+<p>按箭头方向，知道前面的，就能计算出后面的，<strong>反过来不行</strong></p>
+<p>因此 <code>私钥</code> <strong>最重要！</strong></p>
+<p>他们长啥样：</p>
+<ul>
+<li><code>私钥</code> -  <code>KwYC54hbaH6X5CrCfDK19oyJd2d1ivnSakbJxrW4ENbi2E2bJkbN</code></li>
+<li><code>公钥</code> -  <code>2f6e7sUQhP6z6mTMhh...(略)...16ME6Y18QSM</code></li>
+<li><code>地址</code> -  <code>16PXzomhwDovGRHaN6WGZXxk5BB1e78dn7</code></li>
+</ul>
+<p>公钥很长不方便记忆，所以都用地址</p>
+<h2 id="比特币是如何交易的">比特币是如何交易的</h2>
+<p>一个<code>地址</code>相当于一个账户，比特币通过<code>地址</code>互相转账</p>
+<p>谁都可以向一个<code>地址</code>转账，但是要花<code>地址</code>里的钱，必须知道<code>私钥</code></p>
+<p>这就是为什么<code>私钥</code><strong>最重要</strong></p>
+<p>比特币的区块链上记录的就是<code>地址</code>之间的转账记录</p>
+<p>有转账记录，就能算出<code>地址</code>里有多少钱</p>
+<h2 id="什么是钱包">什么是钱包</h2>
+<p>一个<code>地址</code>就是一个账户，每个人名下都可能有很多账户</p>
+<p>但是有一个<code>地址</code>就肯定有一个<code>私钥</code></p>
+<p>钱包就是帮你管理私钥的</p>
+<p>钱包一般都有一下功能：</p>
+<ul>
+<li>
+<p>帮你计算你拥有多少钱（就是从区块链上计算地的地址里有多少比特币）</p>
+</li>
+<li>
+<p>备份，如果你手机或电脑丢了，有备份就能找回你的私钥</p>
+</li>
+<li>
+<p>交易，给别的地址转账</p>
+</li>
+<li>
+<p>帮你自动生成私钥（也就是地址）</p>
+</li>
+</ul>
+<p>为什么每个人要有很多地址，而不是一个：</p>
+<p>谁都可以从区块链上计算出某个<code>地址</code>的交易记录，如果你一直使用一个<code>地址</code>，你的隐私可能就暴漏了</p>
+<p>一般是不能从<code>地址</code>推算出拥有这个<code>地址</code>的人是谁的，但如果你用的时间长了，比如从某个网址买东西用这个<code>地址</code>转账了，就能吧<code>地址</code>和你这个人联系起来，就知道你是谁了</p>
+<p>由于<code>地址</code>可以凭空产生，谁都可以轻易生成(后面讲)</p>
+<p>所以转账都用很多不同地址，不过这些事情钱包帮你做了，小白可能感觉不到</p>
+<p>你可能担心钱包安全性，但他们大多是安全的，前提是知名钱包，官网上推荐的钱包一般都安全</p>
+<p><a href="https://bitcoin.org" target="_blank" rel="noopener noreffer">https://bitcoin.org</a></p>
+<p>(也可以看我写的另一篇钱包推荐</p>
+<h2 id="如何生成地址">如何生成地址</h2>
+<p>谁都可以生成一个<code>私钥</code>，从而生成<code>地址</code></p>
+<p><code>私钥</code>本质上是256个0和1组成的二进制串，然后编码成字符串</p>
+<p>这256个0和1是随机的，所以你连续抛256次硬币，就能得到一个地址</p>
+<p>这里<strong>随机</strong>非常重要，如果你只是凭喜好写出了256个0和1，那和你有相同习惯的人也可能写出来跟你一样的0和1,等于你的私钥被别人知道了。</p>
+<p>没人会去抛硬币吧应该，大家都用软件生成<code>私钥</code>，这些软件都有自己的随机方法</p>
+<p>这是一个安全的网站：<a href="https://www.bitaddress.org" target="_blank" rel="noopener noreffer">www.bitaddress.org</a></p>
+<p>根据你的鼠标位置取样，生成随机的<code>私钥</code></p>
+<p>冷钱包：</p>
+<p>在离线的安全的环境下生成一个<code>私钥</code>，这个<code>私钥</code>只有你知道。</p>
+<p>如果还能在离线环境签名交易，这个操作就是冷钱包的功能</p>
+<p>只要你不联网，就没有泄漏的可能(流氓软件太多)，冷钱包就是一套离线解决方案</p>
+<p>当然发布交易还是需要网络，可以把签名后的信息生成二维码，让联网设备读取、发布。</p>
+<p>（用市面上常见的钱包已经很安全了</p>
+<h2 id="交易所">交易所</h2>
+<p>如果你在币圈没有熟人，可以到交易所买比特币</p>
+<p>交易所和股票那个交易所的职能差不多</p>
+<p>你在上面买的比特币都被存在交易所里，可以提出来，但有手续费</p>
+<p>交易所不会吧私钥给你，也就是说你只能通过交易所把比特币提出来，如果交易所跑路了，你币没了(概率极低)</p>
+<p>知名交易所都很安全：我一般用火币 ，(火币打钱<code>1KiritobkMPpaWBjTDHSoiP5icv8PEFNdR</code>)</p>
+<p>交易所注册邀请码：(使用邀请码双方都会获得奖励)</p>
+<ul>
+<li>火币 -
+<ul>
+<li>邀请链接 - <a href="https://www.huobi.me/topic/invited/?invite_code=6a995" target="_blank" rel="noopener noreffer">www.huobi.me/topic/invited/?invite_code=6a995</a></li>
+<li>邀请码 - <code>6a995</code></li>
+</ul>
+</li>
+</ul>
+]]></description>
+</item></channel>
+</rss>

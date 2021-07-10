@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>矩阵快速幂 - kirito&#39;s blog</title><meta name="Description" content="kirito&#39;s blog"><meta property="og:title" content="矩阵快速幂" />
+<meta property="og:description" content="大一还是大二学线性代数的时候，感觉这玩意怎么这么无聊，这破矩阵能干啥？老师讲课跟催眠一样。后来学习OpenGL的时候才感受到矩阵的魅力，原来" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.kirito41dd.cn/matrix-fast-power/" />
+<meta property="og:image" content="https://www.kirito41dd.cn/logo.png"/>
+<meta property="article:published_time" content="2019-03-25T12:23:42+08:00" />
+<meta property="article:modified_time" content="2019-03-25T12:23:42+08:00" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://www.kirito41dd.cn/logo.png"/>
+
+<meta name="twitter:title" content="矩阵快速幂"/>
+<meta name="twitter:description" content="大一还是大二学线性代数的时候，感觉这玩意怎么这么无聊，这破矩阵能干啥？老师讲课跟催眠一样。后来学习OpenGL的时候才感受到矩阵的魅力，原来"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://www.kirito41dd.cn/matrix-fast-power/" /><link rel="prev" href="https://www.kirito41dd.cn/mysql-operation-manual/" /><link rel="next" href="https://www.kirito41dd.cn/2020-spring-recruits/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><meta name="google-site-verification" content="5J8bsg9tKySrpONjEV2nAOqQ08TCVjsooCRIuDsxhD4" /><meta name="baidu-site-verification" content="code-NY7bFlUK92" /><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "矩阵快速幂",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/www.kirito41dd.cn\/matrix-fast-power\/"
+        },"image": ["https:\/\/blog-1256556944.file.myqcloud.com\/kirito.jpg"],"genre": "posts","keywords": "algorithm, math","wordcount":  1358 ,
+        "url": "https:\/\/www.kirito41dd.cn\/matrix-fast-power\/","datePublished": "2019-03-25T12:23:42+08:00","dateModified": "2019-03-25T12:23:42+08:00","publisher": {
+            "@type": "Organization",
+            "name": "kirito","logo": "https:\/\/blog-1256556944.file.myqcloud.com\/kirito.jpg"},"author": {
+                "@type": "Person",
+                "name": "kirito"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="kirito&#39;s blog">kirito</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><a class="menu-item" href="https://travellings.link" rel="noopener noreffer" target="_blank"><i class='fas fa-fw fa-subway'> </i> 开往 </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="kirito&#39;s blog">kirito</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a class="menu-item" href="https://travellings.link" title="" rel="noopener noreffer" target="_blank"><i class='fas fa-fw fa-subway'> </i>开往</a><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content always-active" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">矩阵快速幂</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>kirito</a></span>&nbsp;<span class="post-category">收录于 <a href="/categories/algorithm/"><i class="far fa-folder fa-fw"></i>algorithm</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2019-03-25">2019-03-25</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1358 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 3 分钟&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#解决哪些问题">解决哪些问题</a></li>
+    <li><a href="#矩阵快速幂">矩阵快速幂</a></li>
+    <li><a href="#构造矩阵例题">构造矩阵例题</a></li>
+    <li><a href="#附赠">附赠！</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>大一还是大二学线性代数的时候，感觉这玩意怎么这么无聊，这破矩阵能干啥？老师讲课跟催眠一样。后来学习OpenGL的时候才感受到矩阵的魅力，原来3D世界的平移、旋转、缩放都可以用一个小小的四阶矩阵的运算来完成，AMAZING 啊！！！(比老师上课有意思多了)</p>
+<p>矩阵快速幂也是打ACM期间学到的，思想上和整数的快速幂一样，操作替换成了矩阵运算而已。</p>
+<p><del>没错，课堂上的时间都用来睡觉、刷手机了</del></p>
+<h2 id="解决哪些问题">解决哪些问题</h2>
+<p>求解一些递推公式的第n项的时候，通过递推公式构造转移矩阵，并用矩阵快速幂可以快速得到第n项的值。特别对于n很大的时候不能循环迭代，可用矩阵快速幂解决。</p>
+<p>比如斐波那契数列： $F_0=0,F_1=1,F_n=F_n-1+F_n-2,(n \ge2,n \in N^*)$</p>
+<p>0 1 1 2 3 5 8&hellip;</p>
+<p>如果要求第n项，n比较小的话，可以直接循环迭代出来。</p>
+<p>如果n比较大，第一亿个是多少，用循环就太慢了，矩阵快速幂更快更适合。</p>
+<p>根据矩阵乘法性质，构造转移矩阵</p>
+<div>
+$$
+\begin{bmatrix}
+1&1\\
+1&0\end{bmatrix} \times\begin{bmatrix}
+F_{n-1}\\
+F_{n-2}
+\end{bmatrix} = \begin{bmatrix}
+F_{n}\\
+F_{n-1}
+\end{bmatrix}
+$$
+</div>
+<p>那么</p>
+<div>
+$$
+\begin{bmatrix}
+1&1\\
+1&0\end{bmatrix}^{n-1} \times\begin{bmatrix}
+F_{1}\\
+F_{0}
+\end{bmatrix} = \begin{bmatrix}
+F_{n}\\
+F_{n-1}
+\end{bmatrix}
+$$
+</div>
+<p>这样问题就变成了求转移矩阵的幂。这个转移矩阵一定构造成方阵。</p>
+<h2 id="矩阵快速幂">矩阵快速幂</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span><span class="cp">#define MATRIX_SIZE 2
+</span><span class="cp"></span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">mod</span> <span class="o">=</span> <span class="mf">1e9</span><span class="o">+</span><span class="mi">7</span><span class="p">;</span>
+<span class="k">struct</span> <span class="nc">Matrix</span> <span class="c1">//构造一个方阵
+</span><span class="c1"></span><span class="p">{</span>
+    <span class="kt">int</span> <span class="n">data</span><span class="p">[</span><span class="n">MATRIX_SIZE</span><span class="p">][</span><span class="n">MATRIX_SIZE</span><span class="p">];</span>
+    <span class="n">Matrix</span><span class="p">(){</span>
+        <span class="n">memset</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">data</span><span class="p">));</span>
+        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span> <span class="c1">// 初始化为单位矩阵
+</span><span class="c1"></span>        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="n">Matrix</span> <span class="k">operator</span> <span class="o">+</span> <span class="p">(</span><span class="n">Matrix</span>  <span class="n">o</span><span class="p">)</span><span class="k">const</span><span class="p">{</span> <span class="c1">//(a+b)%mod
+</span><span class="c1"></span>        <span class="n">Matrix</span> <span class="n">re</span><span class="p">;</span> 
+        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+            <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">j</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">){</span>
+                <span class="n">re</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="n">o</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])</span> <span class="o">%</span> <span class="n">mod</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">re</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">Matrix</span> <span class="k">operator</span> <span class="o">*</span> <span class="p">(</span><span class="n">Matrix</span>  <span class="n">o</span><span class="p">)</span><span class="k">const</span><span class="p">{</span> <span class="c1">//(a*b)%mod
+</span><span class="c1"></span>        <span class="n">Matrix</span> <span class="n">re</span><span class="p">;</span>
+        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+            <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">j</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">){</span>
+                <span class="n">re</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+                <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">k</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">k</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span>
+                    <span class="n">re</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">re</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="p">((</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">o</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">])</span> <span class="o">%</span> <span class="n">mod</span><span class="p">))</span> <span class="o">%</span> <span class="n">mod</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">re</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">Matrix</span> <span class="k">operator</span> <span class="o">^</span> <span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">)</span><span class="k">const</span><span class="p">{</span> <span class="c1">// (a^n)%mod
+</span><span class="c1"></span>        <span class="n">Matrix</span> <span class="n">re</span><span class="p">,</span><span class="n">base</span><span class="p">;</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+        <span class="k">while</span><span class="p">(</span><span class="n">n</span><span class="p">){</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">n</span><span class="o">&amp;</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">re</span> <span class="o">=</span> <span class="n">re</span> <span class="o">*</span> <span class="n">base</span><span class="p">;</span>
+            <span class="n">n</span><span class="o">&gt;&gt;=</span><span class="mi">1</span><span class="p">;</span>
+            <span class="n">base</span> <span class="o">=</span> <span class="n">base</span> <span class="o">*</span> <span class="n">base</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">re</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">Matrix</span> <span class="nf">Psum</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">)</span><span class="k">const</span><span class="p">{</span> <span class="c1">//(a+a^2+a^3.....+a^n)%mod
+</span><span class="c1"></span>        <span class="n">Matrix</span> <span class="n">a</span><span class="p">,</span><span class="n">ans</span><span class="p">,</span><span class="n">pre</span><span class="p">;</span>
+        <span class="kt">int</span> <span class="n">m</span><span class="p">;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">n</span><span class="o">==</span><span class="mi">1</span><span class="p">)</span> <span class="k">return</span> <span class="n">a</span><span class="p">;</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">n</span><span class="o">/</span><span class="mi">2</span><span class="p">;</span>
+        <span class="n">pre</span> <span class="o">=</span> <span class="n">a</span><span class="p">.</span><span class="n">Psum</span><span class="p">(</span><span class="n">m</span><span class="p">);</span> <span class="c1">// a^[1,n/2] 相加
+</span><span class="c1"></span>        <span class="n">ans</span> <span class="o">=</span> <span class="n">pre</span> <span class="o">+</span> <span class="p">(</span><span class="n">pre</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span><span class="o">^</span><span class="n">m</span><span class="p">));</span> <span class="c1">// ans = [1,n/2] + a^(n/2)*[1,n/2]
+</span><span class="c1"></span>        <span class="k">if</span><span class="p">(</span><span class="n">n</span><span class="o">&amp;</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">ans</span> <span class="o">=</span> <span class="n">ans</span> <span class="o">+</span> <span class="p">(</span><span class="n">a</span><span class="o">^</span><span class="n">n</span><span class="p">);</span>    <span class="c1">//n为奇数时候a^n会漏掉，补上
+</span><span class="c1"></span>        <span class="k">return</span> <span class="n">ans</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="kt">void</span> <span class="nf">out</span><span class="p">(){</span>
+        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+            <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">j</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">){</span>
+                <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%d &#34;</span><span class="p">,</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]);</span>
+            <span class="p">}</span><span class="n">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(){</span>
+    <span class="n">Matrix</span> <span class="n">ma</span><span class="p">,</span><span class="n">swa</span><span class="p">;</span>
+    <span class="n">ma</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+    <span class="n">ma</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+    <span class="n">ma</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+    <span class="n">ma</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">n</span><span class="p">;</span>
+    <span class="n">ma</span><span class="p">.</span><span class="n">out</span><span class="p">();</span>
+    <span class="k">while</span><span class="p">(</span><span class="n">scanf</span><span class="p">(</span><span class="s">&#34;%d&#34;</span> <span class="p">,</span> <span class="o">&amp;</span><span class="n">n</span><span class="p">)</span> <span class="p">,</span> <span class="n">n</span><span class="o">&gt;=</span><span class="mi">1</span><span class="p">){</span>
+        <span class="n">swa</span> <span class="o">=</span> <span class="n">ma</span><span class="o">^</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+        <span class="c1">//swa.out();
+</span><span class="c1"></span>        <span class="n">printf</span><span class="p">(</span><span class="s">&#34;is %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">swa</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">1</span> <span class="o">+</span> <span class="n">swa</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">0</span> <span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="构造矩阵例题">构造矩阵例题</h2>
+<p><a href="http://acm.hdu.edu.cn/showproblem.php?pid=6470" target="_blank" rel="noopener noreffer">hdu6470</a></p>
+<blockquote>
+<p>Farmer John有n头奶牛.</p>
+<p>某天奶牛想要数一数有多少头奶牛,以一种特殊的方式:</p>
+<p>第一头奶牛为1号,第二头奶牛为2号,第三头奶牛之后,假如当前奶牛是第n头,那么他的编号就是2倍的第n-2头奶牛的编号加上第n-1头奶牛的编号再加上自己当前的n的三次方为自己的编号.</p>
+<p>现在Farmer John想知道,第n头奶牛的编号是多少,估计答案会很大,你只要输出答案对于123456789取模.</p>
+</blockquote>
+<p>根据题意可以得到递推公式：</p>
+<div>
+$$
+F_n=\begin{cases}
+1& n=1\\
+2& n=2\\
+2\times F_{n-2} + F_{n-1}+n^3& n\ge3
+\end{cases}
+$$
+</div>
+<p>由于$n^3$的存在，这个递推公式并不是线性的，所以要想办法把$n^3$展开：</p>
+<div>
+$$
+n^3=(n-1+1)^3=C^0_3(n-1)^3+C^1_3(n-1)^2+C^2_3(n-1)^1+C^3_3(n-1)^0 \\=1\times(n-1)^3+3\times (n-1)^2+3\times(n-1)^1+1\times(n-1)^0
+$$
+</div>
+<p>那么转移矩阵$M$为：</p>
+<div>
+$$
+\begin{bmatrix}
+0&1&0&0&0&0\\
+2&1&C_3^0&C_3^1&C_3^2&C_3^3\\
+0&0&C_3^0&C_3^1&C_3^2&C_3^3\\
+0&0&0&C_2^0&C_2^1&C_2^2\\
+0&0&0&0&C_1^0 &C_1^1\\
+0&0&0&0&0&1
+\end{bmatrix}\times
+\begin{bmatrix}
+F_{n-2}\\F_{n-1}\\(n-1)^3\\(n-1)^2\\(n-1)^1\\(n-1)^0
+\end{bmatrix}
+ = 
+\begin{bmatrix}
+F_{n-1}\\F_{n}\\(n)^3\\(n)^2\\(n)^1\\(n)^0
+\end{bmatrix}
+$$
+</div>
+<p>取$n=3$：</p>
+<div>
+$$
+\begin{bmatrix}
+F_{n-2}\\F_{n-1}\\(n-1)^3\\(n-1)^2\\(n-1)^1\\(n-1)^0
+\end{bmatrix}=\begin{bmatrix}
+F_{1}\\F_{2 }\\2^3\\ 2^2\\ 2^1\\ 2^0
+\end{bmatrix}
+$$
+</div>
+<p>所以：</p>
+<div>
+$$
+F_n = M^{n-2 } \times \begin{bmatrix}
+F_{1}\\F_{2 }\\2^3\\ 2^2\\ 2^1\\ 2^0
+\end{bmatrix},n \ge 2
+$$
+</div>
+AC代码：
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span><span class="cp">#define MATRIX_SIZE 6
+</span><span class="cp"></span><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">mod</span> <span class="o">=</span> <span class="mi">123456789</span><span class="p">;</span>
+<span class="k">struct</span> <span class="nc">Matrix</span> <span class="c1">//构造一个方阵
+</span><span class="c1"></span><span class="p">{</span>
+    <span class="kt">long</span> <span class="kt">long</span> <span class="n">data</span><span class="p">[</span><span class="n">MATRIX_SIZE</span><span class="p">][</span><span class="n">MATRIX_SIZE</span><span class="p">];</span>
+    <span class="n">Matrix</span><span class="p">(){</span>
+        <span class="n">memset</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">data</span><span class="p">));</span>
+        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span> <span class="c1">// 初始化为单位矩阵
+</span><span class="c1"></span>        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="n">Matrix</span> <span class="k">operator</span> <span class="o">*</span> <span class="p">(</span><span class="n">Matrix</span>  <span class="n">o</span><span class="p">)</span><span class="k">const</span><span class="p">{</span> <span class="c1">//(a*b)%mod
+</span><span class="c1"></span>        <span class="n">Matrix</span> <span class="n">re</span><span class="p">;</span>
+        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+            <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">j</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">){</span>
+                <span class="n">re</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+                <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">k</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">k</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span>
+                    <span class="n">re</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">re</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="p">((</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">o</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">])</span> <span class="o">%</span> <span class="n">mod</span><span class="p">))</span> <span class="o">%</span> <span class="n">mod</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">re</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">Matrix</span> <span class="k">operator</span> <span class="o">^</span> <span class="p">(</span><span class="kt">long</span> <span class="kt">long</span> <span class="n">n</span><span class="p">)</span><span class="k">const</span><span class="p">{</span> <span class="c1">// (a^n)%mod
+</span><span class="c1"></span>        <span class="n">Matrix</span> <span class="n">re</span><span class="p">,</span><span class="n">base</span><span class="p">;</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+        <span class="k">while</span><span class="p">(</span><span class="n">n</span><span class="p">){</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">n</span><span class="o">&amp;</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">re</span> <span class="o">=</span> <span class="n">re</span> <span class="o">*</span> <span class="n">base</span><span class="p">;</span>
+            <span class="n">n</span><span class="o">&gt;&gt;=</span><span class="mi">1</span><span class="p">;</span>
+            <span class="n">base</span> <span class="o">=</span> <span class="n">base</span> <span class="o">*</span> <span class="n">base</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">re</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+<span class="n">Matrix</span> <span class="n">ma</span><span class="p">,</span><span class="n">swa</span><span class="p">;</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(){</span>
+    <span class="kt">int</span> <span class="n">mm</span><span class="p">[</span><span class="mi">6</span><span class="p">][</span><span class="mi">6</span><span class="p">]</span><span class="o">=</span><span class="p">{</span>
+        <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">},</span>
+        <span class="p">{</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span>
+        <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span>
+        <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span>
+        <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span>
+        <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">}</span>
+    <span class="p">};</span>
+    <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="n">i</span><span class="o">&lt;</span><span class="mi">6</span><span class="p">;</span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="n">j</span><span class="o">&lt;</span><span class="mi">6</span><span class="p">;</span><span class="n">j</span><span class="o">++</span><span class="p">)</span>
+            <span class="n">ma</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">=</span><span class="n">mm</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">];</span>
+    <span class="kt">long</span> <span class="kt">long</span> <span class="n">t</span><span class="p">,</span><span class="n">a</span><span class="p">;</span>
+    <span class="n">cin</span><span class="o">&gt;&gt;</span><span class="n">t</span><span class="p">;</span>
+    <span class="k">while</span><span class="p">(</span><span class="n">t</span><span class="o">--</span><span class="p">){</span>
+        <span class="n">cin</span><span class="o">&gt;&gt;</span><span class="n">a</span><span class="p">;</span>
+        <span class="n">swa</span> <span class="o">=</span> <span class="n">ma</span><span class="o">^</span><span class="p">(</span><span class="n">a</span><span class="o">-</span><span class="mi">2</span><span class="p">);</span>
+        <span class="kt">long</span> <span class="kt">long</span> <span class="n">ac</span><span class="p">;</span>
+        <span class="n">ac</span><span class="o">=</span> <span class="n">swa</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">1</span><span class="p">;</span>
+        <span class="n">ac</span><span class="o">+=</span><span class="n">swa</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">;</span>
+        <span class="n">ac</span><span class="o">+=</span><span class="n">swa</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="mi">8</span><span class="p">;</span>
+        <span class="n">ac</span><span class="o">+=</span><span class="n">swa</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span><span class="o">*</span><span class="mi">4</span><span class="p">;</span>
+        <span class="n">ac</span><span class="o">+=</span><span class="n">swa</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">;</span>
+        <span class="n">ac</span><span class="o">+=</span><span class="n">swa</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">5</span><span class="p">]</span><span class="o">*</span><span class="mi">1</span><span class="p">;</span>
+        <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">ac</span><span class="o">%</span><span class="n">mod</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="附赠">附赠！</h2>
+<p>这个方程怎么用矩阵计算，可以试着练练手。</p>
+<div>
+$$
+f(x)=
+\begin{cases}
+1& x=0 \\
+1& x=1 \\
+9\times f(x-1) + 9\times f(x-2) + 6& x>1
+\end{cases}
+$$
+</div>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2019-03-25</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/algorithm/">algorithm</a>,&nbsp;<a href="/tags/math/">math</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/mysql-operation-manual/" class="prev" rel="prev" title="MySQL操作手册(个人笔记)"><i class="fas fa-angle-left fa-fw"></i>MySQL操作手册(个人笔记)</a>
+            <a href="/2020-spring-recruits/" class="next" rel="next" title="2020春招记录">2020春招记录<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="disqus_thread" class="comment"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://disqus.com/?ref_noscript">Disqus</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line"><small>1KiritobkMPpaWBjTDHSoiP5icv8PEFNdR</small></div><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.77.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.10"><i class="far fa-kiss-wink-heart fa-fw"></i> LoveIt</a>
+                </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2020 - 2021</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">kirito</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><script type="text/javascript" src="https://kirito-blog.disqus.com/embed.js" defer></script><script type="text/javascript" src="/lib/smooth-scroll/smooth-scroll.min.js"></script><script type="text/javascript" src="/lib/autocomplete/autocomplete.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.stemmer.support.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.zh.min.js"></script><script type="text/javascript" src="/lib/lazysizes/lazysizes.min.js"></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js"></script><script type="text/javascript" src="/lib/katex/auto-render.min.js"></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js"></script><script type="text/javascript" src="/lib/katex/mhchem.min.js"></script><script type="text/javascript" src="/lib/cookieconsent/cookieconsent.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":30},"comment":{},"cookieconsent":{"content":{"dismiss":"同意","link":"了解更多","message":"本网站使用 Cookies 来改善您的浏览体验."},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrIndexURL":"/index.json","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50,"type":"lunr"}};</script><script type="text/javascript" src="/js/theme.min.js"></script><script type="text/javascript">
+            window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());
+            gtag('config', 'G-ZKPP127E4F');
+        </script><script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id=G-ZKPP127E4F" async></script><script type="text/javascript">var _hmt = _hmt || [];</script><script type="text/javascript" src="https://hm.baidu.com/hm.js?2004ef75aa13d757f75bf6f1f3add242" async></script></body>
+</html>

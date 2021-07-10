@@ -1,0 +1,1196 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>kirito&#39;s blog</title>
+        <link>https://www.kirito41dd.cn/</link>
+        <description>kirito&#39;s blog</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sat, 10 Jul 2021 18:50:44 &#43;0800</lastBuildDate>
+            <atom:link href="https://www.kirito41dd.cn/index.xml" rel="self" type="application/rss+xml" />
+        <item>
+    <title>Rust所有权与借用</title>
+    <link>https://www.kirito41dd.cn/rust-ownership-and-borrowing/</link>
+    <pubDate>Sat, 10 Jul 2021 18:50:44 &#43;0800</pubDate>
+    <author>kirito</author>
+    <guid>https://www.kirito41dd.cn/rust-ownership-and-borrowing/</guid>
+    <description><![CDATA[<p>学习笔记，对标cpp理解下rust所有权以及借用的概念，顺便提下比较特殊的切片(DST)</p>
+<h2 id="所有权ownership"><strong><ruby>所有权<rt>Ownership</rt></ruby></strong></h2>
+<p>rust中每个值都有一个所有者变量，并且同一时间只有能一个所有者，当值的所有者变量超出作用域，值的内存会被释放。</p>
+<p>下面的代码<code>String</code>的所有权从<code>s1</code>转移到了<code>s2</code>，发生了<strong>Move</strong>，此时再访问<code>s1</code>是非法的。<a href="https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html#ways-variables-and-data-interact-move" target="_blank" rel="noopener noreffer">参考</a></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">s1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&#34;hello&#34;</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">s2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">s1</span><span class="p">;</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>下面的代码<code>i32</code>的所有权<strong>没有</strong>从<code>x</code>转移到<code>y</code>，而是<code>y</code>复制了<code>x</code>，发生了<strong>Copy</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">x</span>: <span class="kt">i32</span> <span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>Move本质上也是浅拷贝：比如<code>String</code>内部实现是有一个指针指向了保存的字符串，所有权转移，其实只是拷贝了这个指针的值，并没有拷贝这个字符串。这时<code>s1</code>和<code>s2</code>的内存空间都保存着这个指针地址，由于所有权的存在，编译器保证了访问<code>s1</code>是非法的，所以<code>s1</code>虽然还指向字符串，但是什么都做不了，保证了安全。</p>
+<p>关于内存释放：由于只有在所有者生命完结后，才会发生释放，所有权保证同一时间只有一个所有者，所以字符串所在地址并不会被<strong><ruby>释放两次<rt>double free</rt></ruby></strong>。</p>
+<p>这里我想对标cpp：cpp实现类似高效转移使用的是右值引用与移动构造函数。在<code>s2</code>的移动构造函数中把<code>s1</code>的指针偷过来，然后把<code>s1</code>的指针指向一个空字符串的地址或标记其无效。<code>s1</code>是作为右值引用传过来的，在语义上是将亡值，所以可以修改<code>s1</code>内部结构。但是，cpp没有所有权概念，编译器不会阻止你继续访问<code>s1</code>。<del>这很安全（个屁</del></p>
+<p>rust在什么情况下Move什么情况下Copy，取决于类型是否实现了<code>Copy</code>Trait。上面<code>i32</code>本来已经很小了，也没东西可以浅拷贝（就4个字节折腾啥），所以<code>i32</code>是拷贝语义。</p>
+<p>rust基本类型几乎都实现了<code>Copy</code>Trait：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">pub</span><span class="w"> </span><span class="k">trait</span><span class="w"> </span><span class="nb">Copy</span>: <span class="nb">Clone</span> <span class="p">{</span><span class="w">
+</span><span class="w"></span><span class="c1">// Empty. 只是个Marker
+</span><span class="c1"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>对于tuple、array，如果元素都实现了<code>Copy</code>，也会传拷贝。对于复杂类型，如果一个类型的某个部分实现了<code>Drop</code>Trait，那么这个类型无法实现<code>Copy</code>；如果组成部分都实现了<code>Copy</code>，复杂类型也可以实现<code>Copy</code>。</p>
+<p>所有权转移可以发生在赋值、传参、函数返回。</p>
+<h2 id="引用references借用borrowing"><strong><ruby>引用<rt>references</rt></ruby></strong>&amp;<strong><ruby>借用<rt>borrowing</rt></ruby></strong></h2>
+<p>下面的代码中<code>b</code>并没有拿走所有权，而是通过<code>&amp;</code>取得了<code>a</code>的引用。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&#34;123&#34;</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">a</span><span class="p">;</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p><code>b</code>是对<code>a</code>的引用也可以描述为<code>b</code>借用了<code>a</code>，rust引用的底层可以对标为其他语言中的指针，只不过rust的引用带了生命周期和借用检查所以很安全。如cpp中的指针只是记录值了一个内存地址，与一个整型并没有啥差别，可以被保存被带到任何地方，容易发生内存泄漏。而rust编译器会保证引用的生命周期不会超过其指向的值的生命周期。</p>
+<p>引用分为<strong><ruby>不可变引用<rt>immutable references</rt></ruby></strong>与<strong><ruby>可变引用<rt>mutable references</rt></ruby></strong>，获取可变引用使用<code>let b = &amp;mut a</code>，前提是<code>a</code>是可变的才能获取可变引用，可变引用与不可变引用的关系类似读写锁：</p>
+<ol>
+<li>可以同时存在多个不可变引用(读锁)</li>
+<li>可变引用与不可变引用不能同时存在(读、写锁互斥)</li>
+<li>只能同时有一个可变引用(写锁)</li>
+</ol>
+<h3 id="切片slice"><strong><ruby>切片<rt>slice</rt></ruby></strong></h3>
+<p>切片很特殊，用来引用数组中的连续元素序列。</p>
+<ol>
+<li><strong><ruby>字符串切片<rt>string slices</rt></ruby></strong> - <code>&amp;str</code>
+<ul>
+<li><code>let s = String::from(&quot;hello world&quot;); let hello = &amp;s[0..5];</code></li>
+<li><code>let s: &amp;str = &quot;xxx&quot;; let s2: &amp;str = &amp;s[..];</code></li>
+<li>字符串切片特殊点是范围只能取有效的utf8字符边界</li>
+</ul>
+</li>
+<li>数组切片 - <code>&amp;[T]</code>
+<ul>
+<li><code>let a = [1, 2, 3, 4, 5];  let slice = &amp;a[1..3];</code></li>
+</ul>
+</li>
+</ol>
+<p>切片用[start..end]来确定引用范围，区间左闭右开<code>[start,end)</code>。范围还可以简写为<code>[..2]</code>、<code>[3..]</code>、<code>[..]</code>，省略表示取边界。</p>
+<p>切片是个胖指针，会保存目标集合的指针，与引用范围。</p>
+<p>切片之所以特殊，需要说下rust的<strong><ruby>动态大小类型<rt>Dynamic Sized Type,DST</rt></ruby></strong>，DST表示编译期无法获取大小的类型。</p>
+<p>从数组说起，数组的类型表示为<code>[T; N]</code>，<code>T</code>是元素类型而<code>N</code>是元素个数，所以数组的大小编译期是可以确定的，数组不是DST。注意<code>&amp;[i32; 3]</code>是一个普通的数组引用，而<code>&amp;[i32]</code>才是一个数组切片。</p>
+<p><strong>切片是DST</strong>，准确来说<code>[i32]</code>才叫做切片，<code>[T]</code>这种类型表示由<code>T</code>组成的切片，这个切片的长度在编译期是不确定的（DST），编译器无法为一个不确定大小的类型分配空间，所以也无法声明DST类型的变量，只能用胖指针<code>&amp;[T]</code>来引用。</p>
+<p><code>&amp;[T]</code>的大小是固定的，里面有用于存储数据地址和长度的空间，这样就可以在运行时获取长度信息。比如要制造切片<code>[1..n]</code>，n的大小是编译期间无法得到的，所以只能在运行期间计算n的值，然后初始化胖指针完成引用。</p>
+<p>字符串切片<code>str</code>也是DST，对应胖指针是<code>&amp;str</code>，可以把<code>str</code>理解为<code>[T]</code>的特殊形式，主要是用来表示utf8字符串。</p>
+<p>除了切片，<code>dyn trait</code>(Trait对应的类型)也是DST，对应的胖指针是<code>Trait Object</code>。（只要是DST类型，就无法声明对应类型变量</p>
+]]></description>
+</item><item>
+    <title>Read Copy Update</title>
+    <link>https://www.kirito41dd.cn/read-copy-update/</link>
+    <pubDate>Mon, 28 Jun 2021 21:05:43 &#43;0800</pubDate>
+    <author>kirito</author>
+    <guid>https://www.kirito41dd.cn/read-copy-update/</guid>
+    <description><![CDATA[<p><strong><ruby>RCU<rt>Read Copy Update</rt></ruby></strong>这个词最近才听到，是在公司一位老哥的直播分享里听到的。那天在群里没事乱划，突然看到一个直播分享，原本就想进去嫖一眼，结果内容异常硬核，从头看到尾。</p>
+<p>topic是用类似<strong><ruby>JIT<rt>Just In Time</rt></ruby></strong>的方式加速Go的json解析，这里顺便给他们打个广告，这个库开源了：<a href="https://github.com/bytedance/sonic" target="_blank" rel="noopener noreffer">https://github.com/bytedance/sonic</a></p>
+<p>分享里提到了RCU这种技术，RCU原本是Linux内核中的一种同步机制，并且其针对的场景是读多写少。分享里他们遇到的场景是需要实现一个buffer，特性是：</p>
+<ol>
+<li>读操作<strong>远多</strong>于写操作</li>
+<li>希望读操作无锁、无等待</li>
+</ol>
+<p>这样的场景非常适合使用RCU这种技术，RCU的基本实现是：</p>
+<ol>
+<li>
+<p>读使用原子操作读取数据指针，无锁、无等待</p>
+</li>
+<li>
+<p>写/更新操作用互斥锁防护</p>
+</li>
+<li>
+<p>不直接写/更新，而是先复制一份，对复制的数据进行写/更新</p>
+</li>
+<li>
+<p>通过原子操作将数据指针指向刚修改过的副本</p>
+<p><small>注：由于可能涉及资源释放，所以在有GC的语言上更容易实现</small></p>
+</li>
+</ol>
+<p>本质上就是牺牲写性能，提升读性能</p>
+<p>代码也非常简单，只用互斥锁和一个原子变量就可以实现：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">RCU</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">m</span> <span class="nx">sync</span><span class="p">.</span><span class="nx">Mutex</span>
+    <span class="nx">p</span> <span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">RCU</span><span class="p">)</span> <span class="nf">Get</span><span class="p">(</span><span class="nx">key</span> <span class="nx">K</span><span class="p">)</span> <span class="nx">V</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span><span class="o">*</span><span class="nx">Map</span><span class="p">[</span><span class="nx">K</span><span class="p">]</span><span class="nx">V</span><span class="p">)(</span><span class="nx">atomic</span><span class="p">.</span><span class="nf">LoadPointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">r</span><span class="p">.</span><span class="nx">p</span><span class="p">))[</span><span class="nx">key</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">RCU</span><span class="p">)</span> <span class="nf">Put</span><span class="p">(</span><span class="nx">key</span> <span class="nx">K</span><span class="p">,</span> <span class="nx">val</span> <span class="nx">V</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">m</span><span class="p">.</span><span class="nf">Lock</span><span class="p">()</span>
+    <span class="k">defer</span> <span class="nx">r</span><span class="p">.</span><span class="nx">m</span><span class="p">.</span><span class="nf">Unlock</span><span class="p">()</span>
+    <span class="nx">newm</span> <span class="o">:=</span> <span class="nb">new</span><span class="p">(</span><span class="nx">Map</span><span class="p">[</span><span class="nx">K</span><span class="p">]</span><span class="nx">V</span><span class="p">)</span>
+    <span class="nx">atomic</span><span class="p">.</span><span class="nf">StorePointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">r</span><span class="p">.</span><span class="nx">p</span><span class="p">,</span> <span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="nx">newm</span><span class="p">))</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>简单说一下，代码中<code>Map</code>、<code>K</code>、<code>V</code>都是虚拟的，可以根据需要更换（也不局限于KV）。</p>
+<p>主要思想是通过原子操作，来更换指针指向的地址。</p>
+<p>对于读，每次都会读出一个安全的数据地址，不会有其他线程修改这段数据，所以无需同步手段。</p>
+<p>对于写，同时只能有一个写，否则存在丢失更新，所以加互斥锁防护。</p>
+<p>由于写都是在拷贝上进行，所以不会影响读的性能</p>
+<p>NICE！！！</p>
+]]></description>
+</item><item>
+    <title>毕业了！！！</title>
+    <link>https://www.kirito41dd.cn/bi-ye-leee/</link>
+    <pubDate>Mon, 07 Jun 2021 22:05:11 &#43;0800</pubDate>
+    <author>kirito</author>
+    <guid>https://www.kirito41dd.cn/bi-ye-leee/</guid>
+    <description><![CDATA[<div class="featured-image">
+                <img src="https://blog-1256556944.file.myqcloud.com/public/henu.png" referrerpolicy="no-referrer">
+            </div><p><strong>明德新民 止于至善</strong>
+</br>
+</br>
+感觉校歌是真滴好听！</p>
+<center><small>
+嵩岳苍苍 河水泱泱，
+<p>中原文化悠且长，</p>
+<p>济济多士 风雨一堂，</p>
+<p>继往开来扬辉光，</p>
+<p>四郊多垒 国仇难忘，</p>
+<p>民主是式 科学允张，</p>
+<p>猗欤吾校永无疆！</p>
+<p>猗欤吾校永无疆！
+</small></center></p>
+<p><meting-js url="https://blog-1256556944.file.myqcloud.com/public/%E6%A0%A1%E6%AD%8C.mp3" name="河南大学校歌" artist="词:嵇文甫 曲:陈梓北" cover="https://blog-1256556944.file.myqcloud.com/public/%E6%A0%A1%E5%BE%BD.webp" theme="#448aff" autoplay="true"></meting-js>
+</br>
+</br>
+从2017到2021，由于疫情的关系整整一年半没有呆在学校，就感觉四年过的非常快。大三下学期在被窝中完成课业，大四还没开学就顶着疫情去北京实习了。四年前的我还是个一无所知的少年，四年后蜕变成了一个一无所知的青年（</p>
+<p>学生的身份就此结束了，没有选择继续读研，原因有很多：</p>
+<ol>
+<li>不会学习，对不感兴趣的课一点都听不进去</li>
+<li>喜欢操代码，感觉可以直接工作（事实证明我确实可以</li>
+<li>拿过一些奖项，但由于非专业课业成绩差点，还是离保研差了一步</li>
+<li>考研是不可能考研的，很反感硕士考题。（看室友备考时来问我的题目，谭浩强年代的C，净考一些没有意义的玩意。</li>
+<li>硕士了又怎样（</li>
+</ol>
+<p>希望以后不会对自己的选择后悔
+</br>
+</br>
+大学四年也成长了很多，感谢我的两任女朋友(<del>前任与现任</del>)
+</br>
+</br></p>
+<p>照片🐎一下我sqdl，<del>网络并非法外之地</del></p>
+<center>
+<image comment="大礼堂" src="https://blog-1256556944.file.myqcloud.com/public/henu_dalitang_mask.png">
+</center>
+<center>
+<image comment="欧美预备" src="https://blog-1256556944.file.myqcloud.com/public/henu_oumei_mask.png">
+</center>
+最后，疾风亦有归途🐶
+]]></description>
+</item><item>
+    <title>Ctrl&#43;C与Kill杀死进程的区别</title>
+    <link>https://www.kirito41dd.cn/different-from-ctrl-c-and-kill/</link>
+    <pubDate>Fri, 07 May 2021 20:11:26 &#43;0800</pubDate>
+    <author>kirito</author>
+    <guid>https://www.kirito41dd.cn/different-from-ctrl-c-and-kill/</guid>
+    <description><![CDATA[<p>在linux系统中，通过bash中输入<code>&lt;Ctrl+C&gt;</code>或者使用命令<code>kill -9 $pid</code>都可以杀死进程，但是它们有很大的不同。</p>
+<p>先放结论：<strong>kill命令只会杀死目标进程，而bash快捷键则会杀死整个前台进程组！</strong></p>
+<h2 id="linux杀进程方式">linux杀进程方式</h2>
+<p>不管使用那种方式，杀死进程都是通过发送信号（signal）来完成的，kill命令其实就是向目标pid进程发送信号：</p>
+<ul>
+<li><code>kill -9</code> - 发送<code>SIGKILL</code></li>
+<li><code>kill -2</code> - 发送<code>SIGINT</code></li>
+<li><code>kill -15</code> - 发送<code>SIGTERM</code></li>
+</ul>
+<p>完整列表如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># kill -l</span>
+HUP INT QUIT ILL TRAP ABRT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM URG STOP TSTP CONT CHLD TTIN TTOU IO XCPU XFSZ VTALRM PROF WINCH INFO USR1 USR2
+</code></pre></td></tr></table>
+</div>
+</div><p>bash快捷键发送信号方式如下：</p>
+<ul>
+<li>INT - <code>&lt;Ctrl+C&gt;</code></li>
+<li>KILL - <code>&lt;Ctrl+\&gt;</code></li>
+</ul>
+<h2 id="前台进程组">前台进程组</h2>
+<p>会话是一个或多个进程组的集合，每登陆一个终端就相当于一个新会话，一个会话可以有一个前台进程组和多个后台进程组。</p>
+<p>默认通过bash启动的程序，都会放在前台进程组，包括这个程序的子进程。</p>
+<p>如果要放在后台进行组，可以使用<code>&amp;</code>指定</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="nb">echo</span> <span class="m">123</span> <span class="p">&amp;</span>            
+</code></pre></td></tr></table>
+</div>
+</div><p>（另外，只有前台启动才会绑定标准输入输出。）</p>
+<p>在bash中通过<code>&lt;Ctrl+C&gt;</code>或<code>&lt;Ctrl+\&gt;</code>杀死进程，信号会被发送至前台进程组中的每一个进程。</p>
+<p>而通过kill杀死程序，信号只会发送给目标pid进程。</p>
+<h2 id="验证">验证</h2>
+<p>程序1:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+    <span class="s">&#34;time&#34;</span>
+    <span class="s">&#34;os/exec&#34;</span>
+<span class="p">)</span>
+
+<span class="kd">func</span> <span class="nf">main</span><span class="p">(){</span>
+    <span class="nx">cmd</span> <span class="o">:=</span> <span class="nx">exec</span><span class="p">.</span><span class="nf">Command</span><span class="p">(</span><span class="s">&#34;sleep&#34;</span><span class="p">,</span> <span class="s">&#34;100000&#34;</span><span class="p">)</span>
+    <span class="nx">cmd</span><span class="p">.</span><span class="nf">Start</span><span class="p">()</span>
+    <span class="nx">time</span><span class="p">.</span><span class="nf">Sleep</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span> <span class="o">*</span> <span class="mi">99999</span><span class="p">)</span>
+    <span class="k">return</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>上面的程序启动子进程运行sleep命令，然后睡眠。</p>
+<p>测试结果：</p>
+<ul>
+<li>用 kill -9、-2、-15 分别杀死主进程，sleep子进程存活。</li>
+<li>用 <code>&lt;Ctrl+C&gt;</code>、<code>&lt;Ctrl+\&gt;</code>分别杀死主进程，sleep子进程被杀。</li>
+</ul>
+<p>程序2</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span><span class="p">(</span>
+    <span class="s">&#34;time&#34;</span>
+    <span class="s">&#34;os/exec&#34;</span>
+    <span class="s">&#34;syscall&#34;</span>
+<span class="p">)</span>
+
+<span class="kd">func</span> <span class="nf">main</span><span class="p">(){</span>
+    <span class="nx">cmd</span> <span class="o">:=</span> <span class="nx">exec</span><span class="p">.</span><span class="nf">Command</span><span class="p">(</span><span class="s">&#34;sleep&#34;</span><span class="p">,</span> <span class="s">&#34;100000&#34;</span><span class="p">)</span>
+    <span class="c1">// 将子进程放入新的进程组
+</span><span class="c1"></span>    <span class="nx">cmd</span><span class="p">.</span><span class="nx">SysProcAttr</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">syscall</span><span class="p">.</span><span class="nx">SysProcAttr</span><span class="p">{</span><span class="nx">Setpgid</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">Pgid</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+    <span class="nx">cmd</span><span class="p">.</span><span class="nf">Start</span><span class="p">()</span>
+    <span class="nx">time</span><span class="p">.</span><span class="nf">Sleep</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span> <span class="o">*</span> <span class="mi">99999</span><span class="p">)</span>
+    <span class="k">return</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>上面的程序同程序1一样，区别是给子进程设置了单独的进程组（此时子进程就不在前台进程组中了）。</p>
+<p>测试结果：</p>
+<ul>
+<li>用 kill -9、-2、-15 分别杀死主进程，sleep子进程存活。</li>
+<li>用 <code>&lt;Ctrl+C&gt;</code>、<code>&lt;Ctrl+\&gt;</code>分别杀死主进程，sleep子进程存活！</li>
+</ul>
+]]></description>
+</item><item>
+    <title>Go中的引用变量</title>
+    <link>https://www.kirito41dd.cn/reference-variable-in-go/</link>
+    <pubDate>Tue, 13 Apr 2021 12:44:34 &#43;0800</pubDate>
+    <author>kirito</author>
+    <guid>https://www.kirito41dd.cn/reference-variable-in-go/</guid>
+    <description><![CDATA[<div class="featured-image">
+                <img src="https://blog-1256556944.file.myqcloud.com/public/rustgo2.png" referrerpolicy="no-referrer">
+            </div><p>Go语言的函数参数传递，只有值传递，没有引用传递。Slice、Map 只是胖指针，在传参时同样是值传递。</p>
+<p>除了函数传参，range Slice、range Map 也是按值拷贝，并不能取得容器里内容的引用。</p>
+<p>Go里面有没有引用的概念呢？我的答案是有，而且只有<strong>一种</strong>情况体现了引用的概念：<strong>闭包变量按引用捕获</strong>。</p>
+<p>分析下面代码：<a href="https://goplay.space/#qOIAgIWxtub" target="_blank" rel="noopener noreffer">在线运行</a> 或 <a href="https://play.golang.org/" target="_blank" rel="noopener noreffer">playground</a></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+	<span class="s">&#34;fmt&#34;</span>
+<span class="p">)</span>
+
+<span class="kd">func</span> <span class="nf">gen</span><span class="p">()</span> <span class="p">(</span><span class="kd">func</span><span class="p">()</span> <span class="kt">int</span><span class="p">,</span> <span class="kd">func</span><span class="p">()</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">a</span> <span class="o">:=</span> <span class="mi">0</span>
+	<span class="k">return</span> <span class="kd">func</span><span class="p">()</span> <span class="kt">int</span> <span class="p">{</span>
+			<span class="nx">a</span><span class="o">++</span>
+			<span class="k">return</span> <span class="nx">a</span>
+		<span class="p">},</span>
+		<span class="kd">func</span><span class="p">()</span> <span class="kt">int</span> <span class="p">{</span>
+			<span class="nx">a</span><span class="o">++</span>
+			<span class="k">return</span> <span class="nx">a</span>
+		<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="nx">f1</span><span class="p">,</span> <span class="nx">f2</span> <span class="o">:=</span> <span class="nf">gen</span><span class="p">()</span>
+	<span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nf">f1</span><span class="p">())</span> <span class="c1">// 1
+</span><span class="c1"></span>	<span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nf">f2</span><span class="p">())</span> <span class="c1">// 2
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>闭包函数f1和f2都捕获了变量a，f1运行后影响了f2的结果，说明两个闭包函数都是捕获的a的引用。</p>
+<p>实现上来讲，应该是函数值f1和f2都指向同一个闭包环境，因次f1对a的修改对f2也是可见的。</p>
+<p>从结果上来看，两个闭包函数都有对同一个闭包环境里变量a的引用。</p>
+]]></description>
+</item><item>
+    <title>crud boy</title>
+    <link>https://www.kirito41dd.cn/crud-boy/</link>
+    <pubDate>Thu, 01 Apr 2021 11:13:17 &#43;0800</pubDate>
+    <author>kirito</author>
+    <guid>https://www.kirito41dd.cn/crud-boy/</guid>
+    <description><![CDATA[<p>记录下日常搬砖过程中的踩坑和学到的骚操作，随缘更新。</p>
+<h2 id="mysql">MySQL</h2>
+<ul>
+<li>mysql中字符串类型索引查询时必须加引号，不然不会使用索引。原因是不支持函数索引，不加引号会使用了cast函数做隐式类型转换。(这里一般是int到string的cast</li>
+<li>有时候写子查询嵌套非常多，可以使用<code>with as</code>优化可读性，装逼点这玩意叫<strong><ruby>公用表表达式<rt>common table expression,CTE</rt></ruby></strong>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="k">with</span> <span class="n">t1</span> <span class="k">as</span> <span class="p">(</span><span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">xxx</span><span class="p">)</span>
+<span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">t1</span><span class="p">;</span> <span class="c1">-- 必须紧跟着就使用,不用就销毁了
+</span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+<h3 id="on-conflict">On Conflict</h3>
+<p>遇到的场景是去优化有大量的数据需要upsert的场景：数据不存在就插入，数据存在就更新。接手时的实现是每次都做两次网络io，先判断是否存在，然后做更新操作。为了节省大量的io时间，我开始寻求更好的解决方案。</p>
+<p>刚开始的思路是找类似redis pipline的方式：构造一个pipline，往里面赛语句，然后exec，才会发生网络io，redis服务器会按顺序执行所有语句。这和在mysql里用拼接多条语句很类似，发现只能实现批量插入，因为upsert还有一个判断逻辑。</p>
+<p>最终开始求助我司内部大佬：得出的结论是使用Conflict.</p>
+<blockquote>
+<p><a href="https://gorm.io/docs/create.html#Upsert-On-Conflict">https://gorm.io/docs/create.html#Upsert-On-Conflict</a></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="c1">-- MERGE INTO &#34;users&#34; USING *** WHEN NOT MATCHED THEN INSERT *** WHEN MATCHED THEN UPDATE SET &#34;name&#34;=&#34;excluded&#34;.&#34;name&#34;; SQL &gt; Server
+</span><span class="c1">-- INSERT INTO &#34;users&#34; *** ON CONFLICT (&#34;id&#34;) DO UPDATE SET &#34;name&#34;=&#34;excluded&#34;.&#34;name&#34;, &#34;age&#34;=&#34;excluded&#34;.&#34;age&#34;; PostgreSQL
+</span><span class="c1"></span><span class="k">INSERT</span> <span class="k">INTO</span> <span class="o">`</span><span class="n">users</span><span class="o">`</span> <span class="o">***</span> <span class="k">ON</span> <span class="n">DUPLICATE</span> <span class="k">KEY</span> <span class="k">UPDATE</span> <span class="o">`</span><span class="n">name</span><span class="o">`=</span><span class="k">VALUES</span><span class="p">(</span><span class="n">name</span><span class="p">),</span><span class="o">`</span><span class="n">age</span><span class="o">=</span><span class="k">VALUES</span><span class="p">(</span><span class="n">age</span><span class="p">);</span>
+</code></pre></td></tr></table>
+</div>
+</div></blockquote>
+<p>原理是利用唯一键的冲突，在发生冲突时做更新操作。</p>
+<ul>
+<li>利用冲突做大批量upsert操作
+<ul>
+<li>拼sql,尝试一次插入多列，定义冲突时更新的字段</li>
+<li>表中必须存在唯一键(primary key 或 unique key)才能使用</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="k">INSERT</span> <span class="k">INTO</span> <span class="o">`</span><span class="n">users</span><span class="o">`</span> <span class="p">(</span><span class="n">id</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+<span class="k">VALUES</span>  <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&#34;jinzhu1&#34;</span><span class="p">),</span>
+        <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s2">&#34;jinzhu2&#34;</span><span class="p">)</span>
+<span class="k">ON</span> <span class="n">DUPLICATE</span> <span class="k">KEY</span> <span class="k">UPDATE</span> <span class="o">`</span><span class="n">name</span><span class="o">`</span> <span class="o">=</span> <span class="k">VALUES</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><center>
+真・金柱大佬亲传(
+<p></p>
+</center>
+<h2 id="es">ES</h2>
+<ul>
+<li>es创建mapping踩坑,<code>text</code>会把索引字段分词，搜索用match而不能用term，<code>keyword</code>不会进行分词</li>
+</ul>
+<h2 id="hive">Hive</h2>
+<ul>
+<li>hive里也可以使用<code>with as</code>，注意区分和临时表的区别，临时表储存在磁盘的临时区中，只有数据库连接断开，或者drop掉才会消失</li>
+</ul>
+<h3 id="创建变量">创建变量</h3>
+<p>在mysql创建和使用变量可以这样：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="k">set</span> <span class="o">@</span><span class="n">id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">xxx</span> <span class="k">where</span> <span class="n">id</span> <span class="o">=</span> <span class="o">@</span><span class="n">id</span><span class="p">;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>在hive里可以这样：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="k">set</span> <span class="nb">date</span> <span class="o">=</span> <span class="s1">&#39;xxx&#39;</span><span class="p">;</span>
+<span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">xxx</span> <span class="k">where</span> <span class="nb">date</span> <span class="o">=</span> <span class="err">${</span><span class="n">hiveconf</span><span class="p">:</span><span class="nb">date</span><span class="err">}</span>
+</code></pre></td></tr></table>
+</div>
+</div>]]></description>
+</item><item>
+    <title>RSA算法原理</title>
+    <link>https://www.kirito41dd.cn/rsa/</link>
+    <pubDate>Sun, 31 Jan 2021 13:56:06 &#43;0800</pubDate>
+    <author>kirito</author>
+    <guid>https://www.kirito41dd.cn/rsa/</guid>
+    <description><![CDATA[<h1 id="rsa-算法原理">RSA 算法原理</h1>
+<h2 id="数论知识">数论知识</h2>
+<p><strong>质数</strong></p>
+<p>​	大于1的自然数中，只能被1和它本身的数整除，如 2、3、5、7</p>
+<p><strong>互质关系</strong>：</p>
+<p>​	如果两个正整数，除了1以外，没有其他公因子，我们就称这两个数是互质关系</p>
+<ul>
+<li>1与任何数都互质</li>
+<li>任意两个质数都互质</li>
+<li>质数与小于它的每一个数，都构成互质关系。如5与1、2、3、4都构成互质关系</li>
+</ul>
+<p><strong>欧拉函数</strong>：</p>
+<p>​	任意给定正整数n，请问在小于等于n的正整数之中，有多少个与n构成互质关系？计算这个值的方法就叫做欧拉函数，以符号$\phi(n)$表示</p>
+<ul>
+<li>$\phi(1)=1$</li>
+<li>如果n为质数，则 $\phi(n)=n-1$</li>
+<li>如果n是两个互质的整数之积 $n=p_1\times p_2$ 则 $\phi(n)=\phi(p_1)\times \phi(p_2)$</li>
+</ul>
+<p><strong>欧拉定理</strong>：</p>
+<p>​	如果两个正整数a和n互质，则下面的公式成立：
+$$
+a^{\phi(n)} \equiv 1 \pmod n
+$$
+<strong>模反元素</strong>：</p>
+<p>​	如果两个正整数a和n互质，那么一定可以找到b，使得下面的公式成立：
+$$
+ab\equiv1\pmod n
+$$
+​	证明模反元素必然存在，把欧拉定理拆开，$a\times a^{\phi(n)-1} \equiv 1 \pmod n$,</p>
+<p>$a^{\phi(n)-1} + kn$ 全都是模反元素</p>
+<h2 id="密钥生成步骤">密钥生成步骤</h2>
+<p><strong>随机选择两个不相等的质数p和q (越大越好)</strong></p>
+<p><strong>计算p和q的乘积</strong> $n=p\times q$</p>
+<p><strong>计算n的欧拉函数</strong> $\phi(n)=(p-1)(q-1)$</p>
+<p><strong>随机选择一个整数e</strong>, $1&lt;e&lt;\phi(n) 且 e与\phi(n)互质$</p>
+<p><strong>计算e对于$\phi(n)$的模反元素d</strong>（知道e和$\phi(n)$就等于知道了模反元素）</p>
+<p><strong>公布(n,e)为公钥、(n,d)为私钥</strong></p>
+<h2 id="加密和解密">加密和解密</h2>
+<p><strong>加密</strong>：公钥(n,e)</p>
+<p>加密信息为m, m必须是整数，且m必须小于n</p>
+<p>加密就是算出下面式子中的c:
+$$
+m^e\equiv c \pmod n
+$$
+即密文 $c=m^e\bmod n$</p>
+<p><strong>解密</strong>： 私钥(n,d)</p>
+<p>下面的等式一定成立:
+$$
+c^d \equiv m \pmod n
+$$
+即明文 $m = c^d\bmod n$</p>
+<h2 id="证明">证明</h2>
+<div>
+$$
+为什么\ \ c^d \equiv m \pmod n \ \ \ (1) \\ 
+\because m^e\equiv c \pmod n\\
+\therefore c = m^e-kn\\
+c带入(1)得 \ (m^e - kn)^d \equiv m \pmod n\\
+等同与\ m^{ed}\equiv m \pmod n \ \ (2)\\
+(比如(a+b)^2 = a^2 + 2ab + b2，只有a得最高项不带b) \\
+\because ed \equiv 1 \pmod{\phi(n)}\\
+\therefore ed = h\phi(n) +1 \\
+将ed带入(2)得 \ m^{h\phi(n)+1} \equiv m \pmod n \ \ \ (3)\\
+$$
+</div>
+证明(1)就是证明（3）：
+<p>如果 m 和 n 互质</p>
+<div>
+$$
+由欧拉定理得\ m^{\phi(n)}\equiv 1 \pmod n \ \\
+\because m\equiv m \pmod n \\
+同余式相乘性质：若a≡b(mod\ n)，c≡d(mod\ n)，则ac≡bd(mod\ n)。\\
+(m^{\phi(n)})^h\times m \equiv m \times1^h \pmod n \\
+m^{h\phi(n)+1} \equiv m \pmod n\\
+证明完成
+$$
+</div>
+<p>如果 m 和 n 不互质</p>
+<div>
+$$
+\because n = pq\ (质因子)\\\therefore 必然有\ m = kp\ 或\ m=kq\ (公因子只能是p或q)\\以\ m=kp\ 为例，kp与q必然互质,p为质数\\根据欧拉定理\ (kp)^{q-1} \equiv 1 \pmod q \ (自己多次乘上自己，再两边同时乘kp)\\进一步得到\ [(kp)^{q-1}]^{h(p-1)} \times kp \equiv kp \pmod q\\\because ed = h\phi(n) +1 \\化简\ (kp)^{ed} \equiv kp \pmod q\\改写成\ (kp)^{ed} = kp + tq\\这时t必然能被p整除,即\ t=t'p\ (因为(kp)^{ed}一定是p的整倍数)\\(kp)^{ed} = kp+t'pq\\\because m=kp, n=pq\\\therefore m^{ed}=m+t'n\\\therefore m^{ed} \equiv m \pmod n\\证明完成
+$$
+</div>
+]]></description>
+</item><item>
+    <title>比特币钱包推荐</title>
+    <link>https://www.kirito41dd.cn/btc-wallet/</link>
+    <pubDate>Tue, 05 Jan 2021 20:50:00 &#43;0800</pubDate>
+    <author>kirito</author>
+    <guid>https://www.kirito41dd.cn/btc-wallet/</guid>
+    <description><![CDATA[<h2 id="说明">说明</h2>
+<p>推荐下我使用过的钱包，来给你提供建议。</p>
+<h2 id="bitcoin-core">Bitcoin Core</h2>
+<p><a href="" rel=""></a></p>
+<p>关键信息：</p>
+<ul>
+<li>平台：Windows、Linux、MacOS</li>
+<li>获取：<a href="https://bitcoin.org/zh_CN/download" target="_blank" rel="noopener noreffer">https://bitcoin.org/zh_CN/download</a></li>
+<li>源代码：<a href="https://github.com/bitcoin/bitcoin" target="_blank" rel="noopener noreffer">https://github.com/bitcoin/bitcoin</a></li>
+<li>全节点：是</li>
+</ul>
+<p>核心钱包是全节点钱包，意味着你需要同步并存储所有区块数据。截止到2021年，区块数据约350GB，你至少需要保证500GB的存储空间以应对未来的数据增长。虽然全节点能够使区块链更安全，但不建议小白同步。因为如果你的全节点不能以服务的形式存在（通常需要一个公网IP），那么别人并不能主动和你建立链接，意义不大。提供全节点服务以保障区块链安全的使命请交给其他有情怀的专业人士。对于非专业人士（特指不是程序员）操作过于繁琐，不建议使用。</p>
+<p><a href="" rel=""></a></p>
+<p>优点：</p>
+<ul>
+<li>开源，意味着更安全，开发者不受任何人控制。</li>
+<li>支持HD钱包: bip32「分层确定性(Hierarchical Deterministic)钱包」</li>
+<li>有强大的命令行，不过需要大量学习</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>新版本不支持生成1开头的地址（我平时不用的理由</li>
+<li>要时常备份钱包文件（找零机制，外部导入私钥 这些都需要备份才行）</li>
+<li>学习成本高</li>
+</ul>
+<h2 id="electrum">Electrum</h2>
+<p><a href="" rel=""></a></p>
+<p>关键信息：</p>
+<ul>
+<li>平台：Windows、Linux、MacOS、Android（超难看）</li>
+<li>获取：<a href="https://electrum.org" target="_blank" rel="noopener noreffer">https://electrum.org</a></li>
+<li>源代码：<a href="https://github.com/spesmilo/electrum" target="_blank" rel="noopener noreffer">https://github.com/spesmilo/electrum</a></li>
+<li>全节点：否</li>
+</ul>
+<p>Electrum是一个轻节点钱包，你不用同步节点数据，而是由别人提供的服务器来帮你广播、查询交易。这些服务器不会存储你的私钥（也做不到）。你只需要连接一些服务器，就能够安全的完成交易。</p>
+<p><a href="" rel=""></a></p>
+<p>优点：</p>
+<ul>
+<li>使用方便</li>
+<li>支持HD钱包，支持助记词（但不是bip39）</li>
+<li>功能强大，兼容所有地址类型</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>不支持导出bip39助记词，使用的是自定义版本，但可以导入bip39</li>
+<li>只能使用桌面版本，移动端不支持（Android版本做的太垃圾了</li>
+<li>除了上面，我觉得完美</li>
+</ul>
+<h2 id="imtoken">Imtoken</h2>
+<p><a href="" rel=""></a></p>
+<p>关键信息：</p>
+<ul>
+<li>平台：Android、iOS</li>
+<li>获取：谷歌商店、App Store、<a href="https://token.im/?locale=zh" target="_blank" rel="noopener noreffer">https://token.im</a></li>
+<li>部分源代码：<a href="https://github.com/consenlabs/token-core" target="_blank" rel="noopener noreffer">https://github.com/consenlabs/token-core</a></li>
+<li>全节点：否</li>
+</ul>
+<p>Imtoken是一个主打移动端的轻节点钱包，并且支持多币种，能满足日常使用。</p>
+<p></p>
+<p>优点：</p>
+<ul>
+<li>HD钱包，支持导出bip39助记词</li>
+<li>同时支持隔离见证地址和普通地址</li>
+<li>对地址私钥控制方便，可以任意导出</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>多币种钱包（我只需要btc</li>
+<li>有官方的一些推送内容</li>
+<li>夹私货，推销自己的平台币（无奈其他开源移动端功能不够，我目前使用这个</li>
+</ul>
+<h2 id="其他">其他</h2>
+<p>这个网站列出了可信度较高的钱包：<a href="https://bitcoin.org/zh_CN/choose-your-wallet?step=5" target="_blank" rel="noopener noreffer">https://bitcoin.org</a></p>
+<p>桌面端基本用core钱包或Electrum就够了。</p>
+<p>移动端我也用Bither，觉得很不错，比imtoken功能少点，但完全开源更可信。</p>
+<p>其他交易所推出的钱包我就不推荐了，夹私货太多。</p>
+<h2 id="推荐阅读">推荐阅读</h2>
+<ul>
+<li><a href="https://learnblockchain.cn/2018/09/28/hdwallet" target="_blank" rel="noopener noreffer">bip32、bip39、bip44</a></li>
+</ul>
+]]></description>
+</item><item>
+    <title>写给小白的比特币入门</title>
+    <link>https://www.kirito41dd.cn/btc-start/</link>
+    <pubDate>Fri, 04 Dec 2020 21:22:14 &#43;0800</pubDate>
+    <author>kirito</author>
+    <guid>https://www.kirito41dd.cn/btc-start/</guid>
+    <description><![CDATA[<h2 id="说明">说明</h2>
+<p>为了给小白说清：</p>
+<p>私钥 公钥 地址 钱包 交易所 咋获得比特币</p>
+<p>简单粗暴，<strong>不讲原理</strong>，<strong>不讲原理</strong>，<strong>不讲原理</strong></p>
+<h2 id="定理雾">定理(雾</h2>
+<p>说了不讲原理，就当这是定理</p>
+<p><code>私钥</code>  →<code>公钥</code> → <code>地址</code></p>
+<p>按箭头方向，知道前面的，就能计算出后面的，<strong>反过来不行</strong></p>
+<p>因此 <code>私钥</code> <strong>最重要！</strong></p>
+<p>他们长啥样：</p>
+<ul>
+<li><code>私钥</code> -  <code>KwYC54hbaH6X5CrCfDK19oyJd2d1ivnSakbJxrW4ENbi2E2bJkbN</code></li>
+<li><code>公钥</code> -  <code>2f6e7sUQhP6z6mTMhh...(略)...16ME6Y18QSM</code></li>
+<li><code>地址</code> -  <code>16PXzomhwDovGRHaN6WGZXxk5BB1e78dn7</code></li>
+</ul>
+<p>公钥很长不方便记忆，所以都用地址</p>
+<h2 id="比特币是如何交易的">比特币是如何交易的</h2>
+<p>一个<code>地址</code>相当于一个账户，比特币通过<code>地址</code>互相转账</p>
+<p>谁都可以向一个<code>地址</code>转账，但是要花<code>地址</code>里的钱，必须知道<code>私钥</code></p>
+<p>这就是为什么<code>私钥</code><strong>最重要</strong></p>
+<p>比特币的区块链上记录的就是<code>地址</code>之间的转账记录</p>
+<p>有转账记录，就能算出<code>地址</code>里有多少钱</p>
+<h2 id="什么是钱包">什么是钱包</h2>
+<p>一个<code>地址</code>就是一个账户，每个人名下都可能有很多账户</p>
+<p>但是有一个<code>地址</code>就肯定有一个<code>私钥</code></p>
+<p>钱包就是帮你管理私钥的</p>
+<p>钱包一般都有一下功能：</p>
+<ul>
+<li>
+<p>帮你计算你拥有多少钱（就是从区块链上计算地的地址里有多少比特币）</p>
+</li>
+<li>
+<p>备份，如果你手机或电脑丢了，有备份就能找回你的私钥</p>
+</li>
+<li>
+<p>交易，给别的地址转账</p>
+</li>
+<li>
+<p>帮你自动生成私钥（也就是地址）</p>
+</li>
+</ul>
+<p>为什么每个人要有很多地址，而不是一个：</p>
+<p>谁都可以从区块链上计算出某个<code>地址</code>的交易记录，如果你一直使用一个<code>地址</code>，你的隐私可能就暴漏了</p>
+<p>一般是不能从<code>地址</code>推算出拥有这个<code>地址</code>的人是谁的，但如果你用的时间长了，比如从某个网址买东西用这个<code>地址</code>转账了，就能吧<code>地址</code>和你这个人联系起来，就知道你是谁了</p>
+<p>由于<code>地址</code>可以凭空产生，谁都可以轻易生成(后面讲)</p>
+<p>所以转账都用很多不同地址，不过这些事情钱包帮你做了，小白可能感觉不到</p>
+<p>你可能担心钱包安全性，但他们大多是安全的，前提是知名钱包，官网上推荐的钱包一般都安全</p>
+<p><a href="https://bitcoin.org" target="_blank" rel="noopener noreffer">https://bitcoin.org</a></p>
+<p>(也可以看我写的另一篇钱包推荐</p>
+<h2 id="如何生成地址">如何生成地址</h2>
+<p>谁都可以生成一个<code>私钥</code>，从而生成<code>地址</code></p>
+<p><code>私钥</code>本质上是256个0和1组成的二进制串，然后编码成字符串</p>
+<p>这256个0和1是随机的，所以你连续抛256次硬币，就能得到一个地址</p>
+<p>这里<strong>随机</strong>非常重要，如果你只是凭喜好写出了256个0和1，那和你有相同习惯的人也可能写出来跟你一样的0和1,等于你的私钥被别人知道了。</p>
+<p>没人会去抛硬币吧应该，大家都用软件生成<code>私钥</code>，这些软件都有自己的随机方法</p>
+<p>这是一个安全的网站：<a href="https://www.bitaddress.org" target="_blank" rel="noopener noreffer">www.bitaddress.org</a></p>
+<p>根据你的鼠标位置取样，生成随机的<code>私钥</code></p>
+<p>冷钱包：</p>
+<p>在离线的安全的环境下生成一个<code>私钥</code>，这个<code>私钥</code>只有你知道。</p>
+<p>如果还能在离线环境签名交易，这个操作就是冷钱包的功能</p>
+<p>只要你不联网，就没有泄漏的可能(流氓软件太多)，冷钱包就是一套离线解决方案</p>
+<p>当然发布交易还是需要网络，可以把签名后的信息生成二维码，让联网设备读取、发布。</p>
+<p>（用市面上常见的钱包已经很安全了</p>
+<h2 id="交易所">交易所</h2>
+<p>如果你在币圈没有熟人，可以到交易所买比特币</p>
+<p>交易所和股票那个交易所的职能差不多</p>
+<p>你在上面买的比特币都被存在交易所里，可以提出来，但有手续费</p>
+<p>交易所不会吧私钥给你，也就是说你只能通过交易所把比特币提出来，如果交易所跑路了，你币没了(概率极低)</p>
+<p>知名交易所都很安全：我一般用火币 ，(火币打钱<code>1KiritobkMPpaWBjTDHSoiP5icv8PEFNdR</code>)</p>
+<p>交易所注册邀请码：(使用邀请码双方都会获得奖励)</p>
+<ul>
+<li>火币 -
+<ul>
+<li>邀请链接 - <a href="https://www.huobi.me/topic/invited/?invite_code=6a995" target="_blank" rel="noopener noreffer">www.huobi.me/topic/invited/?invite_code=6a995</a></li>
+<li>邀请码 - <code>6a995</code></li>
+</ul>
+</li>
+</ul>
+]]></description>
+</item><item>
+    <title>使用github page和CI(github action)创建博客</title>
+    <link>https://www.kirito41dd.cn/blog-with-gitpage-and-ci/</link>
+    <pubDate>Sun, 01 Nov 2020 14:43:41 &#43;0800</pubDate>
+    <author>kirito</author>
+    <guid>https://www.kirito41dd.cn/blog-with-gitpage-and-ci/</guid>
+    <description><![CDATA[<h2 id="这个博客是怎么来的">这个博客是怎么来的</h2>
+<p>问就是白嫖github page，白嫖太爽了(</p>
+<p>静态博客的生成器使用的是<a href="https://www.gohugo.org/" target="_blank" rel="noopener noreffer">Hugo</a>、主题使用的<a href="https://hugoloveit.com/zh-cn/theme-documentation-basics/" target="_blank" rel="noopener noreffer">LoveIt</a>、评论系统使用<a href="https://disqus.com/" target="_blank" rel="noopener noreffer">Disqus</a>，LoveIt这个主题已经集成好了Disqus。</p>
+<p>由于使用静态博客生成器，在每次改动后都需要重新运行一次生成命令，生成一大堆静态文件，再提交到gh-page，很麻烦。</p>
+<p>为了让这个过程更加优雅，可以吧生成静态文件和部署这个过程放到CI里自动化完成。这里使用了github workflow的Action功能。</p>
+<p>这样一来，只需要在本地编辑博客内容，然后push到github，就会自动触发CI流程，将生成的静态内容部署到<code>XXX.github.io</code>，也就是gh-page的仓库。</p>
+<h2 id="准备工作">准备工作</h2>
+<p>我一共新建了两个仓库：</p>
+<ul>
+<li><code>XXX.github.io</code>， gh-page仓库,由CI负责提交</li>
+<li><code>blog</code>，存放博客文件</li>
+</ul>
+<p>主要工作是都在<code>blog</code>这个仓库上进行，另一个仓库是自动化操作的。</p>
+<p><code>blog</code>存放了博客的主要骨架，还有一些脚本，方便在CI中做一些工作。</p>
+<p><del>申请一个<a href="https://github.com/settings/applications/new" target="_blank" rel="noopener noreffer">Github Application</a>，如果你想使用Gitalk代替Disqus</del></p>
+<p>申请一个<a href="https://github.com/settings/tokens/new" target="_blank" rel="noopener noreffer">Personal access tokens</a>，CI流程中使用它来对<code>XXX.github.io</code>仓库进行提交，涉及到鉴权。</p>
+<p>Github Application 和 Personal access tokens 都是需要保密的，不能直接写在配置文件里或这CI流程的脚本里。好在github的Workflow提供了在CI中访问仓库中配置的秘密环境变量的能力。</p>
+<p>进入仓库-&gt;Settings-&gt;Secrets-&gt;new Secret，配置两个环境变量，如下：
+</p>
+<h2 id="杂项">杂项</h2>
+<p>使用了腾讯的<a href="https://console.cloud.tencent.com/cos5/bucket" target="_blank" rel="noopener noreffer">对象存储</a>来存图片，可有可无。</p>
+<p>一个域名，可有可无。</p>
+<p>阿里云的CDN，可有可无。</p>
+<h2 id="blog搭建过程">blog搭建过程</h2>
+<p>首先看下我(本地)仓库的目录情况，<a href="https://github.com/kirito41dd/blog" target="_blank" rel="noopener noreffer">github地址</a></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-sh" data-lang="sh">.
+├── .github
+│   └── workflows
+│       └── main.yml <span class="c1"># github workflow 的action配置文件(CI脚本)</span>
+├── .gitmodules <span class="c1"># git submodule 创建的，为了引入LoveIt</span>
+├── README.md
+├── bin <span class="c1"># 这个目录是脚本生成的，里面有hugo命令，不会被提交到仓库</span>
+├── script
+│   └── get-hugo.sh <span class="c1"># 本地 CI 都可以执行，用来获取hugo命令</span>
+└── site <span class="c1"># 站点目录，存放hugo博客的骨架</span>
+    ├── archetypes
+    ├── config.toml
+    ├── config.tomlconfig.toml
+    ├── content <span class="c1"># 存放博客内容的地方</span>
+    ├── data
+    ├── layouts
+    ├── public <span class="c1"># hugo生成的静态博客</span>
+    ├── resources
+    ├── static <span class="c1"># static 目录在生产静态文件时，会被拷贝到public</span>
+    │   ├── .nojekyll <span class="c1"># 两个文件最终都会出现在gh-page仓库的根目录</span>
+    │   └── CNAME <span class="c1"># 如过有域名需要这个</span>
+    └── themes
+        └── LoveIt <span class="c1"># submodule方式引入，LoveIt主题</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><code>.gitignore</code>忽略文件</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-text" data-lang="text">bin/
+public/
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="骨架">骨架</h3>
+<p>初始化git仓库后，首先编写了一个<a href="https://github.com/kirito41dd/blog/blob/main/script/get-hugo.sh" target="_blank" rel="noopener noreffer">脚本</a><code>script/get-hugo.sh</code>，这个脚本的功能是自动根据系统类型下载hugo,并解压到脚本所在位置的上级目录下的<code>bin</code>文件夹。脚本只支持mac或linux系统，CI也会用到这个脚本，windows用户可以手动安装。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># 此脚本安装hugo到脚本所在位置的../bin目录</span>
+<span class="nv">CURDIR</span><span class="o">=</span><span class="k">$(</span><span class="nb">cd</span> <span class="k">$(</span>dirname <span class="nv">$0</span><span class="k">)</span><span class="p">;</span> <span class="nb">pwd</span><span class="k">)</span>
+<span class="nb">cd</span> <span class="nv">$CURDIR</span>
+<span class="nb">echo</span> <span class="s2">&#34;执行目录 `pwd`&#34;</span>
+
+
+<span class="c1"># 判断环境是mac还是linux,决定hugo版本</span>
+<span class="k">if</span> <span class="o">[</span> <span class="k">$(</span>uname -s<span class="k">)</span> <span class="o">=</span> <span class="s1">&#39;Darwin&#39;</span> <span class="o">]</span><span class="p">;</span><span class="k">then</span>
+    <span class="nb">echo</span> <span class="s1">&#39;当前环境为Darwin&#39;</span>
+    <span class="nv">HUGOURL</span><span class="o">=</span><span class="s1">&#39;https://github.com/gohugoio/hugo/releases/download/v0.77.0/hugo_extended_0.77.0_macOS-64bit.tar.gz&#39;</span>
+<span class="k">else</span>
+    <span class="nb">echo</span> <span class="s1">&#39;当前环境为Linux&#39;</span>
+    <span class="nv">HUGOURL</span><span class="o">=</span><span class="s1">&#39;https://github.com/gohugoio/hugo/releases/download/v0.77.0/hugo_extended_0.77.0_Linux-64bit.tar.gz&#39;</span>
+<span class="k">fi</span>
+<span class="nb">echo</span> <span class="s2">&#34;hugo 获取地址:</span><span class="nv">$HUGOURL</span><span class="s2">&#34;</span>
+
+<span class="nb">echo</span> <span class="s1">&#39;开始下载&#39;</span>
+curl -sSL -o hugo.tar.gz <span class="nv">$HUGOURL</span>
+<span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> -ne <span class="m">0</span> <span class="o">]</span><span class="p">;</span><span class="k">then</span>
+    <span class="nb">echo</span> <span class="s1">&#39;下载失败&#39;</span>
+    <span class="nb">exit</span> <span class="m">1</span>
+<span class="k">fi</span>
+
+<span class="c1"># 解压文件</span>
+<span class="nv">BINDIR</span><span class="o">=</span><span class="s2">&#34;</span><span class="nv">$CURDIR</span><span class="s2">/../bin&#34;</span>
+<span class="k">if</span> <span class="o">[</span> ! -d <span class="s2">&#34;</span><span class="nv">$BINDIR</span><span class="s2">&#34;</span> <span class="o">]</span><span class="p">;</span><span class="k">then</span>
+    mkdir <span class="nv">$CURDIR</span>/../bin
+<span class="k">fi</span>
+<span class="nb">echo</span> <span class="s2">&#34;解压到 </span><span class="nv">$BINDIR</span><span class="s2">&#34;</span>
+tar -xzf ./hugo.tar.gz -C <span class="nv">$CURDIR</span>/../bin
+rm ./hugo.tar.gz
+
+<span class="c1"># 验证下解压安装成功</span>
+<span class="nb">echo</span> <span class="s1">&#39;success&#39;</span>
+<span class="nv">$BINDIR</span>/hugo version
+</code></pre></td></tr></table>
+</div>
+</div><p>执行<code>sh scrpit/get-hugo.sh</code>，就可以使用hugo了，执行<code>bin/hugo vesion</code>打印hugo版本。</p>
+<p>然后创建站点，执行：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-sh" data-lang="sh">bin/hugo new site .
+</code></pre></td></tr></table>
+</div>
+</div><p>生成site目录。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-sh" data-lang="sh">tree ./site
+.
+├── archetypes
+├── config.toml <span class="c1"># 配置文件</span>
+├── content
+├── data
+├── layouts
+├── static
+└── themes <span class="c1"># 主题文件夹</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>下一步拉取主题，我使用的是<a href="https://hugoloveit.com/zh-cn/theme-documentation-basics/" target="_blank" rel="noopener noreffer">LoveIt</a>。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># 在site目录执行</span>
+git submodule add https://github.com/dillonzq/LoveIt.git themes/LoveIt
+
+<span class="c1"># 注意有了submodules后，再从别的地方拉取仓库记得</span>
+<span class="c1"># git submodule init</span>
+<span class="c1"># git submodule update</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>参考<a href="https://hugoloveit.com/zh-cn/theme-documentation-basics/" target="_blank" rel="noopener noreffer">LoveIt</a>的文档，配置好<code>config.toml</code>文件</p>
+<p>我的<a href="https://github.com/kirito41dd/blog/blob/main/site/config.toml" target="_blank" rel="noopener noreffer">配置</a>中需要说明的只有下面几行：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-toml" data-lang="toml"><span class="c">#  评论系统设置</span>
+<span class="p">[</span><span class="nx">params</span><span class="p">.</span><span class="nx">page</span><span class="p">.</span><span class="nx">comment</span><span class="p">]</span>
+  <span class="nx">enable</span> <span class="p">=</span> <span class="kc">true</span>
+  <span class="c"># Disqus 评论系统设置</span>
+  <span class="p">[</span><span class="nx">params</span><span class="p">.</span><span class="nx">page</span><span class="p">.</span><span class="nx">comment</span><span class="p">.</span><span class="nx">disqus</span><span class="p">]</span>
+    <span class="nx">enable</span> <span class="p">=</span> <span class="kc">true</span>
+    <span class="c"># Disqus 的 shortname</span>
+    <span class="nx">shortname</span> <span class="p">=</span> <span class="s2">&#34;kirito-blog&#34;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这是Disqus的配置，很简单。</p>
+<p>博客编写的部分请直接去看hugo的<a href="https://www.gohugo.org/" target="_blank" rel="noopener noreffer">文档</a></p>
+<p>博客有内容后，本地看效果使用下面命令：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">cd</span> site
+<span class="c1"># 本地预览（不会展示gitalk）</span>
+../bin/hugo server
+<span class="c1"># 本地预览，但是使用生产环境(会展示gitalk，但不建议)</span>
+../bin/hugo server -e production
+</code></pre></td></tr></table>
+</div>
+</div><p>hugo生成静态站点的方式是直接在site目录执行：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-sh" data-lang="sh">../bin/hugo
+</code></pre></td></tr></table>
+</div>
+</div><p>完成后将生成<code>public</code>文件夹，注意不要提交到仓库中。</p>
+<p>下面把生成的静态站点，提交到gh-page仓库，就能展示博客了，当然也可以使用其他静态托管服务。</p>
+<h3 id="配置ci部署">配置CI部署</h3>
+<p>回到仓库根目录，创建Action文件：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-sh" data-lang="sh">mkdir -p .github/workflows
+touch .github/workflows/main.yml
+</code></pre></td></tr></table>
+</div>
+</div><p>CI配置参考<a href="https://docs.github.com/en/actions/quickstart" target="_blank" rel="noopener noreffer">文档</a></p>
+<p>我的<a href="https://github.com/kirito41dd/blog/blob/main/.github/workflows/main.yml" target="_blank" rel="noopener noreffer">CI配置</a>中需要说明的几行：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-yml" data-lang="yml">- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">init blog</span><span class="w">
+</span><span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p">|</span><span class="sd">
+</span><span class="sd">    git submodule init 
+</span><span class="sd">    git submodule update
+</span><span class="sd">    sh script/get-hugo.sh
+</span><span class="sd">    cd site
+</span><span class="sd">    ../bin/hugo</span><span class="w">    
+</span><span class="w">
+</span><span class="w"></span><span class="c"># 部署blog</span><span class="w">
+</span><span class="w"></span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">deploy blog</span><span class="w">
+</span><span class="w">  </span><span class="nt">env</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="nt">GITHUB_REPO</span><span class="p">:</span><span class="w"> </span><span class="l">github.com/zshorz/zshorz.github.io</span><span class="w">
+</span><span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p">|</span><span class="sd">
+</span><span class="sd">    cd site/public
+</span><span class="sd">    git init &amp;&amp; git add .
+</span><span class="sd">    git config user.name &#34;xxxx&#34;
+</span><span class="sd">    git config user.email &#34;xxxx@mail.com&#34;
+</span><span class="sd">    git commit -m &#34;GitHub Actions Auto Builder at $(date +&#39;%Y-%m-%d %H:%M:%S&#39;)&#34;
+</span><span class="sd">    git push --force --quiet &#34;https://${{ secrets.ACCESS_TOKEN }}@$GITHUB_REPO&#34; master:master</span><span class="w">    
+</span></code></pre></td></tr></table>
+</div>
+</div><p>还记得在仓库中配置了secret环境变量，而在CI中访问那些环境变量的方法就是<code>${{secrets.NAME}}</code></p>
+<p>CI的脚本有两部分，首先初始化blog，然后将生成的静态网站，部署到<code>xxx.github.io</code></p>
+<p>我把脚本抽出来单独注释（注意这是在CI的docker自动执行的，不是本地环境）</p>
+<p>第一部分</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># 初始化submodule，拉取LoveIt主题</span>
+git submodule init 
+git submodule update
+<span class="c1"># 执行脚本安装hugo环境</span>
+sh script/get-hugo.sh
+<span class="nb">cd</span> site
+<span class="c1"># 生成站点，输出到public目录</span>
+../bin/hugo
+</code></pre></td></tr></table>
+</div>
+</div><p>第二部分</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># 进入生成的静态站点目录</span>
+<span class="nb">cd</span> site/public
+<span class="c1"># 初始化为git仓库</span>
+git init <span class="o">&amp;&amp;</span> git add .
+git config user.name <span class="s2">&#34;xxxx&#34;</span>
+git config user.email <span class="s2">&#34;xxxx@qq.com&#34;</span>
+<span class="c1"># 本地提交</span>
+git commit -m <span class="s2">&#34;GitHub Actions Auto Builder at </span><span class="k">$(</span>date +<span class="s1">&#39;%Y-%m-%d %H:%M:%S&#39;</span><span class="k">)</span><span class="s2">&#34;</span>
+<span class="c1"># 强制推送到远端仓库</span>
+git push --force --quiet <span class="s2">&#34;https://</span><span class="si">${</span><span class="p">{ secrets.ACCESS_TOKEN </span><span class="si">}</span><span class="s2">}@</span><span class="nv">$GITHUB_REPO</span><span class="s2">&#34;</span> master:master
+</code></pre></td></tr></table>
+</div>
+</div><p>到此CI就配置好了。</p>
+<h3 id="push仓库">push仓库</h3>
+<p>直接将你的仓库push到远端，会自动触发CI，你可以在这里查看执行情况
+</p>
+<p>待CI执行成功后，打开在浏览器中输入<code>xxx.github.io</code>查看博客站点，就是你现在看到的样子了。</p>
+<h2 id="可选项目">可选项目</h2>
+<h3 id="配置域名">配置域名</h3>
+<p>比如域名是<code>kirito41dd.cn</code>，你想当你访问<code>www.kirito41dd.cn</code>的时候，就是你的博客站点。</p>
+<p>添加文件<code>site/static/CNAME</code>，在里面写上<code>www.kirito41dd.cn</code>，push让CI再次构建</p>
+<p>然后打开你的域名控制台，为<code>www.kirito41dd.cn</code>添加一个CNAME记录，记录值为<code>xxx.github.io</code></p>
+<p>稍后浏览器输入域名网址，你就又看到这个页面了</p>
+<h3 id="cdn加速">CDN加速</h3>
+<p>我用的阿里云的cdn，不知道为啥还没收我钱(</p>
+<h2 id="最后">最后</h2>
+<p>git push 享受下 CI 部署的丝滑(</p>
+]]></description>
+</item></channel>
+</rss>

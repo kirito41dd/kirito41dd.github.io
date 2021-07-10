@@ -1,0 +1,1517 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>cpp - 标签 - kirito&#39;s blog</title>
+        <link>https://www.kirito41dd.cn/tags/cpp/</link>
+        <description>cpp - 标签 - kirito&#39;s blog</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sat, 23 Dec 2017 19:33:15 &#43;0800</lastBuildDate><atom:link href="https://www.kirito41dd.cn/tags/cpp/" rel="self" type="application/rss+xml" /><item>
+    <title>CPP知识点笔记</title>
+    <link>https://www.kirito41dd.cn/cpp-note/</link>
+    <pubDate>Sat, 23 Dec 2017 19:33:15 &#43;0800</pubDate>
+    <author>kirito</author>
+    <guid>https://www.kirito41dd.cn/cpp-note/</guid>
+    <description><![CDATA[<p>记录cpp中大部分的知识点，个人理解有限，不一定都正确。</p>
+<h2 id="22-cout控制输出长度格式">2.2 cout控制输出长度/格式：</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">setw</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="o">&lt;&lt;</span><span class="n">a</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>   <span class="c1">//setw()在头文件&lt;iomanip&gt;中，只能右对齐，等价%8d
+</span><span class="c1"></span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">setiosflags</span><span class="p">(</span><span class="n">ios</span><span class="o">::</span><span class="n">left</span><span class="p">)</span><span class="o">&lt;&lt;</span><span class="n">setw</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="o">&lt;&lt;</span><span class="n">a</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="c1">//这样为左对齐
+</span><span class="c1"></span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">setw</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="o">&lt;&lt;</span><span class="n">setprecision</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">&lt;&lt;</span><span class="n">setiosflags</span><span class="p">(</span><span class="n">ios</span><span class="o">::</span><span class="n">fixed</span><span class="p">)</span><span class="o">&lt;&lt;</span><span class="n">b</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="c1">//b是一个浮点数，等价于%8.2f
+</span><span class="c1"></span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">setfill</span><span class="p">(</span><span class="sc">&#39;x&#39;</span><span class="p">)</span><span class="o">&lt;&lt;</span><span class="n">set</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="o">&lt;&lt;</span><span class="n">a</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="c1">//将空白用x填充
+</span><span class="c1"></span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">hex</span><span class="o">&lt;&lt;</span><span class="n">a</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="c1">//等价于printf(&#34;%x\n&#34;,a);十六进制
+</span><span class="c1"></span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">oct</span><span class="o">&lt;&lt;</span><span class="n">a</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="c1">//等价于printf(&#34;%o\n&#34;,a);八进制
+</span><span class="c1"></span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">a</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="c1">//等价于printf(&#34;%d\n&#34;,a);十进制
+</span></code></pre></td></tr></table>
+</div>
+</div><h2 id="23-函数重载静多态">2.3 函数重载（静多态）</h2>
+<p>匹配原则</p>
+<ol>
+<li>严格匹配</li>
+<li>隐式转换（小到大可以，大到小不可以）寻求匹配，找到则匹配</li>
+<li>返回值不构成重载</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">extern</span> <span class="s">&#34;C&#34;</span><span class="p">{}</span> <span class="c1">//将括号内按c的方式编译，不与其他同名函数重载。c库每一个头文件都有
+</span><span class="c1">//---------------------------------------------------------
+</span><span class="c1"></span><span class="cp">#ifdef __cplusplus</span><span class="c1">//如果是c++编译器
+</span><span class="c1"></span><span class="k">extern</span> <span class="s">&#34;c&#34;</span><span class="p">{</span>
+<span class="cp">#endif </span><span class="c1">// __cplusplus
+</span><span class="c1"></span>
+<span class="c1">// 内容
+</span><span class="c1"></span>
+<span class="cp">#ifdef __cplusplus
+</span><span class="cp"></span><span class="p">}</span>
+<span class="cp">#endif          </span><span class="c1">//表示不使用c++的重载特性
+</span><span class="c1">//----------------------------------------------------------
+</span></code></pre></td></tr></table>
+</div>
+</div><h2 id="24-运算符重载operator-overload">2.4 <strong><ruby>运算符重载<rt>Operator Overload</rt></ruby></strong></h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp">    <span class="c1">//运算符其实就是函数
+</span><span class="c1"></span>    <span class="k">struct</span> <span class="nc">zuobiao</span>  <span class="c1">//坐标
+</span><span class="c1"></span>    <span class="p">{</span>
+        <span class="kt">int</span> <span class="n">x</span><span class="p">;</span><span class="kt">int</span> <span class="n">y</span><span class="p">;</span>
+    <span class="p">};</span>
+    <span class="n">zuobiao</span> <span class="k">operator</span> <span class="o">+</span> <span class="p">(</span><span class="n">zuobiao</span> <span class="n">a</span><span class="p">,</span><span class="n">zuobiao</span> <span class="n">b</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">zuobiao</span> <span class="n">c</span><span class="p">;</span>
+        <span class="n">c</span><span class="p">.</span><span class="n">x</span><span class="o">=</span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="o">+</span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="p">;</span>  <span class="n">c</span><span class="p">.</span><span class="n">y</span><span class="o">=</span><span class="n">a</span><span class="p">.</span><span class="n">y</span><span class="o">+</span><span class="n">b</span><span class="p">.</span><span class="n">y</span><span class="p">;</span>
+        <span class="k">return</span> <span class="n">c</span><span class="p">;</span>
+    <span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="25-默认参数default-parameters">2.5 <strong><ruby>默认参数<rt>Default Parameters</rt></ruby></strong></h2>
+<p>参数只能从右往左默认，中间不能跳跃</p>
+<h2 id="26-引用raference">2.6 <strong><ruby>引用<rt>Raference</rt></ruby></strong></h2>
+<p><code>&amp;</code>前为类型名时为引用，其他均为取地址</p>
+<p>变量名，本身是一段内存的引用，即别名（alias）。此处引入的引用是为已有变量起一个别名，声明如下</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="kt">int</span> <span class="n">a</span><span class="p">;</span>
+<span class="kt">int</span> <span class="o">&amp;</span><span class="n">ra</span><span class="o">=</span><span class="n">a</span><span class="p">;</span>
+<span class="c1">//1. 引用是一种声明关系，必须初始化，引用不开辟空间
+</span><span class="c1">//2. 此种声明关系一经声明 不可变更
+</span><span class="c1"></span><span class="kt">int</span> <span class="o">&amp;</span><span class="n">rr</span><span class="o">=</span><span class="n">ra</span><span class="p">;</span>
+<span class="c1">//3. 可以对引用，再次引用。多次引用的结果，多个引用指向同一个变量
+</span><span class="c1">//引用的本质是对指针的包装，指针可以有引用，但不应该有引用的指针
+</span><span class="c1"></span>
+<span class="c1">//const int&amp;ra=a; 能用const就用；use const whatever possible
+</span><span class="c1">//思考：引用的本质是什么？  int &amp; ra = a；   int * const p = &amp;a;  引用的本质是不可以修改指向的指针；
+</span></code></pre></td></tr></table>
+</div>
+</div><h2 id="27-newdelete申请动态内存">2.7 new/delete(申请动态内存)</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="kt">int</span> <span class="o">*</span><span class="n">p</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="p">(</span><span class="mi">200</span><span class="p">);</span>   <span class="c1">//开一个int类型单变量并初始化为200
+</span><span class="c1"></span><span class="kt">int</span> <span class="o">*</span><span class="n">ps</span> <span class="o">=</span> <span class="k">new</span> <span class="n">string</span><span class="p">(</span><span class="s">&#34;hellwo world&#34;</span><span class="p">);</span><span class="c1">//开一个string类型单变量并初始化为 hellow world
+</span><span class="c1"></span><span class="kt">int</span> <span class="o">*</span><span class="n">p1</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="p">[</span><span class="mi">5</span><span class="p">]{</span><span class="mi">0</span><span class="p">};</span><span class="c1">//开一个int数组 每一项初始化为0；
+</span><span class="c1"></span><span class="kt">int</span> <span class="o">**</span><span class="n">pp</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="o">*</span><span class="p">[</span><span class="mi">5</span><span class="p">];</span><span class="c1">//指针数组，存放的指针
+</span><span class="c1"></span><span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">p</span><span class="p">)[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="p">{{</span><span class="mi">0</span><span class="p">}};</span><span class="c1">//p是一个指针 它指向包含4个int元素的一维数组 p为首地址 记不住怎么写编译器可以给你提示
+</span><span class="c1">//也可以new一个结构体  但初始化应用 {} 因为可能有有多个值
+</span><span class="c1"></span><span class="cm">/*应用程序在内存中分为
+</span><span class="cm">    代码区、
+</span><span class="cm">    全局(静态)数据存储区、
+</span><span class="cm">    栈区、
+</span><span class="cm">    堆区。
+</span><span class="cm">    通过new出来的内存在堆区。
+</span><span class="cm">    局部变量，函数参数等存在栈区
+</span><span class="cm">*/</span>
+<span class="kt">int</span> <span class="o">*</span><span class="n">p</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span> <span class="p">;</span>
+<span class="k">delete</span> <span class="n">p</span><span class="p">;</span>
+<span class="kt">int</span> <span class="o">*</span><span class="n">p</span><span class="o">=</span><span class="k">new</span> <span class="kt">int</span><span class="p">[</span><span class="mi">5</span><span class="p">];</span>
+<span class="k">delete</span> <span class="p">[]</span><span class="n">p</span><span class="p">;</span>
+<span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">p</span><span class="p">)[</span><span class="mi">4</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span><span class="o">=</span><span class="k">new</span> <span class="kt">int</span><span class="p">[</span><span class="mi">5</span><span class="p">][</span><span class="mi">4</span><span class="p">][</span><span class="mi">3</span><span class="p">];</span>
+<span class="k">delete</span> <span class="p">[]</span><span class="n">p</span><span class="p">;</span>
+<span class="c1">//异常处理  new很少出错 一般别用
+</span><span class="c1"></span><span class="kt">int</span> <span class="o">*</span><span class="n">p</span> <span class="o">=</span> <span class="k">new</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">nothrow</span><span class="p">)</span> <span class="kt">int</span> <span class="p">;</span>
+<span class="k">if</span><span class="p">(</span><span class="n">p</span> <span class="o">==</span> <span class="k">nullptr</span><span class="p">){</span><span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">}</span><span class="c1">//NULL 好像变成nullptr了c++11
+</span></code></pre></td></tr></table>
+</div>
+</div><h2 id="28-内联函数">2.8 内联函数</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="kr">inline</span> <span class="kt">int</span> <span class="nf">sqr</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="n">i</span><span class="o">*</span><span class="n">i</span><span class="p">;</span>
+<span class="p">}</span><span class="c1">//inline 是给编译器的一种建议，编译器来决定是否inline，但你不说编译器一定不inline    66666
+</span><span class="c1">//适用环境 函数体很小 且 频繁使用
+</span></code></pre></td></tr></table>
+</div>
+</div><h2 id="29-cast强制类型转换">2.9 cast强制类型转换</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="kt">int</span> <span class="n">a</span><span class="o">=</span><span class="mi">5</span><span class="p">;</span>    <span class="kt">float</span> <span class="n">b</span><span class="o">=</span><span class="mf">6.5</span><span class="p">;</span>
+<span class="k">static_cast</span> <span class="c1">//对于隐式类型可以转化的，可用这个
+</span><span class="c1"></span><span class="n">b</span><span class="o">=</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>  <span class="c1">//作者不想让你强转，所以搞这么麻烦 哈啊哈
+</span><span class="c1"></span><span class="kt">void</span> <span class="o">*</span><span class="n">p</span><span class="p">;</span><span class="kt">int</span> <span class="o">*</span><span class="n">q</span><span class="p">;</span>
+<span class="n">p</span><span class="o">=</span><span class="n">q</span><span class="p">;</span><span class="c1">//可以
+</span><span class="c1"></span><span class="n">q</span><span class="o">=</span><span class="n">p</span><span class="p">;</span><span class="c1">//不可以 q=static_cast&lt;int*&gt;(p);OK
+</span><span class="c1"></span><span class="k">dynamic_cast</span>
+<span class="k">reinterpret_cast</span> <span class="c1">//对于无隐式类型的转化，static_cast无效，例如将int赋值给int*指针  reinterpert重新解释
+</span><span class="c1"></span><span class="k">const_cast</span> <span class="c1">//脱常   只能用于指针和引用
+</span><span class="c1"></span><span class="kt">void</span> <span class="n">fun1</span><span class="p">(</span><span class="kt">int</span> <span class="o">&amp;</span> <span class="n">v</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">v</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="k">const</span> <span class="kt">int</span> <span class="n">a</span><span class="p">;</span>
+    <span class="n">fun1</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>        <span class="c1">//这是传不进去的
+</span><span class="c1"></span>    <span class="n">fun1</span><span class="p">(</span><span class="k">const_cast</span><span class="o">&lt;</span><span class="kt">int</span> <span class="o">&amp;&gt;</span><span class="p">(</span><span class="n">a</span><span class="p">));</span><span class="c1">//这样就传进去了  不要妄图用这个方法修改const  其行为是未定义的且没有意义
+</span><span class="c1"></span>    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="210-const">2.10 const</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="cp">#define N 200       </span><span class="c1">//宏，在预处理阶段发生了替换
+</span><span class="c1"></span><span class="k">const</span> <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">200</span><span class="p">;</span>  <span class="c1">//在编译阶段发生了替换
+</span><span class="c1">//所以const永远不会发生改变
+</span></code></pre></td></tr></table>
+</div>
+</div><h2 id="211-命名空间namespace">2.11 <strong><ruby>命名空间<rt>Namespace</rt></ruby></strong></h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="kt">int</span> <span class="n">v</span><span class="o">=</span><span class="mi">55</span><span class="p">;</span>
+<span class="n">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">v</span><span class="o">=</span><span class="mi">5</span><span class="p">;</span>
+    <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">v</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="c1">//打印局部变量
+</span><span class="c1"></span>    <span class="n">cout</span><span class="o">&lt;&lt;::</span><span class="n">v</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="c1">//打印全局变量
+</span><span class="c1"></span><span class="p">}</span><span class="c1">//全局命名空间其实是一个没有名字的命名空间，也可以用::作用域运算符访问。
+</span><span class="c1"></span>
+<span class="k">namespace</span> <span class="c1">//是对全局命名空间的再次划分
+</span><span class="c1"></span><span class="k">namespace</span> <span class="n">name</span><span class="c1">//协同开发 可以在不同文件中定义同名空间，将自动合并
+</span><span class="c1"></span><span class="p">{</span>
+    <span class="kt">int</span> <span class="n">x</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">func</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&#34;haha&#34;</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">struct</span> <span class="nc">xy</span>
+    <span class="p">{</span>
+        <span class="kt">int</span> <span class="n">x</span><span class="p">;</span><span class="kt">int</span> <span class="n">y</span><span class="p">;</span>
+    <span class="p">};</span>
+    <span class="c1">//可以写很多，包括再写一个命名空间
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="212-字符串类型string">2.12 字符串类型string</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//位于命名空间std；它是一个类不是关键字
+</span><span class="c1">//用cin输入时有空格会结束，但输出时字符串里可以有空格
+</span><span class="c1"></span><span class="n">string</span> <span class="n">str</span><span class="o">=</span><span class="s">&#34;china&#34;</span><span class="err">，</span><span class="n">s2</span><span class="o">=</span><span class="s">&#34;0&#34;</span><span class="p">;</span>
+<span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">str</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="o">&lt;&lt;</span><span class="n">enld</span><span class="p">;</span> <span class="c1">//获得长度
+</span><span class="c1"></span>
+<span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="mi">100</span><span class="p">];</span>
+<span class="n">strcpy</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span><span class="n">str</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span><span class="c1">//strcpy位于string.h   str.c_str()对象函数返回一个c语言类型的字符串，以兼容c
+</span><span class="c1"></span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">buf</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
+
+<span class="n">str</span><span class="p">.</span><span class="n">swap</span><span class="p">(</span><span class="n">s2</span><span class="p">);</span><span class="c1">//用对象方法交换
+</span><span class="c1"></span>
+<span class="kt">int</span> <span class="n">n</span><span class="o">=</span><span class="n">str</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="sc">&#39;a&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">);</span><span class="c1">//查找a，返回下标，第二个参数为从0开始，找不到返回-1
+</span><span class="c1"></span><span class="kt">int</span> <span class="n">n</span><span class="o">=</span><span class="n">str</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#34;in&#34;</span><span class="p">,</span><span class="mi">0</span><span class="p">);</span><span class="c1">//查找字串,有返回首下标，没有返回-(
+</span><span class="c1"></span>
+<span class="c1">//删空格
+</span><span class="c1"></span><span class="n">string</span> <span class="n">ss</span><span class="o">=</span><span class="s">&#34;   sdfsdfs     &#34;</span><span class="p">;</span>
+<span class="n">ss</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">ss</span><span class="p">.</span><span class="n">find_first_not_of</span><span class="p">(</span><span class="sc">&#39; &#39;</span><span class="p">));</span><span class="c1">//从0删到第一个不是空格，参数一从什么地方删，参数二删几个
+</span><span class="c1"></span><span class="n">ss</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">ss</span><span class="p">.</span><span class="n">find_last_not_of</span><span class="p">(</span><span class="sc">&#39; &#39;</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span><span class="c1">//从最后一个不是空格删到最后
+</span></code></pre></td></tr></table>
+</div>
+</div><h2 id="31-封装encapsulation">3.1 <strong><ruby>封装<rt>Encapsulation</rt></ruby></strong></h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//c语言的封装风格，数据放在一起打包为struck，然后吧数据以引用或指针的方式传递给行为。
+</span><span class="c1"></span><span class="k">struct</span> <span class="nc">date</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">year</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">month</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">day</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="kt">void</span> <span class="nf">init</span><span class="p">(</span><span class="n">date</span> <span class="o">&amp;</span> <span class="n">d</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">cin</span><span class="o">&gt;&gt;</span><span class="n">d</span><span class="p">.</span><span class="n">year</span><span class="p">;</span>
+    <span class="n">cin</span><span class="o">&gt;&gt;</span><span class="n">d</span><span class="p">.</span><span class="n">month</span><span class="p">;</span>
+    <span class="n">cin</span><span class="o">&gt;&gt;</span><span class="n">d</span><span class="p">.</span><span class="n">day</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="c1">//c++认为c封装不彻底，1数据和行为分离，2没有权限控制。
+</span><span class="c1">//权限控制 private protected public
+</span><span class="c1"></span><span class="k">class</span> <span class="nc">date2</span>
+<span class="p">{</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="kt">int</span> <span class="n">year</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">month</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">day</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">viod</span> <span class="n">print</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">year</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+<span class="c1">//类名也是一种特别的名称空间
+</span></code></pre></td></tr></table>
+</div>
+</div><h2 id="32-类的构造器constructor">3.2 <strong><ruby>类的构造器<rt>constructor</rt></ruby></strong></h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//constructor 构造器
+</span><span class="c1">//1.与类名相同，无返回值，生成对象时自动调用，用于初始化
+</span><span class="c1">//2.可以有参数，可以重载，默认参数
+</span><span class="c1"></span><span class="k">class</span> <span class="nc">sss</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">sss</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&#34;我是构造器&#34;</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">sss</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">i</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+<span class="n">sss</span> <span class="nf">s</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span><span class="c1">//使用构造器的重载， 创建对象时加参数
+</span></code></pre></td></tr></table>
+</div>
+</div><h2 id="322-类的析构器destructor">3.2.2 <strong><ruby>类的析构器<rt>destructor</rt></ruby></strong></h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//1.~类名（）无参无反，对象销毁时的内存处理工作
+</span><span class="c1"></span><span class="k">class</span> <span class="nc">sss</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="o">~</span><span class="n">ksss</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&#34;我是析构器&#34;</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
+    <span class="p">}</span>
+
+<span class="p">};</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="41-自实现string">4.1 自实现string</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//代码in坚果云
+</span><span class="c1"></span><span class="k">class</span> <span class="nc">A</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">A</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="kt">int</span> <span class="n">k</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="c1">//参数列表，效率高，在函数声明之后，实现体之前，：开头
+</span><span class="c1"></span>    <span class="o">:</span><span class="n">x</span><span class="p">(</span><span class="n">i</span><span class="p">),</span><span class="n">y</span><span class="p">(</span><span class="n">j</span><span class="p">),</span><span class="n">z</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="c1">//初始化顺序，跟变量的声明顺序有关，初始化列表中的顺序无关，即xyz顺序可变
+</span><span class="c1"></span>    <span class="p">{</span>
+
+    <span class="p">}</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="kt">int</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">;</span>
+
+<span class="p">};</span>
+<span class="c1">//拷贝构造器
+</span><span class="c1"></span>    <span class="c1">//由已存在的对象，创建新对象，也就是所新对象不是由构造器来构造，而是由
+</span><span class="c1"></span>    <span class="c1">//拷贝构造器来完成，拷贝构造器的格式是固定的
+</span><span class="c1"></span><span class="k">class</span> <span class="nc">A</span>
+<span class="p">{</span>
+    <span class="n">A</span><span class="p">(</span><span class="k">const</span> <span class="n">A</span> <span class="o">&amp;</span> <span class="n">another</span><span class="p">)</span><span class="c1">//&amp;是引用
+</span><span class="c1"></span><span class="p">};</span>
+    <span class="c1">//若不提供，系统提供默认，自定义是系统不再提供默认
+</span><span class="c1"></span>    <span class="c1">//系统提供的默认是一种等位拷贝，浅浅的拷贝，会导致内存重析构。doble free
+</span><span class="c1"></span>    <span class="c1">//含有堆空间时要自实现拷贝
+</span><span class="c1"></span>
+<span class="c1">//友元 同类对象无私处，异类对象有友元
+</span><span class="c1"></span>
+<span class="c1">//运算符重载
+</span><span class="c1"></span>    <span class="c1">//赋值运算符重载
+</span><span class="c1"></span>    <span class="n">string</span> <span class="n">s4</span><span class="o">=</span><span class="n">s3</span><span class="p">;</span><span class="c1">//本质不是赋值，而是拷贝构造，在声明时候=号表示初始化
+</span><span class="c1">//this指针
+</span><span class="c1"></span>    <span class="c1">//系统创建对象时，默认生成当前对象的this指针。
+</span><span class="c1">//对对象来说，传引用效率很高，不然调用拷贝构造效率低。
+</span><span class="c1">//栈上的对象可以返回，但不能返回栈上的引用（除非实例不会销毁，比如对象方法返回自己，结束后对象还在，引用有效）
+</span><span class="c1"></span>    <span class="n">A</span> <span class="o">&amp;</span> <span class="n">func</span><span class="p">(){</span><span class="c1">//这是错的，func执行完b会销毁，但这个回传的引用仍指向这个地址
+</span><span class="c1"></span>        <span class="n">A</span> <span class="n">b</span><span class="p">;</span>
+        <span class="k">return</span> <span class="n">b</span><span class="p">;</span>
+    <span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="51-const-static-修饰类">5.1 const static 修饰类</h2>
+<p>static</p>
+<ol>
+<li>在c中，修饰全部变量表示吧作用于限制在本文件内</li>
+<li>修饰局部变量表示吧变量生命周期提升为全局</li>
+<li>c++中在类内部，用来实现族类对象间的数据共享。</li>
+<li>c++中，修饰类成员时，表示这个成员变量属于整个类，而不是某个对象（既属于类，也属于对象，但终归于类）
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">static</span> <span class="kt">int</span> <span class="n">a</span><span class="p">;</span><span class="c1">//声明写在类内
+</span><span class="c1"></span><span class="kt">int</span> <span class="n">A</span><span class="o">::</span><span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="c1">//初始化写在内外
+</span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>修饰成员函数时，也属于整个类；因为他属于类，没有this指针（this只有对象实例有）
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//不能访问数据成员及成员，没有this
+</span><span class="c1"></span><span class="k">static</span> <span class="n">string</span> <span class="nf">getstr</span><span class="p">();</span>
+<span class="k">const</span> <span class="k">static</span> <span class="kt">int</span> <span class="n">h</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+<span class="c1">//static const 修饰数据成员，必须在类内初始化；就地初始化
+</span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ol>
+<p>const</p>
+<ol>
+<li>修饰数据成员，初始化位置只能在 参数列表里；（新版本虽然可以直接等于号初始化，但别被惯傻了）</li>
+<li>修饰成员函数（注意不是修饰返回类型），位置放在声明之后，实现体之前，大概也没有别的地方可以放了（haha）</li>
+<li>const函数承诺不会修改数据成员，也只能调用其他const函数。</li>
+<li>还可以构成重载（wtf？）
+<ul>
+<li>修饰类对象，从对象层面不修改成员，只能调用const成员函数，构成重载就是配饰有无const的对象的情况</li>
+<li>即const对象只能调用const成员函数，非const对象优先调用非const成员函数（若无则调用const成员函数）</li>
+</ul>
+</li>
+</ol>
+<h2 id="52-指向类成员的指针">5.2 指向类成员的指针</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//都指向非静态成员
+</span><span class="c1"></span><span class="s">&#34;成员类型 类名::* 指针名 = &amp;类名::成员名&#34;</span>
+<span class="k">class</span> <span class="nc">stuu</span>
+<span class="p">{</span>
+    <span class="kt">void</span> <span class="nf">print</span><span class="p">();</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="kt">int</span> <span class="n">a</span><span class="p">;</span>
+<span class="p">};</span>
+    <span class="c1">//指向数据成员
+</span><span class="c1"></span>        <span class="c1">//在定义时必须和类关联，使用时必须和对象关联
+</span><span class="c1"></span>            <span class="kt">int</span> <span class="n">stuu</span><span class="o">::*</span> <span class="n">pa</span><span class="o">=&amp;</span><span class="n">stuu</span><span class="o">::</span><span class="n">a</span><span class="p">;</span>
+            <span class="n">stuu</span> <span class="n">dx</span><span class="p">;</span>
+            <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">dx</span><span class="p">.</span><span class="o">*</span><span class="n">pa</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
+            <span class="c1">//(内部实现，实际上时记录了偏移量)
+</span><span class="c1"></span>    <span class="c1">//指向函数成员
+</span><span class="c1"></span>        <span class="c1">//
+</span><span class="c1"></span>        <span class="kt">void</span> <span class="p">(</span><span class="n">stuu</span><span class="o">::*</span><span class="n">pf</span><span class="p">)()</span><span class="o">=&amp;</span><span class="n">stuu</span><span class="o">::</span><span class="n">print</span><span class="p">;</span>
+        <span class="p">(</span><span class="n">dx</span><span class="p">.</span><span class="o">*</span><span class="n">pf</span><span class="p">)();</span>
+
+    <span class="nl">tip</span><span class="p">:</span><span class="c1">//在类中想用常量时
+</span><span class="c1"></span>        <span class="k">enum</span><span class="p">{</span><span class="n">cnt</span><span class="o">=</span><span class="mi">4</span><span class="p">};</span><span class="c1">//因为用const必须参数列表初始化，static const 太浪费
+</span></code></pre></td></tr></table>
+</div>
+</div><h2 id="53-友元">5.3 友元</h2>
+<ol>
+<li>友元可以是友元函数，友元类，异类才有友元（同类无私处）</li>
+<li>友元是单方面的，你拿我当朋友不等于我也拿你当朋友(涩会涩会)</li>
+<li>访问时必须通过
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">class</span> <span class="nc">A</span>
+<span class="p">{</span>
+    <span class="k">friend</span> <span class="kt">void</span> <span class="nf">dis</span><span class="p">(</span><span class="n">A</span> <span class="o">&amp;</span> <span class="n">t</span><span class="p">);</span>
+    <span class="k">friend</span> <span class="k">class</span> <span class="nc">B</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="c1">// 该函数可以访问A的私有成员
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">dis</span><span class="p">(</span><span class="n">A</span> <span class="o">&amp;</span> <span class="n">t</span><span class="p">);</span><span class="c1">//访问时必须通过对象访问，因为他不是成员函数
+</span><span class="c1">// 该类可以访问A的私有成员
+</span><span class="c1"></span><span class="k">class</span> <span class="nc">B</span><span class="p">{</span><span class="kt">void</span> <span class="nf">dis</span><span class="p">(</span><span class="n">A</span> <span class="o">&amp;</span> <span class="n">t</span><span class="p">);};</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+</ol>
+<h2 id="54-单双目运算符重载">5.4 单双目运算符重载</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//不能重载的运算符
+</span><span class="c1"></span>    <span class="p">.</span>  <span class="p">.</span><span class="o">*</span>  <span class="o">::</span>  <span class="o">?:</span>  <span class="k">sizeof</span> <span class="c1">//sizeof是运算符，不是函数
+</span><span class="c1">//除了=号外，基类中被重载的操作符都将被派生类继承
+</span><span class="c1"></span>    <span class="c1">//“赋值运算符重载函数”不是不能被派生类继承，而是被派生类的默认“赋值运算符重载函数”给shadow了
+</span><span class="c1">//通常情况下，双目运算符重载为成员需要一个参数，重载为友元要两个参数，做成员时this也是参数
+</span><span class="c1">//重载-（负号）时用const修饰成员函数，-c=t就不会过编译了，这才是对的，注意-(-c)所以只能用const修饰成员函数而不是返回值。
+</span><span class="c1">//
+</span><span class="c1"></span>    <span class="n">Clock</span> <span class="k">operator</span><span class="o">++</span><span class="p">(</span><span class="n">Clock</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">)</span> <span class="c1">//前置单目运算符 ++c
+</span><span class="c1"></span>    <span class="n">Clock</span> <span class="k">operator</span><span class="o">++</span><span class="p">(</span><span class="n">Clock</span><span class="o">&amp;</span> <span class="n">c</span><span class="p">,</span><span class="kt">int</span><span class="p">)</span> <span class="c1">//后置单目运算符 c++
+</span><span class="c1">//day 6.2
+</span><span class="c1">//流输入输出运算符重载
+</span><span class="c1"></span>    <span class="n">istream</span> <span class="o">&amp;</span> <span class="k">operator</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">istream</span><span class="o">&amp;</span><span class="p">,</span><span class="err">自定义类</span><span class="o">&amp;</span><span class="p">);</span>
+    <span class="n">ostream</span> <span class="o">&amp;</span> <span class="k">operator</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">istream</span><span class="o">&amp;</span><span class="p">,</span><span class="k">const</span> <span class="err">自定义类</span><span class="o">&amp;</span><span class="p">);</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="55-类型转化">5.5 类型转化</h2>
+<ol>
+<li>使用 类型转化构造器
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//实现 其他类型 到 本类型 的转化
+</span><span class="c1"></span><span class="k">class</span> <span class="err">本类型</span>
+<span class="p">{</span>
+    <span class="err">本类型</span><span class="p">(</span><span class="k">const</span> <span class="err">其他类型</span> <span class="o">&amp;</span> <span class="n">Ta</span><span class="p">)</span> <span class="c1">//这是一个构造器
+</span><span class="c1"></span>    <span class="p">[</span>
+        <span class="c1">//实现转化
+</span><span class="c1"></span>        <span class="c1">//this-&gt;data = Ta.data ;
+</span><span class="c1"></span>    <span class="p">]</span>
+<span class="p">};</span>
+<span class="err">本类型</span> <span class="o">=</span> <span class="err">其他类型</span><span class="p">;</span> <span class="c1">//隐式转化可用  先调用类型转化，在调用赋值运算符重载
+</span><span class="c1">//我们把只有一个参数的构造器成为类型转化构造器
+</span><span class="c1"></span><span class="k">explicit</span> <span class="c1">//加在转化构造器前表示只能使用 显式转化
+</span><span class="c1"></span><span class="err">本类型</span> <span class="o">=</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="err">本类型</span><span class="o">&gt;</span><span class="p">(</span><span class="err">其他类型</span><span class="p">);</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>使用 类型转换操作符函数
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">class</span> <span class="err">源类</span>
+<span class="p">{</span>
+    <span class="c1">//无参无返回
+</span><span class="c1"></span>    <span class="k">operator</span> <span class="err">目标类型</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="c1">//根据需要进行转化
+</span><span class="c1"></span>        <span class="c1">//目类标型.data = this-&gt;data;
+</span><span class="c1"></span>        <span class="k">return</span> <span class="err">目标类型</span><span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">data2</span><span class="p">,</span><span class="k">this</span><span class="p">.</span><span class="n">data2</span><span class="p">);</span><span class="c1">//特殊，里面有返回,
+</span><span class="c1"></span>        <span class="c1">//实际也可以这么写
+</span><span class="c1"></span>        <span class="err">目标类型</span> <span class="n">swa</span><span class="p">;</span>
+        <span class="n">swa</span><span class="p">.</span><span class="n">data1</span> <span class="o">=</span> <span class="k">this</span><span class="o">-&gt;</span><span class="n">data1</span><span class="p">;</span>
+        <span class="k">return</span> <span class="n">swa</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+</ol>
+<h2 id="56-运算符重载提高篇">5.6 运算符重载提高篇</h2>
+<ol>
+<li>函数操作符()重载 &ndash; 仿函数
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//把类对象当作函数名使用，主要应与于STL和模板
+</span><span class="c1"></span><span class="k">class</span> <span class="err">类名</span>
+<span class="p">{</span>
+    <span class="err">返回值类型</span> <span class="nf">operator</span><span class="p">()</span> <span class="p">(</span><span class="err">参数类型</span><span class="p">)</span>
+    <span class="p">{</span>
+
+    <span class="p">}</span>
+<span class="p">};</span>
+<span class="c1">//lambda 本质就是仿函数
+</span><span class="c1"></span>
+<span class="k">operator</span> <span class="nf">bool</span><span class="p">();</span><span class="c1">//对象可以对void * 重载,if(A)情况，会调用bool();
+</span><span class="c1"></span><span class="k">operator</span> <span class="kt">void</span> <span class="o">*</span><span class="p">();</span><span class="c1">//对象可以对void * 重载，if(A)情况，没有bool()会调用void*(),然后void*被强转成bool;
+</span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>重载 <code>new delete new[] delete[]</code>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//定制化时使用，给特定类定制
+</span><span class="c1"></span><span class="kt">void</span> <span class="o">*</span> <span class="k">operator</span> <span class="nf">new</span><span class="p">(</span><span class="n">size_t</span><span class="p">)</span>
+<span class="kt">void</span> <span class="k">operator</span> <span class="k">delete</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span>
+<span class="kt">void</span> <span class="o">*</span> <span class="k">operator</span> <span class="k">new</span><span class="p">[](</span><span class="n">size_t</span><span class="p">)</span>
+<span class="kt">void</span> <span class="k">operator</span> <span class="k">delete</span><span class="p">[](</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span>
+<span class="c1">//注：operator new 中 size_t 参数是编译器自动计算传递的 其实是 unsigned int
+</span><span class="c1"></span>
+<span class="c1">//了解一下就行↓
+</span><span class="c1"></span><span class="cp">#include</span> <span class="cpf">&lt;memory&gt;</span><span class="cp">
+</span><span class="cp"></span><span class="k">class</span> <span class="nc">A</span><span class="p">{</span><span class="kt">int</span> <span class="n">a</span><span class="p">;};</span>
+<span class="n">auto_ptr</span><span class="o">&lt;</span><span class="n">A</span><span class="o">&gt;</span> <span class="n">ptr</span><span class="p">(</span><span class="k">new</span> <span class="n">A</span><span class="p">);</span> <span class="c1">//auto_ptr 类模板 auto_ptr&lt;A&gt;模板类
+</span><span class="c1"></span><span class="n">ptr</span><span class="o">-&gt;</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+<span class="c1">//一个对象的行为想指针，重载了 -&gt; () *
+</span><span class="c1">//new被ptr托管后，不需要再关心delete的问题
+</span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ol>
+<h2 id="61-继承与派生inheritderive">6.1 <strong><ruby>继承与派生<rt>Inherit&amp;Derive</rt></ruby></strong></h2>
+<ol>
+<li>c++ 通过继承关系实现了代码的可重用性。
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">class</span> <span class="err">派生类名:继承方式 基类名</span>
+<span class="p">{</span>
+
+<span class="p">};</span>
+<span class="c1">//一个派生类可以有多个基类
+</span><span class="c1">//继承方式 public protected private
+</span><span class="c1"></span><span class="cm">/*
+</span><span class="cm">            父类        公有继承    保护继承        私有继承
+</span><span class="cm">    成员属性↘ public      public       protected      private
+</span><span class="cm">            protected   protected    protected      private
+</span><span class="cm">            private     不可访问     不可访问       不可访问（inaccessable）
+</span><span class="cm">*/</span>
+
+<span class="k">protected</span> <span class="err">对于外界访问属性来说等同于</span> <span class="k">private</span><span class="err">，但在派生类中可见</span>
+
+<span class="err">几点说明</span><span class="o">:</span>
+<span class="o">*</span> <span class="err">可见不可见都全盘接收，除了构造器与析构器，基类可能会造成派生类的成员冗余，是需要设计的</span>
+<span class="o">*</span> <span class="err">派生类有了自己的个性，才有意义</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>派生类的构造器
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="err">类名</span><span class="p">(</span><span class="err">参数总列表</span><span class="p">)</span>
+    <span class="o">:</span><span class="err">父类名</span><span class="p">(</span><span class="err">父类构造器列表</span><span class="p">),</span><span class="err">自己的成员</span>
+<span class="p">{</span>
+    <span class="c1">//在参数列表里调用父类构造器，然后再初始化自己的成员
+</span><span class="c1"></span>    <span class="c1">//在父类中如果有标配，重载或默认，把无参的情况包含进来，子类可以不显式的调用父类构造器，隐式调用
+</span><span class="c1"></span><span class="p">}</span>
+<span class="c1">//初始化顺序，父类，其他类对象成员，本类的初始化
+</span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>派生类的拷贝构造器
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//子类未实现拷贝时，会调用父类构造器
+</span><span class="c1">//子类一旦实现拷贝构造，则必须显式的调用父类拷贝构造器
+</span><span class="c1"></span><span class="n">son</span><span class="p">(</span><span class="k">const</span> <span class="n">son</span> <span class="o">&amp;</span> <span class="n">another</span><span class="p">)</span>
+    <span class="o">:</span><span class="n">father</span><span class="p">(</span><span class="n">another</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="c1">// ↑↑↑赋值兼容（子类对象(引用或指针)可以赋给父类对象）
+</span><span class="c1"></span>    <span class="k">this</span><span class="o">-&gt;</span><span class="n">data</span><span class="o">=</span><span class="n">another</span><span class="p">.</span><span class="n">data</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>派生类赋值重载
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//子类中未实现赋值重载时，会调用父类的赋值重载
+</span><span class="c1">//子类一旦实现赋值重载，不会自动调用父类赋值重载
+</span><span class="c1"></span><span class="n">son</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="n">son</span><span class="o">&amp;</span> <span class="n">another</span><span class="p">)</span>
+<span class="p">{</span>
+                        <span class="c1">//赋值兼容
+</span><span class="c1"></span>    <span class="n">father</span><span class="o">::</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="n">another</span><span class="p">);</span><span class="c1">//重载是会被子类继承的，所以可以调用。与构造器不同
+</span><span class="c1"></span>    <span class="k">this</span><span class="o">-&gt;</span><span class="n">data</span><span class="o">=</span><span class="n">another</span><span class="p">.</span><span class="n">data</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>重名问题
+<ol>
+<li>子类中会把父类中重名的成员shadow掉，只需要名字相同即可</li>
+<li>尽量不要重名，否则，调用时加上命名空间</li>
+<li>overload 重载 发生在同一作用域，函数名相同，参数列表不同（个数，类型，顺序）</li>
+<li>shadow 发生在父子类当中，只要函数名相同即可</li>
+</ol>
+</li>
+<li>派生类的友元函数
+<ol>
+<li>父类的友元函数，子类也可以调用</li>
+<li>传参时子类赋值给了父类，赋值兼容</li>
+</ol>
+</li>
+<li>派生类的析构器
+<ol>
+<li>析构顺序：子类，成员，基类</li>
+<li>与构造相反</li>
+</ol>
+</li>
+<li>多继承
+<ol>
+<li>你有n个爹（逃）</li>
+<li>三角问题，多个父类中相同的成员，用到要加父类作用域
+<ul>
+<li>给调用者带来很大的不便</li>
+<li>办法，提取相同成员到一个公共类M中，然后让被提取的类，分别继承这个公共类M（三角变成了四角）
+<ul>
+<li>但是子类还是无法访问这个成员，因为两个基类都继承了M，这个成员还是有两份</li>
+<li>最终办法 虚继承</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+<li>虚继承 virtual(加在继承方式前面)
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//上面的 M 就叫做 虚基类
+</span><span class="c1">//虚继承的意义：在多继承中，保存各个父类的多份同名成员，虽然有时是必要的，可以在不同数据成员中存放不同数据，但在大多数情况下
+</span><span class="c1">//是我们不希望出现的，因为保留多份数据成员的拷贝，不仅占用较多的存储空间，还增加了访问困难
+</span><span class="c1">//虚基类和虚继承，实现了在多继承中只保留一份共同（同名）成员。
+</span><span class="c1">//虚基类，需要抽象和设计，虚继承，是一种继承的扩展
+</span><span class="c1">//初始化问题，多继承的类中一定要调用虚基类的构造器，父类可以用默认
+</span><span class="c1"></span><span class="k">class</span> <span class="nc">A</span><span class="p">{</span>
+    <span class="n">A</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="p">){}</span>
+<span class="p">};</span>
+<span class="k">class</span> <span class="nc">B</span><span class="o">:</span><span class="k">virtual</span> <span class="k">public</span> <span class="n">A</span><span class="p">{</span>
+    <span class="n">B</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">)</span><span class="o">:</span><span class="n">A</span><span class="p">(</span><span class="n">n</span><span class="p">){}</span>
+<span class="p">};</span>
+<span class="k">class</span> <span class="nc">C</span><span class="o">:</span><span class="k">virtual</span> <span class="k">public</span> <span class="n">A</span><span class="p">{</span>
+    <span class="n">C</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">)</span><span class="o">:</span><span class="n">A</span><span class="p">(</span><span class="n">n</span><span class="p">){}</span>
+<span class="p">};</span>
+<span class="k">class</span> <span class="nc">D</span><span class="o">:</span><span class="k">public</span> <span class="n">B</span><span class="p">,</span><span class="k">public</span> <span class="n">C</span><span class="p">{</span>
+    <span class="n">D</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">)</span><span class="o">:</span><span class="n">A</span><span class="p">(</span><span class="n">n</span><span class="p">),</span><span class="n">B</span><span class="p">(</span><span class="n">n</span><span class="p">),</span><span class="n">C</span><span class="p">(</span><span class="n">n</span><span class="p">){}</span><span class="c1">//结果有A()控制，其他配角
+</span><span class="c1"></span><span class="p">};</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+</ol>
+<h2 id="71-多态polymorphism">7.1 <strong><ruby>多态<rt>PolyMorphism</rt></ruby></strong></h2>
+<p>男人不止一面（逃），几个相似但不完全相同的对象，收到同一个消息后，执行不同的操作</p>
+<p>c++中所谓的多态是指，由继承而产生的相关的不同的类，其对象对同一消息会做出不同的响应</p>
+<p>增加程序的灵活性，可以减轻系统升级，维护，调试的工作量和复杂度</p>
+<ol>
+<li>赋值兼容（多态实现的前提）
+<ul>
+<li>赋值兼容规则 是指在需要基类对象的任何地方都可以使用 公有派生类(其他不行) 的对象来替代，赋值兼容是一种默认行为，不需要任何的显式步骤</li>
+<li>派生类的对象可以赋值给基类对象</li>
+<li>派生类的对象可以初始化基类的引用</li>
+<li>派生类的对象的地址可以赋给指向基类的指针</li>
+<li>只能使用基类原有的成员</li>
+</ul>
+</li>
+<li>多态形成的条件
+<ol>
+<li>静多态: 函数重载，也是一种多态现象，通过命名倾轧在编译阶段决定，故称静多态</li>
+<li>动多态: 在运行阶段决定 条件是
+<ol>
+<li>父类中有虚函数</li>
+<li>子类override(覆写)父类中的虚函数</li>
+<li>用已被子类对象赋值的父类指针或引用（对象不行），调用共用接口（发生虚函数调用）</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>虚函数
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">class</span> <span class="nc">A</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">virtual</span> <span class="kt">void</span> <span class="n">func</span><span class="p">();</span><span class="c1">//只需在声明时加；
+</span><span class="c1"></span><span class="p">};</span>
+<span class="c1">//父类时有虚函数时，子类覆写override虚函数时（同名同参同返回），可以不加virtual，但建议加上
+</span><span class="c1">//将子类对象赋值给父类引用或指针时，用这个父类指针或引用访问的虚函数为子类的虚函数（如果有的话）
+</span><span class="c1">//子类中虚函数的访问权限可以不和父类一致
+</span><span class="c1">//覆写范围是很大的，如果不覆写默认从父类继承
+</span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>纯虚函数
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">class</span> <span class="nc">A</span>
+<span class="p">{</span>
+    <span class="k">virtual</span> <span class="kt">void</span> <span class="nf">func</span><span class="p">()</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="c1">//格式，没有实现体
+</span><span class="c1"></span><span class="p">};</span>
+<span class="c1">//含有纯虚函数的类，称为抽象基类（java中叫interface），不可以实例化（A a; 不可以）
+</span><span class="c1">//作用就是给族类提供接口用的,抽象基类不能实例化，但可以用指针和引用指向一个子类，实现多态
+</span><span class="c1">//抽象基类存在的意义就是被继承
+</span><span class="c1">//如果派生类中没有对该函数override，则这个函数在派生类中仍为纯虚函数，派生类仍为纯虚基类
+</span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>含有虚函数的析构: 虚析构，就是为了delete基类指针时将子类对象析构完全
+<ul>
+<li>含有虚函数的类，析构函数也应该声明为虚函数</li>
+<li>在delete父类指针的时候，会调用子类的析构函数，实现完整析构</li>
+<li>当一个类中有虚函数的时候，请将析构器声明为vritual</li>
+</ul>
+</li>
+<li>若干限制
+<ol>
+<li>静态成员函数不能是虚函数，静态成员函数不受对象的捆绑，只有类的信息</li>
+<li>内联函数，普通函数，不能是虚函数</li>
+<li>构造函数不能是虚函数</li>
+<li>析构函数通常声明为虚函数</li>
+</ol>
+</li>
+<li>设计模式 &ndash; 依赖倒置原则
+//定义，高层模块不应该依赖底层模块，二者都应该依赖抽象
+//抽象不应该依赖细节，细节应该依赖抽象
+//核心：面向接口编程</li>
+</ol>
+<h2 id="81-多态的实现原理">8.1 多态的实现原理</h2>
+<ol>
+<li>虚函数表 virtual table
+<ul>
+<li>类实例化时，内存最前面先放一个指向v-table的指针，然后是数据成员</li>
+<li>v-table中，先放父类虚函数，再放子类虚函数</li>
+<li>如果子类override了父类虚函数，则替换虚函数表相应位置的函数指针</li>
+<li>多态实现的前题，一定是生成完了v-table之后，所以在父类构造器调用虚函数实现不了多态</li>
+</ul>
+</li>
+</ol>
+<h2 id="82-运行时类型信息rtti">8.2 <strong><ruby>运行时类型信息<rt>RTTI</rt></ruby></strong></h2>
+<p>run time type identificaition。运行时信息，来自于多态，所以一下运算符只用于基于多态的继承体系中</p>
+<ol>
+<li>typeid运算符
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//使用这个运算符 要包含头文件&lt;typeinfo&gt;
+</span><span class="c1">//返回包含数据信息的type_info对象引用
+</span><span class="c1">//type_info重载了==,!=来比较是否相等，函数name()返回类型名称
+</span><span class="c1">//type_info的拷贝赋值为私有，不可操作，只用来做调试
+</span><span class="c1"></span><span class="n">B</span> <span class="n">b</span><span class="p">;</span>
+<span class="n">cout</span><span class="o">&lt;&lt;</span><span class="k">typeid</span><span class="p">(</span><span class="n">b</span><span class="p">).</span><span class="n">name</span><span class="p">()</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="c1">//输出b信息
+</span><span class="c1"></span><span class="n">A</span> <span class="o">*</span> <span class="n">a</span><span class="o">=&amp;</span><span class="n">b</span><span class="p">;</span>
+<span class="n">cout</span><span class="o">&lt;&lt;</span><span class="k">typeid</span><span class="p">(</span><span class="o">*</span><span class="n">a</span><span class="p">).</span><span class="n">name</span><span class="p">()</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="c1">//输出b信息
+</span><span class="c1">//可以帮你辨别一个指针到底指向谁，在多态中
+</span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ol>
+<h2 id="83-typecast">8.3 typecast</h2>
+<ol>
+<li><code>static_cast&lt;&gt;()</code>
+<ul>
+<li>在一个方向上可以做隐式转换，在另一个方向方向可以做静态转换</li>
+<li>发生在编译阶段，不保证后续使用的正确性</li>
+<li>用于父子类不安全</li>
+</ul>
+</li>
+<li><code>reinterpret_cast&lt;&gt;()</code>
+<ul>
+<li>既不在编译期也不再运行期进行检查，安全性完全由程序员决定</li>
+</ul>
+</li>
+<li><code>dynamic_cast&lt;&gt;()</code>
+<ul>
+<li>运行时的类型转换方法，检查指针所指类型，然后判断是否与要转换的类型有一种“is a”的关系</li>
+<li>如果是，返回对象地址，不是返回null</li>
+<li>只用于含有虚函数的父子类中</li>
+</ul>
+</li>
+</ol>
+<h2 id="9-c模板-template">9 c++模板 template</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//泛型（Generic Programming）：多种数据类型上皆可操作的含义
+</span><span class="c1">//语法格式
+</span><span class="c1"></span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="o">/</span><span class="k">class</span> <span class="err">类型参数表</span><span class="o">&gt;</span>
+<span class="err">返回类型</span> <span class="err">函数模板名</span><span class="p">(</span><span class="err">函数参数表</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="err">函数模板实现体</span>
+<span class="p">}</span>
+
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="p">,</span><span class="k">typename</span> <span class="n">T2</span><span class="p">....</span><span class="o">&gt;</span>
+<span class="kt">void</span> <span class="n">swapp</span><span class="p">(</span><span class="n">T</span> <span class="n">a</span><span class="p">,</span><span class="n">T</span> <span class="n">b</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">a</span><span class="o">^=</span><span class="n">b</span><span class="p">;</span><span class="n">b</span><span class="o">^=</span><span class="n">a</span><span class="p">;</span><span class="n">a</span><span class="o">^=</span><span class="n">b</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="k">class</span> <span class="nc">stackk</span><span class="p">{</span>
+    <span class="n">stackk</span><span class="p">();</span>
+<span class="p">};</span>
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="n">stackk</span><span class="o">::</span><span class="n">stackk</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">()</span>
+<span class="p">{}</span>
+<span class="c1">//定义实现分开时，都要顶着帽子，（写类时，函数在外部实现也要戴帽子，并且函数名后加&lt;T&gt;）
+</span><span class="c1">//模板适用于参数个数相同，函数体相同的情况
+</span><span class="c1">//参数个数如果不同，不要使用模板
+</span></code></pre></td></tr></table>
+</div>
+</div><h2 id="10-c-流类综述">10 C++ 流类综述</h2>
+<p>流类对象都重载了 <code>&lt;&lt;</code> 和 <code>&gt;&gt;</code></p>
+<ol>
+<li>输入输出IO流
+<ul>
+<li>IO对象的构造器和赋值重载是private，不能拷贝或赋值，使用时只能传引用或指针</li>
+<li>IO对象是由缓冲区的，缓冲区写满或遇到endl才写入,(cin背后是键盘，cout背后是屏幕)</li>
+<li>endl,flush,unitbuf 都可以刷缓冲</li>
+</ul>
+</li>
+<li>标准输出 cout cerr clog
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//cout.unsetf(ios::dec);
+</span><span class="c1">//cout.setf(ios::hex);
+</span><span class="c1">//&lt;iomanip&gt; 流算子头文件,上面并不好用
+</span><span class="c1">//cout&lt;&lt;hed&lt;&lt;a&lt;&lt;endl;
+</span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>标准输入 cin
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//istream 成员函数
+</span><span class="c1"></span><span class="n">cin</span><span class="p">.</span><span class="n">get</span><span class="p">();</span><span class="c1">//读一个字符返回，包括空格回车tab空字符
+</span><span class="c1"></span><span class="n">cin</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span><span class="mi">1024</span><span class="p">,</span><span class="sc">&#39;\n&#39;</span><span class="p">);</span>
+<span class="n">cin</span><span class="p">.</span><span class="n">getline</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span><span class="mi">1024</span><span class="p">,</span><span class="err">&#39;默认回车&#39;</span><span class="p">);</span>
+<span class="n">istream</span><span class="o">&amp;</span> <span class="n">ignore</span><span class="p">(</span><span class="n">streamsize</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="kt">int</span> <span class="n">delim</span><span class="o">=</span><span class="n">EOF</span><span class="p">);</span><span class="c1">//跳过n个或遇到delim为止，delim也被跳过
+</span><span class="c1"></span><span class="kt">int</span> <span class="nf">peek</span><span class="p">();</span><span class="c1">//窥视 当前指针不改动，返回内容（int 型），自己转char
+</span><span class="c1"></span><span class="n">istream</span><span class="o">&amp;</span> <span class="n">putback</span><span class="p">(</span><span class="kt">char</span> <span class="n">c</span><span class="p">);</span><span class="c1">//回推指针，并在此位置替换为c
+</span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>文件IO流
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="n">ifstream</span> <span class="nf">ifile</span><span class="p">(</span><span class="s">&#34;1.txt&#34;</span><span class="p">);</span><span class="c1">//只能从文件读入 默认模式 ios::in
+</span><span class="c1"></span>    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">ifile</span><span class="p">)</span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&#34;打开失败&#34;</span><span class="p">;</span>
+<span class="n">ofstream</span> <span class="nf">ofile</span><span class="p">(</span><span class="s">&#34;2.txt&#34;</span><span class="p">);</span><span class="c1">//只能写到文件 默认模式 ios::out|ios::trunc
+</span><span class="c1"></span>    <span class="c1">//没有这个文件自动创建
+</span><span class="c1"></span><span class="n">fstream</span>  <span class="nf">iofile</span><span class="p">(</span><span class="s">&#34;3.txt&#34;</span><span class="p">);</span><span class="c1">//默认模式 ios::in|ios::out|ios::app
+</span><span class="c1"></span>    <span class="n">iofile</span><span class="p">.</span><span class="n">close</span><span class="p">();</span><span class="c1">//刷缓冲区
+</span><span class="c1"></span><span class="n">ios</span><span class="o">::</span><span class="n">in</span> <span class="n">ios</span><span class="o">::</span><span class="n">out</span> <span class="c1">//不会自动创建文件
+</span><span class="c1"></span><span class="n">ios</span><span class="o">::</span><span class="n">trunc</span> <span class="c1">//覆盖原来 会自动创建文件
+</span><span class="c1"></span><span class="n">ios</span><span class="o">::</span><span class="n">app</span> <span class="c1">//追加 会自动创建文件
+</span><span class="c1"></span><span class="n">ios</span><span class="o">::</span><span class="n">binary</span> <span class="c1">//二进制方式
+</span><span class="c1"></span>
+<span class="n">ios</span><span class="o">::</span><span class="n">cur</span> <span class="c1">//文件当前位置
+</span><span class="c1"></span><span class="n">ios</span><span class="o">::</span><span class="n">end</span> <span class="c1">//文件末尾
+</span><span class="c1"></span><span class="n">f</span><span class="p">.</span><span class="n">seekg</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span><span class="n">ios</span><span class="o">::</span><span class="n">cur</span><span class="p">);</span><span class="c1">//seekget 从当前位置向后50
+</span><span class="c1"></span><span class="n">f</span><span class="p">.</span><span class="n">seekp</span><span class="p">(</span><span class="o">-</span><span class="mi">50</span><span class="p">,</span><span class="n">ios</span><span class="o">::</span><span class="n">end</span><span class="p">);</span><span class="c1">//seekput 从文件尾向前50
+</span><span class="c1"></span>
+<span class="c1">//标识
+</span><span class="c1"></span><span class="n">f</span><span class="p">.</span><span class="n">eof</span><span class="p">();</span><span class="c1">//达到文件尾，返回true
+</span><span class="c1"></span><span class="n">f</span><span class="p">.</span><span class="n">bad</span><span class="p">();</span><span class="c1">//读写过程出错，返回true
+</span><span class="c1"></span><span class="n">f</span><span class="p">.</span><span class="n">fail</span><span class="p">();</span><span class="c1">//除了和bad()一样，格式错误（例如想要读整数，得到字母），遇到eof都返回true
+</span><span class="c1"></span><span class="n">f</span><span class="p">.</span><span class="n">good</span><span class="p">();</span><span class="c1">//上面任何返回true，则返回false
+</span><span class="c1"></span><span class="n">f</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span><span class="c1">//将所有标记位置位正常，不是清空流
+</span><span class="c1"></span><span class="n">cin</span><span class="p">.</span><span class="n">sync</span><span class="p">();</span><span class="c1">//清空流
+</span><span class="c1">//遍历读，一个个读
+</span><span class="c1"></span><span class="kt">char</span> <span class="n">c</span><span class="p">;</span>
+<span class="k">while</span><span class="p">(</span><span class="n">f</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="p">),</span><span class="o">!</span><span class="n">f</span><span class="p">.</span><span class="n">eof</span><span class="p">()){</span>
+    <span class="n">f2</span><span class="p">.</span><span class="n">put</span><span class="p">(</span><span class="n">c</span><span class="p">);</span><span class="c1">//写入另一个文件
+</span><span class="c1"></span><span class="p">}</span>
+<span class="c1">//一行一行读
+</span><span class="c1"></span><span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="mi">1024</span><span class="p">];</span>
+<span class="k">while</span><span class="p">(</span><span class="n">f</span><span class="p">.</span><span class="n">getline</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span><span class="mi">1024</span><span class="p">,</span><span class="sc">&#39;\n&#39;</span><span class="p">),</span><span class="o">!</span><span class="n">f</span><span class="p">.</span><span class="n">eof</span><span class="p">()){</span>
+    <span class="n">f2</span><span class="o">&lt;&lt;</span><span class="n">buf</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span><span class="c1">//用get不会跳过\n,用getline \n被跳过，还要补；
+</span><span class="c1"></span><span class="p">}</span>
+<span class="c1">//byte流读
+</span><span class="c1"></span><span class="n">ostream</span> <span class="o">&amp;</span> <span class="n">write</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span> <span class="n">buffer</span><span class="p">,</span><span class="kt">int</span> <span class="n">len</span><span class="p">);</span>
+<span class="n">istream</span> <span class="o">&amp;</span> <span class="n">read</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span> <span class="n">buffer</span><span class="p">,</span><span class="kt">int</span> <span class="n">len</span><span class="p">);</span>
+<span class="k">struct</span> <span class="nc">stu</span><span class="p">{</span>
+    <span class="kt">char</span> <span class="n">name</span><span class="p">[</span><span class="mi">100</span><span class="p">];</span>
+    <span class="kt">char</span> <span class="n">sex</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">age</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="n">stu</span> <span class="n">s</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">=</span>
+<span class="p">{</span>
+    <span class="p">{</span><span class="s">&#34;as&#34;</span><span class="p">,</span><span class="sc">&#39;y&#39;</span><span class="p">,</span><span class="mi">12</span><span class="p">},</span>
+    <span class="p">{</span><span class="s">&#34;gg&#34;</span><span class="p">,</span><span class="sc">&#39;x&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span>
+    <span class="p">{</span><span class="s">&#34;rr&#34;</span><span class="p">,</span><span class="sc">&#39;y&#39;</span><span class="p">,</span><span class="mi">3</span><span class="p">},</span>
+    <span class="p">{</span><span class="s">&#34;ww&#34;</span><span class="p">,</span><span class="sc">&#39;x&#39;</span><span class="p">,</span><span class="mi">100</span><span class="p">},</span>
+    <span class="p">{</span><span class="s">&#34;qq&#34;</span><span class="p">,</span><span class="sc">&#39;x&#39;</span><span class="p">,</span><span class="mi">107</span><span class="p">}</span>
+<span class="p">};</span>
+<span class="n">fstream</span> <span class="nf">f</span><span class="p">(</span><span class="s">&#34;asd.binary&#34;</span><span class="p">,</span><span class="n">ios</span><span class="o">::</span><span class="n">in</span><span class="o">|</span><span class="n">ios</span><span class="o">::</span><span class="n">out</span><span class="o">|</span><span class="n">ios</span><span class="o">::</span><span class="n">trunc</span><span class="o">|</span><span class="n">ios</span><span class="o">::</span><span class="n">binary</span><span class="p">);</span>
+<span class="c1">//f.write(s,sizeof(s));
+</span><span class="c1"></span><span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="n">i</span><span class="o">&lt;</span><span class="mi">5</span><span class="p">;</span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">f</span><span class="p">.</span><span class="n">write</span><span class="p">((</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="k">sizeof</span><span class="p">(</span><span class="n">stu</span><span class="p">));</span>
+<span class="p">}</span>
+<span class="n">f</span><span class="p">.</span><span class="n">seekg</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">ios</span><span class="o">::</span><span class="n">beg</span><span class="p">);</span>
+<span class="n">stu</span> <span class="n">tmp</span><span class="p">;</span>
+<span class="k">while</span><span class="p">(</span><span class="n">f</span><span class="p">.</span><span class="n">read</span><span class="p">((</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">tmp</span><span class="p">,</span><span class="k">sizeof</span><span class="p">(</span><span class="n">stu</span><span class="p">)),</span><span class="o">!</span><span class="n">f</span><span class="p">.</span><span class="n">eof</span><span class="p">()){</span>
+    <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">tmp</span><span class="p">.</span><span class="n">name</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+</ol>
+<h2 id="11-异常exception">11 异常（EXCEPTION）</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//在可能出错的地方使用try-catch结构
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">func</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">){</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">x</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">throw</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span><span class="c1">//在try下面调用的函数中可以抛出异常，终止程序往下执行
+</span><span class="c1"></span>            <span class="c1">//程序立即转到上面捕获异常的地方
+</span><span class="c1"></span>            <span class="c1">//异常传递是一个拷贝，如果自定义类型，注意拷贝构造，
+</span><span class="c1"></span><span class="p">}</span>
+<span class="k">try</span><span class="p">{</span>
+    <span class="n">func</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+<span class="p">}</span><span class="k">catch</span><span class="p">(</span><span class="kt">int</span> <span class="n">e</span><span class="p">)</span><span class="c1">//如果下方扔出的异常不是int型，将接不到，程序调用另一个函数，终止整个程序
+</span><span class="c1"></span><span class="p">{</span><span class="c1">//可以自己写异常信息类型，这样能得到更多信息
+</span><span class="c1"></span>    <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&#34;catch a exception &#34;</span><span class="o">&lt;&lt;</span><span class="n">e</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span><span class="c1">//catch执行完毕，继续执行后面的语句，如果没有匹配，系统调用terminate终止程序
+</span><span class="c1">//可以有多个catch
+</span><span class="c1"></span><span class="k">catch</span><span class="p">(...){</span>
+    <span class="c1">//如果上面都没有接到，这个来接，有这个的时候，系统就不会调用terminate
+</span><span class="c1"></span><span class="p">}</span>
+<span class="c1">//如果有多层try-catch结构，底层抛出一个异常，上层没有人接的话，继续传给上上层
+</span><span class="c1">//如果直到尽头都没有人接，系统才调用terminate
+</span><span class="c1"></span>    <span class="c1">//为了加强程序的可读性，可以在函数声明中列出可能抛出的所有异常类型
+</span><span class="c1"></span>    <span class="c1">//例如：
+</span><span class="c1"></span>        <span class="kt">void</span> <span class="nf">func</span><span class="p">()</span> <span class="k">throw</span><span class="p">(</span><span class="kt">int</span> <span class="p">,</span><span class="n">A</span> <span class="p">,</span><span class="n">B</span> <span class="p">,</span><span class="kt">double</span><span class="p">);</span><span class="c1">//括号没内容表示不抛出异常
+</span><span class="c1">//栈自旋 throw抛出异常时，会在离开栈空间时销毁栈，不执行后面的代码，但看作函数执行完毕，退出销毁
+</span><span class="c1"></span>    <span class="c1">//这也是为什么throw不传引用的原因
+</span></code></pre></td></tr></table>
+</div>
+</div><p>===========================华丽的分割线===================================</p>
+<p>全剧终。。。</p>
+<p>至此你看完了大部分c++  没错，是看！！！</p>
+]]></description>
+</item></channel>
+</rss>

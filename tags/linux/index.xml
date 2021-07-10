@@ -1,0 +1,139 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>linux - 标签 - kirito&#39;s blog</title>
+        <link>https://www.kirito41dd.cn/tags/linux/</link>
+        <description>linux - 标签 - kirito&#39;s blog</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Fri, 07 May 2021 20:11:26 &#43;0800</lastBuildDate><atom:link href="https://www.kirito41dd.cn/tags/linux/" rel="self" type="application/rss+xml" /><item>
+    <title>Ctrl&#43;C与Kill杀死进程的区别</title>
+    <link>https://www.kirito41dd.cn/different-from-ctrl-c-and-kill/</link>
+    <pubDate>Fri, 07 May 2021 20:11:26 &#43;0800</pubDate>
+    <author>kirito</author>
+    <guid>https://www.kirito41dd.cn/different-from-ctrl-c-and-kill/</guid>
+    <description><![CDATA[<p>在linux系统中，通过bash中输入<code>&lt;Ctrl+C&gt;</code>或者使用命令<code>kill -9 $pid</code>都可以杀死进程，但是它们有很大的不同。</p>
+<p>先放结论：<strong>kill命令只会杀死目标进程，而bash快捷键则会杀死整个前台进程组！</strong></p>
+<h2 id="linux杀进程方式">linux杀进程方式</h2>
+<p>不管使用那种方式，杀死进程都是通过发送信号（signal）来完成的，kill命令其实就是向目标pid进程发送信号：</p>
+<ul>
+<li><code>kill -9</code> - 发送<code>SIGKILL</code></li>
+<li><code>kill -2</code> - 发送<code>SIGINT</code></li>
+<li><code>kill -15</code> - 发送<code>SIGTERM</code></li>
+</ul>
+<p>完整列表如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># kill -l</span>
+HUP INT QUIT ILL TRAP ABRT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM URG STOP TSTP CONT CHLD TTIN TTOU IO XCPU XFSZ VTALRM PROF WINCH INFO USR1 USR2
+</code></pre></td></tr></table>
+</div>
+</div><p>bash快捷键发送信号方式如下：</p>
+<ul>
+<li>INT - <code>&lt;Ctrl+C&gt;</code></li>
+<li>KILL - <code>&lt;Ctrl+\&gt;</code></li>
+</ul>
+<h2 id="前台进程组">前台进程组</h2>
+<p>会话是一个或多个进程组的集合，每登陆一个终端就相当于一个新会话，一个会话可以有一个前台进程组和多个后台进程组。</p>
+<p>默认通过bash启动的程序，都会放在前台进程组，包括这个程序的子进程。</p>
+<p>如果要放在后台进行组，可以使用<code>&amp;</code>指定</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="nb">echo</span> <span class="m">123</span> <span class="p">&amp;</span>            
+</code></pre></td></tr></table>
+</div>
+</div><p>（另外，只有前台启动才会绑定标准输入输出。）</p>
+<p>在bash中通过<code>&lt;Ctrl+C&gt;</code>或<code>&lt;Ctrl+\&gt;</code>杀死进程，信号会被发送至前台进程组中的每一个进程。</p>
+<p>而通过kill杀死程序，信号只会发送给目标pid进程。</p>
+<h2 id="验证">验证</h2>
+<p>程序1:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+    <span class="s">&#34;time&#34;</span>
+    <span class="s">&#34;os/exec&#34;</span>
+<span class="p">)</span>
+
+<span class="kd">func</span> <span class="nf">main</span><span class="p">(){</span>
+    <span class="nx">cmd</span> <span class="o">:=</span> <span class="nx">exec</span><span class="p">.</span><span class="nf">Command</span><span class="p">(</span><span class="s">&#34;sleep&#34;</span><span class="p">,</span> <span class="s">&#34;100000&#34;</span><span class="p">)</span>
+    <span class="nx">cmd</span><span class="p">.</span><span class="nf">Start</span><span class="p">()</span>
+    <span class="nx">time</span><span class="p">.</span><span class="nf">Sleep</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span> <span class="o">*</span> <span class="mi">99999</span><span class="p">)</span>
+    <span class="k">return</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>上面的程序启动子进程运行sleep命令，然后睡眠。</p>
+<p>测试结果：</p>
+<ul>
+<li>用 kill -9、-2、-15 分别杀死主进程，sleep子进程存活。</li>
+<li>用 <code>&lt;Ctrl+C&gt;</code>、<code>&lt;Ctrl+\&gt;</code>分别杀死主进程，sleep子进程被杀。</li>
+</ul>
+<p>程序2</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span><span class="p">(</span>
+    <span class="s">&#34;time&#34;</span>
+    <span class="s">&#34;os/exec&#34;</span>
+    <span class="s">&#34;syscall&#34;</span>
+<span class="p">)</span>
+
+<span class="kd">func</span> <span class="nf">main</span><span class="p">(){</span>
+    <span class="nx">cmd</span> <span class="o">:=</span> <span class="nx">exec</span><span class="p">.</span><span class="nf">Command</span><span class="p">(</span><span class="s">&#34;sleep&#34;</span><span class="p">,</span> <span class="s">&#34;100000&#34;</span><span class="p">)</span>
+    <span class="c1">// 将子进程放入新的进程组
+</span><span class="c1"></span>    <span class="nx">cmd</span><span class="p">.</span><span class="nx">SysProcAttr</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">syscall</span><span class="p">.</span><span class="nx">SysProcAttr</span><span class="p">{</span><span class="nx">Setpgid</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">Pgid</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+    <span class="nx">cmd</span><span class="p">.</span><span class="nf">Start</span><span class="p">()</span>
+    <span class="nx">time</span><span class="p">.</span><span class="nf">Sleep</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span> <span class="o">*</span> <span class="mi">99999</span><span class="p">)</span>
+    <span class="k">return</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>上面的程序同程序1一样，区别是给子进程设置了单独的进程组（此时子进程就不在前台进程组中了）。</p>
+<p>测试结果：</p>
+<ul>
+<li>用 kill -9、-2、-15 分别杀死主进程，sleep子进程存活。</li>
+<li>用 <code>&lt;Ctrl+C&gt;</code>、<code>&lt;Ctrl+\&gt;</code>分别杀死主进程，sleep子进程存活！</li>
+</ul>
+]]></description>
+</item></channel>
+</rss>

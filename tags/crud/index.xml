@@ -1,0 +1,108 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>crud - 标签 - kirito&#39;s blog</title>
+        <link>https://www.kirito41dd.cn/tags/crud/</link>
+        <description>crud - 标签 - kirito&#39;s blog</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Thu, 01 Apr 2021 11:13:17 &#43;0800</lastBuildDate><atom:link href="https://www.kirito41dd.cn/tags/crud/" rel="self" type="application/rss+xml" /><item>
+    <title>crud boy</title>
+    <link>https://www.kirito41dd.cn/crud-boy/</link>
+    <pubDate>Thu, 01 Apr 2021 11:13:17 &#43;0800</pubDate>
+    <author>kirito</author>
+    <guid>https://www.kirito41dd.cn/crud-boy/</guid>
+    <description><![CDATA[<p>记录下日常搬砖过程中的踩坑和学到的骚操作，随缘更新。</p>
+<h2 id="mysql">MySQL</h2>
+<ul>
+<li>mysql中字符串类型索引查询时必须加引号，不然不会使用索引。原因是不支持函数索引，不加引号会使用了cast函数做隐式类型转换。(这里一般是int到string的cast</li>
+<li>有时候写子查询嵌套非常多，可以使用<code>with as</code>优化可读性，装逼点这玩意叫<strong><ruby>公用表表达式<rt>common table expression,CTE</rt></ruby></strong>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="k">with</span> <span class="n">t1</span> <span class="k">as</span> <span class="p">(</span><span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">xxx</span><span class="p">)</span>
+<span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">t1</span><span class="p">;</span> <span class="c1">-- 必须紧跟着就使用,不用就销毁了
+</span></code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
+<h3 id="on-conflict">On Conflict</h3>
+<p>遇到的场景是去优化有大量的数据需要upsert的场景：数据不存在就插入，数据存在就更新。接手时的实现是每次都做两次网络io，先判断是否存在，然后做更新操作。为了节省大量的io时间，我开始寻求更好的解决方案。</p>
+<p>刚开始的思路是找类似redis pipline的方式：构造一个pipline，往里面赛语句，然后exec，才会发生网络io，redis服务器会按顺序执行所有语句。这和在mysql里用拼接多条语句很类似，发现只能实现批量插入，因为upsert还有一个判断逻辑。</p>
+<p>最终开始求助我司内部大佬：得出的结论是使用Conflict.</p>
+<blockquote>
+<p><a href="https://gorm.io/docs/create.html#Upsert-On-Conflict">https://gorm.io/docs/create.html#Upsert-On-Conflict</a></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="c1">-- MERGE INTO &#34;users&#34; USING *** WHEN NOT MATCHED THEN INSERT *** WHEN MATCHED THEN UPDATE SET &#34;name&#34;=&#34;excluded&#34;.&#34;name&#34;; SQL &gt; Server
+</span><span class="c1">-- INSERT INTO &#34;users&#34; *** ON CONFLICT (&#34;id&#34;) DO UPDATE SET &#34;name&#34;=&#34;excluded&#34;.&#34;name&#34;, &#34;age&#34;=&#34;excluded&#34;.&#34;age&#34;; PostgreSQL
+</span><span class="c1"></span><span class="k">INSERT</span> <span class="k">INTO</span> <span class="o">`</span><span class="n">users</span><span class="o">`</span> <span class="o">***</span> <span class="k">ON</span> <span class="n">DUPLICATE</span> <span class="k">KEY</span> <span class="k">UPDATE</span> <span class="o">`</span><span class="n">name</span><span class="o">`=</span><span class="k">VALUES</span><span class="p">(</span><span class="n">name</span><span class="p">),</span><span class="o">`</span><span class="n">age</span><span class="o">=</span><span class="k">VALUES</span><span class="p">(</span><span class="n">age</span><span class="p">);</span>
+</code></pre></td></tr></table>
+</div>
+</div></blockquote>
+<p>原理是利用唯一键的冲突，在发生冲突时做更新操作。</p>
+<ul>
+<li>利用冲突做大批量upsert操作
+<ul>
+<li>拼sql,尝试一次插入多列，定义冲突时更新的字段</li>
+<li>表中必须存在唯一键(primary key 或 unique key)才能使用</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="k">INSERT</span> <span class="k">INTO</span> <span class="o">`</span><span class="n">users</span><span class="o">`</span> <span class="p">(</span><span class="n">id</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+<span class="k">VALUES</span>  <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&#34;jinzhu1&#34;</span><span class="p">),</span>
+        <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s2">&#34;jinzhu2&#34;</span><span class="p">)</span>
+<span class="k">ON</span> <span class="n">DUPLICATE</span> <span class="k">KEY</span> <span class="k">UPDATE</span> <span class="o">`</span><span class="n">name</span><span class="o">`</span> <span class="o">=</span> <span class="k">VALUES</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><center>
+真・金柱大佬亲传(
+<p></p>
+</center>
+<h2 id="es">ES</h2>
+<ul>
+<li>es创建mapping踩坑,<code>text</code>会把索引字段分词，搜索用match而不能用term，<code>keyword</code>不会进行分词</li>
+</ul>
+<h2 id="hive">Hive</h2>
+<ul>
+<li>hive里也可以使用<code>with as</code>，注意区分和临时表的区别，临时表储存在磁盘的临时区中，只有数据库连接断开，或者drop掉才会消失</li>
+</ul>
+<h3 id="创建变量">创建变量</h3>
+<p>在mysql创建和使用变量可以这样：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="k">set</span> <span class="o">@</span><span class="n">id</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">xxx</span> <span class="k">where</span> <span class="n">id</span> <span class="o">=</span> <span class="o">@</span><span class="n">id</span><span class="p">;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>在hive里可以这样：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-sql" data-lang="sql"><span class="k">set</span> <span class="nb">date</span> <span class="o">=</span> <span class="s1">&#39;xxx&#39;</span><span class="p">;</span>
+<span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">xxx</span> <span class="k">where</span> <span class="nb">date</span> <span class="o">=</span> <span class="err">${</span><span class="n">hiveconf</span><span class="p">:</span><span class="nb">date</span><span class="err">}</span>
+</code></pre></td></tr></table>
+</div>
+</div>]]></description>
+</item></channel>
+</rss>

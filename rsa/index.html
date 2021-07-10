@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>RSA算法原理 - kirito&#39;s blog</title><meta name="Description" content="kirito&#39;s blog"><meta property="og:title" content="RSA算法原理" />
+<meta property="og:description" content="RSA 算法原理 数论知识 质数 ​ 大于1的自然数中，只能被1和它本身的数整除，如 2、3、5、7 互质关系： ​ 如果两个正整数，除了1以外，没有其他公因子，" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.kirito41dd.cn/rsa/" />
+<meta property="og:image" content="https://www.kirito41dd.cn/logo.png"/>
+<meta property="article:published_time" content="2021-01-31T13:56:06+08:00" />
+<meta property="article:modified_time" content="2021-01-31T13:56:06+08:00" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://www.kirito41dd.cn/logo.png"/>
+
+<meta name="twitter:title" content="RSA算法原理"/>
+<meta name="twitter:description" content="RSA 算法原理 数论知识 质数 ​ 大于1的自然数中，只能被1和它本身的数整除，如 2、3、5、7 互质关系： ​ 如果两个正整数，除了1以外，没有其他公因子，"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://www.kirito41dd.cn/rsa/" /><link rel="prev" href="https://www.kirito41dd.cn/btc-wallet/" /><link rel="next" href="https://www.kirito41dd.cn/crud-boy/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><meta name="google-site-verification" content="5J8bsg9tKySrpONjEV2nAOqQ08TCVjsooCRIuDsxhD4" /><meta name="baidu-site-verification" content="code-NY7bFlUK92" /><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "RSA算法原理",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/www.kirito41dd.cn\/rsa\/"
+        },"image": ["https:\/\/blog-1256556944.file.myqcloud.com\/kirito.jpg"],"genre": "posts","keywords": "RSA","wordcount":  1019 ,
+        "url": "https:\/\/www.kirito41dd.cn\/rsa\/","datePublished": "2021-01-31T13:56:06+08:00","dateModified": "2021-01-31T13:56:06+08:00","publisher": {
+            "@type": "Organization",
+            "name": "kirito","logo": "https:\/\/blog-1256556944.file.myqcloud.com\/kirito.jpg"},"author": {
+                "@type": "Person",
+                "name": "kirito"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="kirito&#39;s blog">kirito</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><a class="menu-item" href="https://travellings.link" rel="noopener noreffer" target="_blank"><i class='fas fa-fw fa-subway'> </i> 开往 </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="kirito&#39;s blog">kirito</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a class="menu-item" href="https://travellings.link" title="" rel="noopener noreffer" target="_blank"><i class='fas fa-fw fa-subway'> </i>开往</a><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content always-active" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">RSA算法原理</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>kirito</a></span>&nbsp;<span class="post-category">收录于 <a href="/categories/default/"><i class="far fa-folder fa-fw"></i>default</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2021-01-31">2021-01-31</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1019 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 3 分钟&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#数论知识">数论知识</a></li>
+    <li><a href="#密钥生成步骤">密钥生成步骤</a></li>
+    <li><a href="#加密和解密">加密和解密</a></li>
+    <li><a href="#证明">证明</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h1 id="rsa-算法原理">RSA 算法原理</h1>
+<h2 id="数论知识">数论知识</h2>
+<p><strong>质数</strong></p>
+<p>​	大于1的自然数中，只能被1和它本身的数整除，如 2、3、5、7</p>
+<p><strong>互质关系</strong>：</p>
+<p>​	如果两个正整数，除了1以外，没有其他公因子，我们就称这两个数是互质关系</p>
+<ul>
+<li>1与任何数都互质</li>
+<li>任意两个质数都互质</li>
+<li>质数与小于它的每一个数，都构成互质关系。如5与1、2、3、4都构成互质关系</li>
+</ul>
+<p><strong>欧拉函数</strong>：</p>
+<p>​	任意给定正整数n，请问在小于等于n的正整数之中，有多少个与n构成互质关系？计算这个值的方法就叫做欧拉函数，以符号$\phi(n)$表示</p>
+<ul>
+<li>$\phi(1)=1$</li>
+<li>如果n为质数，则 $\phi(n)=n-1$</li>
+<li>如果n是两个互质的整数之积 $n=p_1\times p_2$ 则 $\phi(n)=\phi(p_1)\times \phi(p_2)$</li>
+</ul>
+<p><strong>欧拉定理</strong>：</p>
+<p>​	如果两个正整数a和n互质，则下面的公式成立：
+$$
+a^{\phi(n)} \equiv 1 \pmod n
+$$
+<strong>模反元素</strong>：</p>
+<p>​	如果两个正整数a和n互质，那么一定可以找到b，使得下面的公式成立：
+$$
+ab\equiv1\pmod n
+$$
+​	证明模反元素必然存在，把欧拉定理拆开，$a\times a^{\phi(n)-1} \equiv 1 \pmod n$,</p>
+<p>$a^{\phi(n)-1} + kn$ 全都是模反元素</p>
+<h2 id="密钥生成步骤">密钥生成步骤</h2>
+<p><strong>随机选择两个不相等的质数p和q (越大越好)</strong></p>
+<p><strong>计算p和q的乘积</strong> $n=p\times q$</p>
+<p><strong>计算n的欧拉函数</strong> $\phi(n)=(p-1)(q-1)$</p>
+<p><strong>随机选择一个整数e</strong>, $1&lt;e&lt;\phi(n) 且 e与\phi(n)互质$</p>
+<p><strong>计算e对于$\phi(n)$的模反元素d</strong>（知道e和$\phi(n)$就等于知道了模反元素）</p>
+<p><strong>公布(n,e)为公钥、(n,d)为私钥</strong></p>
+<h2 id="加密和解密">加密和解密</h2>
+<p><strong>加密</strong>：公钥(n,e)</p>
+<p>加密信息为m, m必须是整数，且m必须小于n</p>
+<p>加密就是算出下面式子中的c:
+$$
+m^e\equiv c \pmod n
+$$
+即密文 $c=m^e\bmod n$</p>
+<p><strong>解密</strong>： 私钥(n,d)</p>
+<p>下面的等式一定成立:
+$$
+c^d \equiv m \pmod n
+$$
+即明文 $m = c^d\bmod n$</p>
+<h2 id="证明">证明</h2>
+<div>
+$$
+为什么\ \ c^d \equiv m \pmod n \ \ \ (1) \\ 
+\because m^e\equiv c \pmod n\\
+\therefore c = m^e-kn\\
+c带入(1)得 \ (m^e - kn)^d \equiv m \pmod n\\
+等同与\ m^{ed}\equiv m \pmod n \ \ (2)\\
+(比如(a+b)^2 = a^2 + 2ab + b2，只有a得最高项不带b) \\
+\because ed \equiv 1 \pmod{\phi(n)}\\
+\therefore ed = h\phi(n) +1 \\
+将ed带入(2)得 \ m^{h\phi(n)+1} \equiv m \pmod n \ \ \ (3)\\
+$$
+</div>
+证明(1)就是证明（3）：
+<p>如果 m 和 n 互质</p>
+<div>
+$$
+由欧拉定理得\ m^{\phi(n)}\equiv 1 \pmod n \ \\
+\because m\equiv m \pmod n \\
+同余式相乘性质：若a≡b(mod\ n)，c≡d(mod\ n)，则ac≡bd(mod\ n)。\\
+(m^{\phi(n)})^h\times m \equiv m \times1^h \pmod n \\
+m^{h\phi(n)+1} \equiv m \pmod n\\
+证明完成
+$$
+</div>
+<p>如果 m 和 n 不互质</p>
+<div>
+$$
+\because n = pq\ (质因子)\\\therefore 必然有\ m = kp\ 或\ m=kq\ (公因子只能是p或q)\\以\ m=kp\ 为例，kp与q必然互质,p为质数\\根据欧拉定理\ (kp)^{q-1} \equiv 1 \pmod q \ (自己多次乘上自己，再两边同时乘kp)\\进一步得到\ [(kp)^{q-1}]^{h(p-1)} \times kp \equiv kp \pmod q\\\because ed = h\phi(n) +1 \\化简\ (kp)^{ed} \equiv kp \pmod q\\改写成\ (kp)^{ed} = kp + tq\\这时t必然能被p整除,即\ t=t'p\ (因为(kp)^{ed}一定是p的整倍数)\\(kp)^{ed} = kp+t'pq\\\because m=kp, n=pq\\\therefore m^{ed}=m+t'n\\\therefore m^{ed} \equiv m \pmod n\\证明完成
+$$
+</div>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2021-01-31</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/rsa/">RSA</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/btc-wallet/" class="prev" rel="prev" title="比特币钱包推荐"><i class="fas fa-angle-left fa-fw"></i>比特币钱包推荐</a>
+            <a href="/crud-boy/" class="next" rel="next" title="crud boy">crud boy<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="disqus_thread" class="comment"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://disqus.com/?ref_noscript">Disqus</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line"><small>1KiritobkMPpaWBjTDHSoiP5icv8PEFNdR</small></div><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.77.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.10"><i class="far fa-kiss-wink-heart fa-fw"></i> LoveIt</a>
+                </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2020 - 2021</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">kirito</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><script type="text/javascript" src="https://kirito-blog.disqus.com/embed.js" defer></script><script type="text/javascript" src="/lib/smooth-scroll/smooth-scroll.min.js"></script><script type="text/javascript" src="/lib/autocomplete/autocomplete.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.stemmer.support.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.zh.min.js"></script><script type="text/javascript" src="/lib/lazysizes/lazysizes.min.js"></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js"></script><script type="text/javascript" src="/lib/katex/auto-render.min.js"></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js"></script><script type="text/javascript" src="/lib/katex/mhchem.min.js"></script><script type="text/javascript" src="/lib/cookieconsent/cookieconsent.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":30},"comment":{},"cookieconsent":{"content":{"dismiss":"同意","link":"了解更多","message":"本网站使用 Cookies 来改善您的浏览体验."},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrIndexURL":"/index.json","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50,"type":"lunr"}};</script><script type="text/javascript" src="/js/theme.min.js"></script><script type="text/javascript">
+            window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());
+            gtag('config', 'G-ZKPP127E4F');
+        </script><script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id=G-ZKPP127E4F" async></script><script type="text/javascript">var _hmt = _hmt || [];</script><script type="text/javascript" src="https://hm.baidu.com/hm.js?2004ef75aa13d757f75bf6f1f3add242" async></script></body>
+</html>

@@ -1,0 +1,81 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>RCU - 标签 - kirito&#39;s blog</title>
+        <link>https://www.kirito41dd.cn/tags/rcu/</link>
+        <description>RCU - 标签 - kirito&#39;s blog</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Mon, 28 Jun 2021 21:05:43 &#43;0800</lastBuildDate><atom:link href="https://www.kirito41dd.cn/tags/rcu/" rel="self" type="application/rss+xml" /><item>
+    <title>Read Copy Update</title>
+    <link>https://www.kirito41dd.cn/read-copy-update/</link>
+    <pubDate>Mon, 28 Jun 2021 21:05:43 &#43;0800</pubDate>
+    <author>kirito</author>
+    <guid>https://www.kirito41dd.cn/read-copy-update/</guid>
+    <description><![CDATA[<p><strong><ruby>RCU<rt>Read Copy Update</rt></ruby></strong>这个词最近才听到，是在公司一位老哥的直播分享里听到的。那天在群里没事乱划，突然看到一个直播分享，原本就想进去嫖一眼，结果内容异常硬核，从头看到尾。</p>
+<p>topic是用类似<strong><ruby>JIT<rt>Just In Time</rt></ruby></strong>的方式加速Go的json解析，这里顺便给他们打个广告，这个库开源了：<a href="https://github.com/bytedance/sonic" target="_blank" rel="noopener noreffer">https://github.com/bytedance/sonic</a></p>
+<p>分享里提到了RCU这种技术，RCU原本是Linux内核中的一种同步机制，并且其针对的场景是读多写少。分享里他们遇到的场景是需要实现一个buffer，特性是：</p>
+<ol>
+<li>读操作<strong>远多</strong>于写操作</li>
+<li>希望读操作无锁、无等待</li>
+</ol>
+<p>这样的场景非常适合使用RCU这种技术，RCU的基本实现是：</p>
+<ol>
+<li>
+<p>读使用原子操作读取数据指针，无锁、无等待</p>
+</li>
+<li>
+<p>写/更新操作用互斥锁防护</p>
+</li>
+<li>
+<p>不直接写/更新，而是先复制一份，对复制的数据进行写/更新</p>
+</li>
+<li>
+<p>通过原子操作将数据指针指向刚修改过的副本</p>
+<p><small>注：由于可能涉及资源释放，所以在有GC的语言上更容易实现</small></p>
+</li>
+</ol>
+<p>本质上就是牺牲写性能，提升读性能</p>
+<p>代码也非常简单，只用互斥锁和一个原子变量就可以实现：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">RCU</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">m</span> <span class="nx">sync</span><span class="p">.</span><span class="nx">Mutex</span>
+    <span class="nx">p</span> <span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">RCU</span><span class="p">)</span> <span class="nf">Get</span><span class="p">(</span><span class="nx">key</span> <span class="nx">K</span><span class="p">)</span> <span class="nx">V</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span><span class="o">*</span><span class="nx">Map</span><span class="p">[</span><span class="nx">K</span><span class="p">]</span><span class="nx">V</span><span class="p">)(</span><span class="nx">atomic</span><span class="p">.</span><span class="nf">LoadPointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">r</span><span class="p">.</span><span class="nx">p</span><span class="p">))[</span><span class="nx">key</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">RCU</span><span class="p">)</span> <span class="nf">Put</span><span class="p">(</span><span class="nx">key</span> <span class="nx">K</span><span class="p">,</span> <span class="nx">val</span> <span class="nx">V</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">m</span><span class="p">.</span><span class="nf">Lock</span><span class="p">()</span>
+    <span class="k">defer</span> <span class="nx">r</span><span class="p">.</span><span class="nx">m</span><span class="p">.</span><span class="nf">Unlock</span><span class="p">()</span>
+    <span class="nx">newm</span> <span class="o">:=</span> <span class="nb">new</span><span class="p">(</span><span class="nx">Map</span><span class="p">[</span><span class="nx">K</span><span class="p">]</span><span class="nx">V</span><span class="p">)</span>
+    <span class="nx">atomic</span><span class="p">.</span><span class="nf">StorePointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">r</span><span class="p">.</span><span class="nx">p</span><span class="p">,</span> <span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="nx">newm</span><span class="p">))</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>简单说一下，代码中<code>Map</code>、<code>K</code>、<code>V</code>都是虚拟的，可以根据需要更换（也不局限于KV）。</p>
+<p>主要思想是通过原子操作，来更换指针指向的地址。</p>
+<p>对于读，每次都会读出一个安全的数据地址，不会有其他线程修改这段数据，所以无需同步手段。</p>
+<p>对于写，同时只能有一个写，否则存在丢失更新，所以加互斥锁防护。</p>
+<p>由于写都是在拷贝上进行，所以不会影响读的性能</p>
+<p>NICE！！！</p>
+]]></description>
+</item></channel>
+</rss>

@@ -1,0 +1,75 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>go - 标签 - kirito&#39;s blog</title>
+        <link>https://www.kirito41dd.cn/tags/go/</link>
+        <description>go - 标签 - kirito&#39;s blog</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Tue, 13 Apr 2021 12:44:34 &#43;0800</lastBuildDate><atom:link href="https://www.kirito41dd.cn/tags/go/" rel="self" type="application/rss+xml" /><item>
+    <title>Go中的引用变量</title>
+    <link>https://www.kirito41dd.cn/reference-variable-in-go/</link>
+    <pubDate>Tue, 13 Apr 2021 12:44:34 &#43;0800</pubDate>
+    <author>kirito</author>
+    <guid>https://www.kirito41dd.cn/reference-variable-in-go/</guid>
+    <description><![CDATA[<div class="featured-image">
+                <img src="https://blog-1256556944.file.myqcloud.com/public/rustgo2.png" referrerpolicy="no-referrer">
+            </div><p>Go语言的函数参数传递，只有值传递，没有引用传递。Slice、Map 只是胖指针，在传参时同样是值传递。</p>
+<p>除了函数传参，range Slice、range Map 也是按值拷贝，并不能取得容器里内容的引用。</p>
+<p>Go里面有没有引用的概念呢？我的答案是有，而且只有<strong>一种</strong>情况体现了引用的概念：<strong>闭包变量按引用捕获</strong>。</p>
+<p>分析下面代码：<a href="https://goplay.space/#qOIAgIWxtub" target="_blank" rel="noopener noreffer">在线运行</a> 或 <a href="https://play.golang.org/" target="_blank" rel="noopener noreffer">playground</a></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+	<span class="s">&#34;fmt&#34;</span>
+<span class="p">)</span>
+
+<span class="kd">func</span> <span class="nf">gen</span><span class="p">()</span> <span class="p">(</span><span class="kd">func</span><span class="p">()</span> <span class="kt">int</span><span class="p">,</span> <span class="kd">func</span><span class="p">()</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">a</span> <span class="o">:=</span> <span class="mi">0</span>
+	<span class="k">return</span> <span class="kd">func</span><span class="p">()</span> <span class="kt">int</span> <span class="p">{</span>
+			<span class="nx">a</span><span class="o">++</span>
+			<span class="k">return</span> <span class="nx">a</span>
+		<span class="p">},</span>
+		<span class="kd">func</span><span class="p">()</span> <span class="kt">int</span> <span class="p">{</span>
+			<span class="nx">a</span><span class="o">++</span>
+			<span class="k">return</span> <span class="nx">a</span>
+		<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="nx">f1</span><span class="p">,</span> <span class="nx">f2</span> <span class="o">:=</span> <span class="nf">gen</span><span class="p">()</span>
+	<span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nf">f1</span><span class="p">())</span> <span class="c1">// 1
+</span><span class="c1"></span>	<span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nf">f2</span><span class="p">())</span> <span class="c1">// 2
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>闭包函数f1和f2都捕获了变量a，f1运行后影响了f2的结果，说明两个闭包函数都是捕获的a的引用。</p>
+<p>实现上来讲，应该是函数值f1和f2都指向同一个闭包环境，因次f1对a的修改对f2也是可见的。</p>
+<p>从结果上来看，两个闭包函数都有对同一个闭包环境里变量a的引用。</p>
+]]></description>
+</item></channel>
+</rss>

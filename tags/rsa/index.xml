@@ -1,0 +1,97 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>RSA - 标签 - kirito&#39;s blog</title>
+        <link>https://www.kirito41dd.cn/tags/rsa/</link>
+        <description>RSA - 标签 - kirito&#39;s blog</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sun, 31 Jan 2021 13:56:06 &#43;0800</lastBuildDate><atom:link href="https://www.kirito41dd.cn/tags/rsa/" rel="self" type="application/rss+xml" /><item>
+    <title>RSA算法原理</title>
+    <link>https://www.kirito41dd.cn/rsa/</link>
+    <pubDate>Sun, 31 Jan 2021 13:56:06 &#43;0800</pubDate>
+    <author>kirito</author>
+    <guid>https://www.kirito41dd.cn/rsa/</guid>
+    <description><![CDATA[<h1 id="rsa-算法原理">RSA 算法原理</h1>
+<h2 id="数论知识">数论知识</h2>
+<p><strong>质数</strong></p>
+<p>​	大于1的自然数中，只能被1和它本身的数整除，如 2、3、5、7</p>
+<p><strong>互质关系</strong>：</p>
+<p>​	如果两个正整数，除了1以外，没有其他公因子，我们就称这两个数是互质关系</p>
+<ul>
+<li>1与任何数都互质</li>
+<li>任意两个质数都互质</li>
+<li>质数与小于它的每一个数，都构成互质关系。如5与1、2、3、4都构成互质关系</li>
+</ul>
+<p><strong>欧拉函数</strong>：</p>
+<p>​	任意给定正整数n，请问在小于等于n的正整数之中，有多少个与n构成互质关系？计算这个值的方法就叫做欧拉函数，以符号$\phi(n)$表示</p>
+<ul>
+<li>$\phi(1)=1$</li>
+<li>如果n为质数，则 $\phi(n)=n-1$</li>
+<li>如果n是两个互质的整数之积 $n=p_1\times p_2$ 则 $\phi(n)=\phi(p_1)\times \phi(p_2)$</li>
+</ul>
+<p><strong>欧拉定理</strong>：</p>
+<p>​	如果两个正整数a和n互质，则下面的公式成立：
+$$
+a^{\phi(n)} \equiv 1 \pmod n
+$$
+<strong>模反元素</strong>：</p>
+<p>​	如果两个正整数a和n互质，那么一定可以找到b，使得下面的公式成立：
+$$
+ab\equiv1\pmod n
+$$
+​	证明模反元素必然存在，把欧拉定理拆开，$a\times a^{\phi(n)-1} \equiv 1 \pmod n$,</p>
+<p>$a^{\phi(n)-1} + kn$ 全都是模反元素</p>
+<h2 id="密钥生成步骤">密钥生成步骤</h2>
+<p><strong>随机选择两个不相等的质数p和q (越大越好)</strong></p>
+<p><strong>计算p和q的乘积</strong> $n=p\times q$</p>
+<p><strong>计算n的欧拉函数</strong> $\phi(n)=(p-1)(q-1)$</p>
+<p><strong>随机选择一个整数e</strong>, $1&lt;e&lt;\phi(n) 且 e与\phi(n)互质$</p>
+<p><strong>计算e对于$\phi(n)$的模反元素d</strong>（知道e和$\phi(n)$就等于知道了模反元素）</p>
+<p><strong>公布(n,e)为公钥、(n,d)为私钥</strong></p>
+<h2 id="加密和解密">加密和解密</h2>
+<p><strong>加密</strong>：公钥(n,e)</p>
+<p>加密信息为m, m必须是整数，且m必须小于n</p>
+<p>加密就是算出下面式子中的c:
+$$
+m^e\equiv c \pmod n
+$$
+即密文 $c=m^e\bmod n$</p>
+<p><strong>解密</strong>： 私钥(n,d)</p>
+<p>下面的等式一定成立:
+$$
+c^d \equiv m \pmod n
+$$
+即明文 $m = c^d\bmod n$</p>
+<h2 id="证明">证明</h2>
+<div>
+$$
+为什么\ \ c^d \equiv m \pmod n \ \ \ (1) \\ 
+\because m^e\equiv c \pmod n\\
+\therefore c = m^e-kn\\
+c带入(1)得 \ (m^e - kn)^d \equiv m \pmod n\\
+等同与\ m^{ed}\equiv m \pmod n \ \ (2)\\
+(比如(a+b)^2 = a^2 + 2ab + b2，只有a得最高项不带b) \\
+\because ed \equiv 1 \pmod{\phi(n)}\\
+\therefore ed = h\phi(n) +1 \\
+将ed带入(2)得 \ m^{h\phi(n)+1} \equiv m \pmod n \ \ \ (3)\\
+$$
+</div>
+证明(1)就是证明（3）：
+<p>如果 m 和 n 互质</p>
+<div>
+$$
+由欧拉定理得\ m^{\phi(n)}\equiv 1 \pmod n \ \\
+\because m\equiv m \pmod n \\
+同余式相乘性质：若a≡b(mod\ n)，c≡d(mod\ n)，则ac≡bd(mod\ n)。\\
+(m^{\phi(n)})^h\times m \equiv m \times1^h \pmod n \\
+m^{h\phi(n)+1} \equiv m \pmod n\\
+证明完成
+$$
+</div>
+<p>如果 m 和 n 不互质</p>
+<div>
+$$
+\because n = pq\ (质因子)\\\therefore 必然有\ m = kp\ 或\ m=kq\ (公因子只能是p或q)\\以\ m=kp\ 为例，kp与q必然互质,p为质数\\根据欧拉定理\ (kp)^{q-1} \equiv 1 \pmod q \ (自己多次乘上自己，再两边同时乘kp)\\进一步得到\ [(kp)^{q-1}]^{h(p-1)} \times kp \equiv kp \pmod q\\\because ed = h\phi(n) +1 \\化简\ (kp)^{ed} \equiv kp \pmod q\\改写成\ (kp)^{ed} = kp + tq\\这时t必然能被p整除,即\ t=t'p\ (因为(kp)^{ed}一定是p的整倍数)\\(kp)^{ed} = kp+t'pq\\\because m=kp, n=pq\\\therefore m^{ed}=m+t'n\\\therefore m^{ed} \equiv m \pmod n\\证明完成
+$$
+</div>
+]]></description>
+</item></channel>
+</rss>

@@ -1,0 +1,699 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>algorithm - 标签 - kirito&#39;s blog</title>
+        <link>https://www.kirito41dd.cn/tags/algorithm/</link>
+        <description>algorithm - 标签 - kirito&#39;s blog</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Mon, 25 Mar 2019 12:23:42 &#43;0800</lastBuildDate><atom:link href="https://www.kirito41dd.cn/tags/algorithm/" rel="self" type="application/rss+xml" /><item>
+    <title>矩阵快速幂</title>
+    <link>https://www.kirito41dd.cn/matrix-fast-power/</link>
+    <pubDate>Mon, 25 Mar 2019 12:23:42 &#43;0800</pubDate>
+    <author>kirito</author>
+    <guid>https://www.kirito41dd.cn/matrix-fast-power/</guid>
+    <description><![CDATA[<p>大一还是大二学线性代数的时候，感觉这玩意怎么这么无聊，这破矩阵能干啥？老师讲课跟催眠一样。后来学习OpenGL的时候才感受到矩阵的魅力，原来3D世界的平移、旋转、缩放都可以用一个小小的四阶矩阵的运算来完成，AMAZING 啊！！！(比老师上课有意思多了)</p>
+<p>矩阵快速幂也是打ACM期间学到的，思想上和整数的快速幂一样，操作替换成了矩阵运算而已。</p>
+<p><del>没错，课堂上的时间都用来睡觉、刷手机了</del></p>
+<h2 id="解决哪些问题">解决哪些问题</h2>
+<p>求解一些递推公式的第n项的时候，通过递推公式构造转移矩阵，并用矩阵快速幂可以快速得到第n项的值。特别对于n很大的时候不能循环迭代，可用矩阵快速幂解决。</p>
+<p>比如斐波那契数列： $F_0=0,F_1=1,F_n=F_n-1+F_n-2,(n \ge2,n \in N^*)$</p>
+<p>0 1 1 2 3 5 8&hellip;</p>
+<p>如果要求第n项，n比较小的话，可以直接循环迭代出来。</p>
+<p>如果n比较大，第一亿个是多少，用循环就太慢了，矩阵快速幂更快更适合。</p>
+<p>根据矩阵乘法性质，构造转移矩阵</p>
+<div>
+$$
+\begin{bmatrix}
+1&1\\
+1&0\end{bmatrix} \times\begin{bmatrix}
+F_{n-1}\\
+F_{n-2}
+\end{bmatrix} = \begin{bmatrix}
+F_{n}\\
+F_{n-1}
+\end{bmatrix}
+$$
+</div>
+<p>那么</p>
+<div>
+$$
+\begin{bmatrix}
+1&1\\
+1&0\end{bmatrix}^{n-1} \times\begin{bmatrix}
+F_{1}\\
+F_{0}
+\end{bmatrix} = \begin{bmatrix}
+F_{n}\\
+F_{n-1}
+\end{bmatrix}
+$$
+</div>
+<p>这样问题就变成了求转移矩阵的幂。这个转移矩阵一定构造成方阵。</p>
+<h2 id="矩阵快速幂">矩阵快速幂</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span><span class="cp">#define MATRIX_SIZE 2
+</span><span class="cp"></span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">mod</span> <span class="o">=</span> <span class="mf">1e9</span><span class="o">+</span><span class="mi">7</span><span class="p">;</span>
+<span class="k">struct</span> <span class="nc">Matrix</span> <span class="c1">//构造一个方阵
+</span><span class="c1"></span><span class="p">{</span>
+    <span class="kt">int</span> <span class="n">data</span><span class="p">[</span><span class="n">MATRIX_SIZE</span><span class="p">][</span><span class="n">MATRIX_SIZE</span><span class="p">];</span>
+    <span class="n">Matrix</span><span class="p">(){</span>
+        <span class="n">memset</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">data</span><span class="p">));</span>
+        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span> <span class="c1">// 初始化为单位矩阵
+</span><span class="c1"></span>        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="n">Matrix</span> <span class="k">operator</span> <span class="o">+</span> <span class="p">(</span><span class="n">Matrix</span>  <span class="n">o</span><span class="p">)</span><span class="k">const</span><span class="p">{</span> <span class="c1">//(a+b)%mod
+</span><span class="c1"></span>        <span class="n">Matrix</span> <span class="n">re</span><span class="p">;</span> 
+        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+            <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">j</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">){</span>
+                <span class="n">re</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="n">o</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])</span> <span class="o">%</span> <span class="n">mod</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">re</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">Matrix</span> <span class="k">operator</span> <span class="o">*</span> <span class="p">(</span><span class="n">Matrix</span>  <span class="n">o</span><span class="p">)</span><span class="k">const</span><span class="p">{</span> <span class="c1">//(a*b)%mod
+</span><span class="c1"></span>        <span class="n">Matrix</span> <span class="n">re</span><span class="p">;</span>
+        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+            <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">j</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">){</span>
+                <span class="n">re</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+                <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">k</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">k</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span>
+                    <span class="n">re</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">re</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="p">((</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">o</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">])</span> <span class="o">%</span> <span class="n">mod</span><span class="p">))</span> <span class="o">%</span> <span class="n">mod</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">re</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">Matrix</span> <span class="k">operator</span> <span class="o">^</span> <span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">)</span><span class="k">const</span><span class="p">{</span> <span class="c1">// (a^n)%mod
+</span><span class="c1"></span>        <span class="n">Matrix</span> <span class="n">re</span><span class="p">,</span><span class="n">base</span><span class="p">;</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+        <span class="k">while</span><span class="p">(</span><span class="n">n</span><span class="p">){</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">n</span><span class="o">&amp;</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">re</span> <span class="o">=</span> <span class="n">re</span> <span class="o">*</span> <span class="n">base</span><span class="p">;</span>
+            <span class="n">n</span><span class="o">&gt;&gt;=</span><span class="mi">1</span><span class="p">;</span>
+            <span class="n">base</span> <span class="o">=</span> <span class="n">base</span> <span class="o">*</span> <span class="n">base</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">re</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">Matrix</span> <span class="nf">Psum</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">)</span><span class="k">const</span><span class="p">{</span> <span class="c1">//(a+a^2+a^3.....+a^n)%mod
+</span><span class="c1"></span>        <span class="n">Matrix</span> <span class="n">a</span><span class="p">,</span><span class="n">ans</span><span class="p">,</span><span class="n">pre</span><span class="p">;</span>
+        <span class="kt">int</span> <span class="n">m</span><span class="p">;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">n</span><span class="o">==</span><span class="mi">1</span><span class="p">)</span> <span class="k">return</span> <span class="n">a</span><span class="p">;</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">n</span><span class="o">/</span><span class="mi">2</span><span class="p">;</span>
+        <span class="n">pre</span> <span class="o">=</span> <span class="n">a</span><span class="p">.</span><span class="n">Psum</span><span class="p">(</span><span class="n">m</span><span class="p">);</span> <span class="c1">// a^[1,n/2] 相加
+</span><span class="c1"></span>        <span class="n">ans</span> <span class="o">=</span> <span class="n">pre</span> <span class="o">+</span> <span class="p">(</span><span class="n">pre</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span><span class="o">^</span><span class="n">m</span><span class="p">));</span> <span class="c1">// ans = [1,n/2] + a^(n/2)*[1,n/2]
+</span><span class="c1"></span>        <span class="k">if</span><span class="p">(</span><span class="n">n</span><span class="o">&amp;</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">ans</span> <span class="o">=</span> <span class="n">ans</span> <span class="o">+</span> <span class="p">(</span><span class="n">a</span><span class="o">^</span><span class="n">n</span><span class="p">);</span>    <span class="c1">//n为奇数时候a^n会漏掉，补上
+</span><span class="c1"></span>        <span class="k">return</span> <span class="n">ans</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="kt">void</span> <span class="nf">out</span><span class="p">(){</span>
+        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+            <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">j</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">){</span>
+                <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%d &#34;</span><span class="p">,</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]);</span>
+            <span class="p">}</span><span class="n">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(){</span>
+    <span class="n">Matrix</span> <span class="n">ma</span><span class="p">,</span><span class="n">swa</span><span class="p">;</span>
+    <span class="n">ma</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+    <span class="n">ma</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+    <span class="n">ma</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+    <span class="n">ma</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">n</span><span class="p">;</span>
+    <span class="n">ma</span><span class="p">.</span><span class="n">out</span><span class="p">();</span>
+    <span class="k">while</span><span class="p">(</span><span class="n">scanf</span><span class="p">(</span><span class="s">&#34;%d&#34;</span> <span class="p">,</span> <span class="o">&amp;</span><span class="n">n</span><span class="p">)</span> <span class="p">,</span> <span class="n">n</span><span class="o">&gt;=</span><span class="mi">1</span><span class="p">){</span>
+        <span class="n">swa</span> <span class="o">=</span> <span class="n">ma</span><span class="o">^</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+        <span class="c1">//swa.out();
+</span><span class="c1"></span>        <span class="n">printf</span><span class="p">(</span><span class="s">&#34;is %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">swa</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">1</span> <span class="o">+</span> <span class="n">swa</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">0</span> <span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="构造矩阵例题">构造矩阵例题</h2>
+<p><a href="http://acm.hdu.edu.cn/showproblem.php?pid=6470" target="_blank" rel="noopener noreffer">hdu6470</a></p>
+<blockquote>
+<p>Farmer John有n头奶牛.</p>
+<p>某天奶牛想要数一数有多少头奶牛,以一种特殊的方式:</p>
+<p>第一头奶牛为1号,第二头奶牛为2号,第三头奶牛之后,假如当前奶牛是第n头,那么他的编号就是2倍的第n-2头奶牛的编号加上第n-1头奶牛的编号再加上自己当前的n的三次方为自己的编号.</p>
+<p>现在Farmer John想知道,第n头奶牛的编号是多少,估计答案会很大,你只要输出答案对于123456789取模.</p>
+</blockquote>
+<p>根据题意可以得到递推公式：</p>
+<div>
+$$
+F_n=\begin{cases}
+1& n=1\\
+2& n=2\\
+2\times F_{n-2} + F_{n-1}+n^3& n\ge3
+\end{cases}
+$$
+</div>
+<p>由于$n^3$的存在，这个递推公式并不是线性的，所以要想办法把$n^3$展开：</p>
+<div>
+$$
+n^3=(n-1+1)^3=C^0_3(n-1)^3+C^1_3(n-1)^2+C^2_3(n-1)^1+C^3_3(n-1)^0 \\=1\times(n-1)^3+3\times (n-1)^2+3\times(n-1)^1+1\times(n-1)^0
+$$
+</div>
+<p>那么转移矩阵$M$为：</p>
+<div>
+$$
+\begin{bmatrix}
+0&1&0&0&0&0\\
+2&1&C_3^0&C_3^1&C_3^2&C_3^3\\
+0&0&C_3^0&C_3^1&C_3^2&C_3^3\\
+0&0&0&C_2^0&C_2^1&C_2^2\\
+0&0&0&0&C_1^0 &C_1^1\\
+0&0&0&0&0&1
+\end{bmatrix}\times
+\begin{bmatrix}
+F_{n-2}\\F_{n-1}\\(n-1)^3\\(n-1)^2\\(n-1)^1\\(n-1)^0
+\end{bmatrix}
+ = 
+\begin{bmatrix}
+F_{n-1}\\F_{n}\\(n)^3\\(n)^2\\(n)^1\\(n)^0
+\end{bmatrix}
+$$
+</div>
+<p>取$n=3$：</p>
+<div>
+$$
+\begin{bmatrix}
+F_{n-2}\\F_{n-1}\\(n-1)^3\\(n-1)^2\\(n-1)^1\\(n-1)^0
+\end{bmatrix}=\begin{bmatrix}
+F_{1}\\F_{2 }\\2^3\\ 2^2\\ 2^1\\ 2^0
+\end{bmatrix}
+$$
+</div>
+<p>所以：</p>
+<div>
+$$
+F_n = M^{n-2 } \times \begin{bmatrix}
+F_{1}\\F_{2 }\\2^3\\ 2^2\\ 2^1\\ 2^0
+\end{bmatrix},n \ge 2
+$$
+</div>
+AC代码：
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span><span class="cp">#define MATRIX_SIZE 6
+</span><span class="cp"></span><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">mod</span> <span class="o">=</span> <span class="mi">123456789</span><span class="p">;</span>
+<span class="k">struct</span> <span class="nc">Matrix</span> <span class="c1">//构造一个方阵
+</span><span class="c1"></span><span class="p">{</span>
+    <span class="kt">long</span> <span class="kt">long</span> <span class="n">data</span><span class="p">[</span><span class="n">MATRIX_SIZE</span><span class="p">][</span><span class="n">MATRIX_SIZE</span><span class="p">];</span>
+    <span class="n">Matrix</span><span class="p">(){</span>
+        <span class="n">memset</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">data</span><span class="p">));</span>
+        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span> <span class="c1">// 初始化为单位矩阵
+</span><span class="c1"></span>        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="n">Matrix</span> <span class="k">operator</span> <span class="o">*</span> <span class="p">(</span><span class="n">Matrix</span>  <span class="n">o</span><span class="p">)</span><span class="k">const</span><span class="p">{</span> <span class="c1">//(a*b)%mod
+</span><span class="c1"></span>        <span class="n">Matrix</span> <span class="n">re</span><span class="p">;</span>
+        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+            <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">j</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">){</span>
+                <span class="n">re</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+                <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">k</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">k</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span>
+                    <span class="n">re</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">re</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="p">((</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">o</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">])</span> <span class="o">%</span> <span class="n">mod</span><span class="p">))</span> <span class="o">%</span> <span class="n">mod</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">re</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">Matrix</span> <span class="k">operator</span> <span class="o">^</span> <span class="p">(</span><span class="kt">long</span> <span class="kt">long</span> <span class="n">n</span><span class="p">)</span><span class="k">const</span><span class="p">{</span> <span class="c1">// (a^n)%mod
+</span><span class="c1"></span>        <span class="n">Matrix</span> <span class="n">re</span><span class="p">,</span><span class="n">base</span><span class="p">;</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+        <span class="k">while</span><span class="p">(</span><span class="n">n</span><span class="p">){</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">n</span><span class="o">&amp;</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">re</span> <span class="o">=</span> <span class="n">re</span> <span class="o">*</span> <span class="n">base</span><span class="p">;</span>
+            <span class="n">n</span><span class="o">&gt;&gt;=</span><span class="mi">1</span><span class="p">;</span>
+            <span class="n">base</span> <span class="o">=</span> <span class="n">base</span> <span class="o">*</span> <span class="n">base</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">re</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+<span class="n">Matrix</span> <span class="n">ma</span><span class="p">,</span><span class="n">swa</span><span class="p">;</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(){</span>
+    <span class="kt">int</span> <span class="n">mm</span><span class="p">[</span><span class="mi">6</span><span class="p">][</span><span class="mi">6</span><span class="p">]</span><span class="o">=</span><span class="p">{</span>
+        <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">},</span>
+        <span class="p">{</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span>
+        <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span>
+        <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span>
+        <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span>
+        <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">}</span>
+    <span class="p">};</span>
+    <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="n">i</span><span class="o">&lt;</span><span class="mi">6</span><span class="p">;</span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="n">j</span><span class="o">&lt;</span><span class="mi">6</span><span class="p">;</span><span class="n">j</span><span class="o">++</span><span class="p">)</span>
+            <span class="n">ma</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">=</span><span class="n">mm</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">];</span>
+    <span class="kt">long</span> <span class="kt">long</span> <span class="n">t</span><span class="p">,</span><span class="n">a</span><span class="p">;</span>
+    <span class="n">cin</span><span class="o">&gt;&gt;</span><span class="n">t</span><span class="p">;</span>
+    <span class="k">while</span><span class="p">(</span><span class="n">t</span><span class="o">--</span><span class="p">){</span>
+        <span class="n">cin</span><span class="o">&gt;&gt;</span><span class="n">a</span><span class="p">;</span>
+        <span class="n">swa</span> <span class="o">=</span> <span class="n">ma</span><span class="o">^</span><span class="p">(</span><span class="n">a</span><span class="o">-</span><span class="mi">2</span><span class="p">);</span>
+        <span class="kt">long</span> <span class="kt">long</span> <span class="n">ac</span><span class="p">;</span>
+        <span class="n">ac</span><span class="o">=</span> <span class="n">swa</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">1</span><span class="p">;</span>
+        <span class="n">ac</span><span class="o">+=</span><span class="n">swa</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">;</span>
+        <span class="n">ac</span><span class="o">+=</span><span class="n">swa</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="mi">8</span><span class="p">;</span>
+        <span class="n">ac</span><span class="o">+=</span><span class="n">swa</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span><span class="o">*</span><span class="mi">4</span><span class="p">;</span>
+        <span class="n">ac</span><span class="o">+=</span><span class="n">swa</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">;</span>
+        <span class="n">ac</span><span class="o">+=</span><span class="n">swa</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">5</span><span class="p">]</span><span class="o">*</span><span class="mi">1</span><span class="p">;</span>
+        <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">ac</span><span class="o">%</span><span class="n">mod</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="附赠">附赠！</h2>
+<p>这个方程怎么用矩阵计算，可以试着练练手。</p>
+<div>
+$$
+f(x)=
+\begin{cases}
+1& x=0 \\
+1& x=1 \\
+9\times f(x-1) + 9\times f(x-2) + 6& x>1
+\end{cases}
+$$
+</div>
+]]></description>
+</item><item>
+    <title>最长回文子串-马拉车</title>
+    <link>https://www.kirito41dd.cn/manacher/</link>
+    <pubDate>Thu, 17 Jan 2019 14:51:44 &#43;0800</pubDate>
+    <author>kirito</author>
+    <guid>https://www.kirito41dd.cn/manacher/</guid>
+    <description><![CDATA[<p>回文串是指是正着读和反着读都一样的字符串，比如<code>abcba</code>。</p>
+<p>最长回文子串是指在一个字符串中能找到的最长回文串，如这个字符串最长回文字串是最后6个字符：abacac<strong>baaaab</strong></p>
+<p>用马拉车算法求一个串中的最长回文子串：</p>
+<ol>
+<li>首先将字符串长度处理成奇数，如<code>&quot;abbc&quot;</code>处理成<code>&quot;$a#b#b#c#&quot;</code>。</li>
+<li>然后从左到右边遍历求出以每个字符为中心的回文半径<code>Mp</code>, 其中最大的那个回文半径就对应着最长的回文子串。</li>
+</ol>
+<h2 id="manacher">Manacher</h2>
+<p>算法实现如下：</p>
+<p></p>
+<p>图中<code>id</code>表示如果以这个下标为中心，回文半径最远可以到达的位置是<code>mx</code>（这表示区间<code>(id,mx]</code>与<code>[mx&quot;,id)</code>是对称的, <code>id</code>位置就是对称轴）。</p>
+<p>马拉车的思想是利用左边已经求出的回文半径，帮助计算右边的回文半径。如果我们要求下标<code>i</code>的回文半径，那么：</p>
+<ul>
+<li><code>2*id-i</code> 指的就是是下标<code>i</code>关于<code>id</code>的对称位置<code>i&quot;</code>,(<code>i</code>肯定在<code>id</code>的右边,因为是从左往右遍历处理)</li>
+</ul>
+<p>计算回文半径<code>Mp[i]</code>:</p>
+<ol>
+<li>
+<p>如果<code>mx&gt;i</code>(图1,2)，即<code>id</code>处的回文半径能够覆盖当前位置，那么<code>i</code>关于<code>id</code>的对称位置<code>i&quot;</code>一定也在以<code>id</code>为中心的回文串中。</p>
+<p><code>i&quot;</code>位于<code>id</code>左边，所以<code>i&quot;</code>的结果前面已经算出来了，直接得出<code>i&quot;</code>的回文半径就是<code>Mp[i&quot;] = Mp[2*id-i]</code>。</p>
+<p>（图里左边的红色部分就是回文半径为<code>Mp[i&quot;]</code>的回文串，右边是对称的部分）</p>
+<p>这时候计算<code>i</code>的回文半径还分两种情况:</p>
+<ol>
+<li><code>mx-i &gt; Mp[2*id-i]</code></li>
+<li><code>mx-i &lt; Mp[2*id-i]</code></li>
+</ol>
+<p>分别对应图1、2。<code>Mp[i]</code>的值选取两者中较小的那一个。</p>
+<p>因为图中只有同时被红色和绿色覆盖的，才关于<code>i</code>对称，其他的未知。</p>
+</li>
+<li>
+<p>如果，<code>mx &lt;= i</code>(图3)，那么<code>i</code>的回文半径只能通过一次次比较求得。</p>
+</li>
+</ol>
+<p>细节见代码，返回值是最长回文串长度。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">namespace</span> <span class="n">Manacher</span><span class="p">{</span>
+	<span class="k">const</span> <span class="kt">int</span> <span class="n">MAXN</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span><span class="c1">//字符串最大长度
+</span><span class="c1"></span>	<span class="kt">char</span> <span class="n">Ma</span><span class="p">[</span><span class="n">MAXN</span><span class="o">*</span><span class="mi">2</span><span class="p">];</span><span class="c1">//处理后的字符串
+</span><span class="c1"></span>	<span class="kt">int</span> <span class="n">Mp</span><span class="p">[</span><span class="n">MAXN</span><span class="o">*</span><span class="mi">2</span><span class="p">];</span><span class="c1">//每个位置的回文半径,max(Mp[i])-1就是最长回文长度
+</span><span class="c1"></span>	<span class="kt">int</span> <span class="nf">Manacher</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="n">s</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">len</span><span class="p">){</span>
+		<span class="kt">int</span> <span class="n">l</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+		<span class="n">Ma</span><span class="p">[</span><span class="n">l</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="sc">&#39;$&#39;</span><span class="p">;</span>
+		<span class="n">Ma</span><span class="p">[</span><span class="n">l</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="sc">&#39;#&#39;</span><span class="p">;</span>
+		<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">len</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+			<span class="n">Ma</span><span class="p">[</span><span class="n">l</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+			<span class="n">Ma</span><span class="p">[</span><span class="n">l</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="sc">&#39;#&#39;</span><span class="p">;</span>
+		<span class="p">}</span>
+		<span class="n">Ma</span><span class="p">[</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+		<span class="kt">int</span> <span class="n">mx</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">id</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">//从id处回文半径可以达到mx处
+</span><span class="c1"></span>		<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">l</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+			<span class="n">Mp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">mx</span> <span class="o">&gt;</span> <span class="n">i</span> <span class="o">?</span> <span class="n">min</span><span class="p">(</span><span class="n">Mp</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">id</span><span class="o">-</span><span class="n">i</span><span class="p">],</span> <span class="n">mx</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span> <span class="o">:</span> <span class="mi">1</span><span class="p">;</span>
+			<span class="k">while</span><span class="p">(</span><span class="n">Ma</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="n">Mp</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">==</span> <span class="n">Ma</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="n">Mp</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span> <span class="n">Mp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">++</span><span class="p">;</span>
+			<span class="n">ret</span> <span class="o">=</span> <span class="n">max</span><span class="p">(</span><span class="n">Mp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">ret</span><span class="p">);</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="n">Mp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">mx</span><span class="p">){</span>
+				<span class="n">mx</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">Mp</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+				<span class="n">id</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+			<span class="p">}</span>
+		<span class="p">}</span>
+		<span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="例题">例题</h2>
+<p><a href="http://poj.org/problem?id=3974" target="_blank" rel="noopener noreffer">POJ3974</a> 裸题</p>
+]]></description>
+</item><item>
+    <title>轮廓线dp</title>
+    <link>https://www.kirito41dd.cn/contour-dp/</link>
+    <pubDate>Thu, 06 Dec 2018 11:11:52 &#43;0800</pubDate>
+    <author>kirito</author>
+    <guid>https://www.kirito41dd.cn/contour-dp/</guid>
+    <description><![CDATA[<p>哈尔滨理工大学软件与微电子学院第八届程序设计竞赛同步赛（高年级）</p>
+<p>小乐乐搭积木</p>
+<p>链接：<a href="https://ac.nowcoder.com/acm/contest/301/B" target="_blank" rel="noopener noreffer">https://ac.nowcoder.com/acm/contest/301/B</a></p>
+<p>来源：牛客网</p>
+<h2 id="题目描述">题目描述</h2>
+<blockquote>
+<p>小乐乐想要给自己搭建一个积木城堡。
+积木城堡我们假设为n*m的平面矩形。
+小乐乐现在手里有 1*2，2*1两种地砖。
+小乐乐想知道自己有多少种组合方案。</p>
+</blockquote>
+<h2 id="输入描述">输入描述:</h2>
+<blockquote>
+<p>第一行输入整数 n,m。(1&lt;=n,m&lt;=10)</p>
+</blockquote>
+<h2 id="输出描述">输出描述:</h2>
+<blockquote>
+<p>输出组合方案数。</p>
+</blockquote>
+<h2 id="示例">示例</h2>
+<p>输入</p>
+<blockquote>
+<p>2 3</p>
+</blockquote>
+<p>输出</p>
+<blockquote>
+<p>3</p>
+</blockquote>
+<h2 id="ac代码">ac代码</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span><span class="cp"></span><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">dp</span><span class="p">[</span><span class="mi">2</span><span class="p">][(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="mi">11</span><span class="p">)],</span><span class="n">cur</span><span class="p">,</span><span class="n">mask</span><span class="p">;</span>  <span class="c1">//mask 掩码
+</span><span class="c1"></span>
+<span class="kt">void</span> <span class="nf">update</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">,</span><span class="kt">int</span> <span class="n">b</span><span class="p">){</span>
+    <span class="n">dp</span><span class="p">[</span><span class="n">cur</span><span class="p">][</span><span class="n">b</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dp</span><span class="p">[</span><span class="n">cur</span><span class="o">^</span><span class="mi">1</span><span class="p">][</span><span class="n">a</span><span class="p">];</span>  <span class="c1">//更新状态方案数
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(){</span>
+    <span class="n">cin</span><span class="o">&gt;&gt;</span><span class="n">n</span><span class="o">&gt;&gt;</span><span class="n">m</span><span class="p">;</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="n">m</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="c1">//设置掩码
+</span><span class="c1"></span>    <span class="n">memset</span><span class="p">(</span><span class="n">dp</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="k">sizeof</span><span class="p">(</span><span class="n">dp</span><span class="p">));</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">//滚动数组
+</span><span class="c1"></span>    <span class="n">dp</span><span class="p">[</span><span class="n">cur</span><span class="p">][(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="n">m</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">//初始化
+</span><span class="c1"></span>    <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">;</span><span class="n">i</span><span class="o">++</span><span class="p">){</span>
+        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span><span class="n">j</span> <span class="o">&lt;</span> <span class="n">m</span><span class="p">;</span><span class="n">j</span><span class="o">++</span><span class="p">){</span><span class="c1">//当前处理位置(i,j)
+</span><span class="c1"></span>            <span class="n">cur</span> <span class="o">^=</span> <span class="mi">1</span><span class="p">;</span> 
+            <span class="n">memset</span><span class="p">(</span><span class="n">dp</span><span class="p">[</span><span class="n">cur</span><span class="p">],</span><span class="mi">0</span><span class="p">,</span><span class="k">sizeof</span><span class="p">(</span><span class="n">dp</span><span class="p">[</span><span class="n">cur</span><span class="p">]));</span>
+            <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span><span class="n">k</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="n">m</span><span class="p">);</span><span class="n">k</span><span class="o">++</span><span class="p">){</span><span class="c1">//枚举当前状态
+</span><span class="c1"></span>
+                <span class="c1">//当前和上都放  上有空位就不能往左，也不能不放
+</span><span class="c1"></span>                <span class="k">if</span><span class="p">(</span><span class="n">i</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="p">(</span><span class="n">k</span><span class="o">&amp;</span><span class="p">(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span><span class="p">))))</span><span class="c1">//不是第一行，且正上方为空
+</span><span class="c1"></span>                <span class="p">{</span>
+                    <span class="n">update</span><span class="p">(</span><span class="n">k</span><span class="p">,((</span><span class="n">k</span><span class="o">&lt;&lt;</span><span class="mi">1</span><span class="p">)</span><span class="o">^</span><span class="mi">1</span><span class="p">)</span><span class="o">&amp;</span><span class="n">mask</span><span class="p">);</span><span class="c1">//新状态尾部置1
+</span><span class="c1"></span>                <span class="p">}</span><span class="k">else</span>
+                <span class="p">{</span>
+                    <span class="c1">//当前和左放
+</span><span class="c1"></span>                    <span class="k">if</span><span class="p">(</span><span class="n">j</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">k</span><span class="o">&amp;</span><span class="mi">1</span><span class="p">)))</span><span class="c1">//不是第一列并且左边为空 
+</span><span class="c1"></span>                        <span class="n">update</span><span class="p">(</span><span class="n">k</span><span class="p">,((</span><span class="n">k</span><span class="o">&lt;&lt;</span><span class="mi">1</span><span class="p">)</span><span class="o">^</span><span class="mi">3</span><span class="p">)</span><span class="o">&amp;</span><span class="n">mask</span><span class="p">);</span><span class="c1">//新状态尾两个11
+</span><span class="c1"></span>
+                    <span class="c1">//不放
+</span><span class="c1"></span>                    <span class="n">update</span><span class="p">(</span><span class="n">k</span><span class="p">,(</span><span class="n">k</span><span class="o">&lt;&lt;</span><span class="mi">1</span><span class="p">)</span><span class="o">&amp;</span><span class="n">mask</span><span class="p">);</span>
+                                        <span class="c1">//掩码是只取低m位作为状态
+</span><span class="c1"></span>                <span class="p">}</span>
+
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">dp</span><span class="p">[</span><span class="n">cur</span><span class="p">][(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="n">m</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="思路">思路</h2>
+<p>轮廓线dp，状压</p>
+<p>在这道题中，假设我们有一个 5*5 的格子要填充(如图)，黑色部分不是格子的一部分，只是作为虚拟出来的&quot;顶&quot;。</p>
+<p>图1中蓝色部分表示已经填充好的部分；黄色部分是状态压缩表示的状态，已经填充为1，没有为0；红色表示当前处理的位置。</p>
+<p>图2中我们用状态01111表示当前的&quot;轮廓&quot;。这个状态的&quot;头&quot;总是在&quot;当前&quot;的上面，这个状态的&quot;尾&quot;大部分时候在&quot;当前&quot;的左边(图4的情况不是)。</p>
+<p>图3中，我们&quot;当前&quot;的处理方式只能是填充&quot;当前&quot;和&quot;头&quot;(竖着放)，因为如果我们不这样，上方的空位就无法被填充，会被忽略过去。</p>
+<p></p>
+<p>图4中，&ldquo;当前&quot;的左边没有格子，而且上方是0，不可能往左放，只能往上放(竖着放)。处理过之后就变成下面的新状态了。</p>
+<p>图5中，有两种选择，往左放或者不放。</p>
+<p>特别的，如何初始化？</p>
+<p>处理第一行的时候，假设上面还有一层，并且都填充了(就是图中黑色部分)，这样就可以像其他位置一样处理。</p>
+<p>怎么记录方案数？</p>
+<p>每一个状态都是由另一个状态得到的，状态1 —&gt;状态2  ;  状态3 —&gt; 状态2;
+可能很多状态都能到状态2，那么状态2的方案数就是： 状态1方案数 + 状态2方案数 + &hellip;</p>
+<p>设dp[cur][state]表示cur(当前)位置为state状态的方案数。last为上一个位置。</p>
+<p>设 k 表示处理当前位置前的状态(轮廓)，new为处理当前位置后的状态(轮廓)</p>
+<p>转移方程有</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="n">dp</span><span class="p">[</span><span class="n">cur</span><span class="p">][</span><span class="k">new</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dp</span><span class="p">[</span><span class="n">last</span><span class="p">][</span><span class="n">k</span><span class="p">];</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><del>我先去上课 。。。。</del></p>
+<p>具体实现可以看代码。</p>
+<p>需要注意的几点：</p>
+<p>初始化是当上面有一行不存在的，已经填充好的一行</p>
+<p><code>dp[cur][(1&lt;&lt;m)-1] = 1</code></p>
+<p><code>cur ^= 1</code> 是滚动数组的操作，因为当前位置状态只和它之前位置状态有关</p>
+<p>任何时候，上方有空位就不能选择左或者不填。</p>
+]]></description>
+</item></channel>
+</rss>

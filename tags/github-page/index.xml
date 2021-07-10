@@ -1,0 +1,414 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>github page - 标签 - kirito&#39;s blog</title>
+        <link>https://www.kirito41dd.cn/tags/github-page/</link>
+        <description>github page - 标签 - kirito&#39;s blog</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sun, 01 Nov 2020 14:43:41 &#43;0800</lastBuildDate><atom:link href="https://www.kirito41dd.cn/tags/github-page/" rel="self" type="application/rss+xml" /><item>
+    <title>使用github page和CI(github action)创建博客</title>
+    <link>https://www.kirito41dd.cn/blog-with-gitpage-and-ci/</link>
+    <pubDate>Sun, 01 Nov 2020 14:43:41 &#43;0800</pubDate>
+    <author>kirito</author>
+    <guid>https://www.kirito41dd.cn/blog-with-gitpage-and-ci/</guid>
+    <description><![CDATA[<h2 id="这个博客是怎么来的">这个博客是怎么来的</h2>
+<p>问就是白嫖github page，白嫖太爽了(</p>
+<p>静态博客的生成器使用的是<a href="https://www.gohugo.org/" target="_blank" rel="noopener noreffer">Hugo</a>、主题使用的<a href="https://hugoloveit.com/zh-cn/theme-documentation-basics/" target="_blank" rel="noopener noreffer">LoveIt</a>、评论系统使用<a href="https://disqus.com/" target="_blank" rel="noopener noreffer">Disqus</a>，LoveIt这个主题已经集成好了Disqus。</p>
+<p>由于使用静态博客生成器，在每次改动后都需要重新运行一次生成命令，生成一大堆静态文件，再提交到gh-page，很麻烦。</p>
+<p>为了让这个过程更加优雅，可以吧生成静态文件和部署这个过程放到CI里自动化完成。这里使用了github workflow的Action功能。</p>
+<p>这样一来，只需要在本地编辑博客内容，然后push到github，就会自动触发CI流程，将生成的静态内容部署到<code>XXX.github.io</code>，也就是gh-page的仓库。</p>
+<h2 id="准备工作">准备工作</h2>
+<p>我一共新建了两个仓库：</p>
+<ul>
+<li><code>XXX.github.io</code>， gh-page仓库,由CI负责提交</li>
+<li><code>blog</code>，存放博客文件</li>
+</ul>
+<p>主要工作是都在<code>blog</code>这个仓库上进行，另一个仓库是自动化操作的。</p>
+<p><code>blog</code>存放了博客的主要骨架，还有一些脚本，方便在CI中做一些工作。</p>
+<p><del>申请一个<a href="https://github.com/settings/applications/new" target="_blank" rel="noopener noreffer">Github Application</a>，如果你想使用Gitalk代替Disqus</del></p>
+<p>申请一个<a href="https://github.com/settings/tokens/new" target="_blank" rel="noopener noreffer">Personal access tokens</a>，CI流程中使用它来对<code>XXX.github.io</code>仓库进行提交，涉及到鉴权。</p>
+<p>Github Application 和 Personal access tokens 都是需要保密的，不能直接写在配置文件里或这CI流程的脚本里。好在github的Workflow提供了在CI中访问仓库中配置的秘密环境变量的能力。</p>
+<p>进入仓库-&gt;Settings-&gt;Secrets-&gt;new Secret，配置两个环境变量，如下：
+</p>
+<h2 id="杂项">杂项</h2>
+<p>使用了腾讯的<a href="https://console.cloud.tencent.com/cos5/bucket" target="_blank" rel="noopener noreffer">对象存储</a>来存图片，可有可无。</p>
+<p>一个域名，可有可无。</p>
+<p>阿里云的CDN，可有可无。</p>
+<h2 id="blog搭建过程">blog搭建过程</h2>
+<p>首先看下我(本地)仓库的目录情况，<a href="https://github.com/kirito41dd/blog" target="_blank" rel="noopener noreffer">github地址</a></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-sh" data-lang="sh">.
+├── .github
+│   └── workflows
+│       └── main.yml <span class="c1"># github workflow 的action配置文件(CI脚本)</span>
+├── .gitmodules <span class="c1"># git submodule 创建的，为了引入LoveIt</span>
+├── README.md
+├── bin <span class="c1"># 这个目录是脚本生成的，里面有hugo命令，不会被提交到仓库</span>
+├── script
+│   └── get-hugo.sh <span class="c1"># 本地 CI 都可以执行，用来获取hugo命令</span>
+└── site <span class="c1"># 站点目录，存放hugo博客的骨架</span>
+    ├── archetypes
+    ├── config.toml
+    ├── config.tomlconfig.toml
+    ├── content <span class="c1"># 存放博客内容的地方</span>
+    ├── data
+    ├── layouts
+    ├── public <span class="c1"># hugo生成的静态博客</span>
+    ├── resources
+    ├── static <span class="c1"># static 目录在生产静态文件时，会被拷贝到public</span>
+    │   ├── .nojekyll <span class="c1"># 两个文件最终都会出现在gh-page仓库的根目录</span>
+    │   └── CNAME <span class="c1"># 如过有域名需要这个</span>
+    └── themes
+        └── LoveIt <span class="c1"># submodule方式引入，LoveIt主题</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><code>.gitignore</code>忽略文件</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-text" data-lang="text">bin/
+public/
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="骨架">骨架</h3>
+<p>初始化git仓库后，首先编写了一个<a href="https://github.com/kirito41dd/blog/blob/main/script/get-hugo.sh" target="_blank" rel="noopener noreffer">脚本</a><code>script/get-hugo.sh</code>，这个脚本的功能是自动根据系统类型下载hugo,并解压到脚本所在位置的上级目录下的<code>bin</code>文件夹。脚本只支持mac或linux系统，CI也会用到这个脚本，windows用户可以手动安装。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># 此脚本安装hugo到脚本所在位置的../bin目录</span>
+<span class="nv">CURDIR</span><span class="o">=</span><span class="k">$(</span><span class="nb">cd</span> <span class="k">$(</span>dirname <span class="nv">$0</span><span class="k">)</span><span class="p">;</span> <span class="nb">pwd</span><span class="k">)</span>
+<span class="nb">cd</span> <span class="nv">$CURDIR</span>
+<span class="nb">echo</span> <span class="s2">&#34;执行目录 `pwd`&#34;</span>
+
+
+<span class="c1"># 判断环境是mac还是linux,决定hugo版本</span>
+<span class="k">if</span> <span class="o">[</span> <span class="k">$(</span>uname -s<span class="k">)</span> <span class="o">=</span> <span class="s1">&#39;Darwin&#39;</span> <span class="o">]</span><span class="p">;</span><span class="k">then</span>
+    <span class="nb">echo</span> <span class="s1">&#39;当前环境为Darwin&#39;</span>
+    <span class="nv">HUGOURL</span><span class="o">=</span><span class="s1">&#39;https://github.com/gohugoio/hugo/releases/download/v0.77.0/hugo_extended_0.77.0_macOS-64bit.tar.gz&#39;</span>
+<span class="k">else</span>
+    <span class="nb">echo</span> <span class="s1">&#39;当前环境为Linux&#39;</span>
+    <span class="nv">HUGOURL</span><span class="o">=</span><span class="s1">&#39;https://github.com/gohugoio/hugo/releases/download/v0.77.0/hugo_extended_0.77.0_Linux-64bit.tar.gz&#39;</span>
+<span class="k">fi</span>
+<span class="nb">echo</span> <span class="s2">&#34;hugo 获取地址:</span><span class="nv">$HUGOURL</span><span class="s2">&#34;</span>
+
+<span class="nb">echo</span> <span class="s1">&#39;开始下载&#39;</span>
+curl -sSL -o hugo.tar.gz <span class="nv">$HUGOURL</span>
+<span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> -ne <span class="m">0</span> <span class="o">]</span><span class="p">;</span><span class="k">then</span>
+    <span class="nb">echo</span> <span class="s1">&#39;下载失败&#39;</span>
+    <span class="nb">exit</span> <span class="m">1</span>
+<span class="k">fi</span>
+
+<span class="c1"># 解压文件</span>
+<span class="nv">BINDIR</span><span class="o">=</span><span class="s2">&#34;</span><span class="nv">$CURDIR</span><span class="s2">/../bin&#34;</span>
+<span class="k">if</span> <span class="o">[</span> ! -d <span class="s2">&#34;</span><span class="nv">$BINDIR</span><span class="s2">&#34;</span> <span class="o">]</span><span class="p">;</span><span class="k">then</span>
+    mkdir <span class="nv">$CURDIR</span>/../bin
+<span class="k">fi</span>
+<span class="nb">echo</span> <span class="s2">&#34;解压到 </span><span class="nv">$BINDIR</span><span class="s2">&#34;</span>
+tar -xzf ./hugo.tar.gz -C <span class="nv">$CURDIR</span>/../bin
+rm ./hugo.tar.gz
+
+<span class="c1"># 验证下解压安装成功</span>
+<span class="nb">echo</span> <span class="s1">&#39;success&#39;</span>
+<span class="nv">$BINDIR</span>/hugo version
+</code></pre></td></tr></table>
+</div>
+</div><p>执行<code>sh scrpit/get-hugo.sh</code>，就可以使用hugo了，执行<code>bin/hugo vesion</code>打印hugo版本。</p>
+<p>然后创建站点，执行：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-sh" data-lang="sh">bin/hugo new site .
+</code></pre></td></tr></table>
+</div>
+</div><p>生成site目录。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-sh" data-lang="sh">tree ./site
+.
+├── archetypes
+├── config.toml <span class="c1"># 配置文件</span>
+├── content
+├── data
+├── layouts
+├── static
+└── themes <span class="c1"># 主题文件夹</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>下一步拉取主题，我使用的是<a href="https://hugoloveit.com/zh-cn/theme-documentation-basics/" target="_blank" rel="noopener noreffer">LoveIt</a>。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-sh" data-lang="sh"><span class="c1"># 在site目录执行</span>
+git submodule add https://github.com/dillonzq/LoveIt.git themes/LoveIt
+
+<span class="c1"># 注意有了submodules后，再从别的地方拉取仓库记得</span>
+<span class="c1"># git submodule init</span>
+<span class="c1"># git submodule update</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>参考<a href="https://hugoloveit.com/zh-cn/theme-documentation-basics/" target="_blank" rel="noopener noreffer">LoveIt</a>的文档，配置好<code>config.toml</code>文件</p>
+<p>我的<a href="https://github.com/kirito41dd/blog/blob/main/site/config.toml" target="_blank" rel="noopener noreffer">配置</a>中需要说明的只有下面几行：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-toml" data-lang="toml"><span class="c">#  评论系统设置</span>
+<span class="p">[</span><span class="nx">params</span><span class="p">.</span><span class="nx">page</span><span class="p">.</span><span class="nx">comment</span><span class="p">]</span>
+  <span class="nx">enable</span> <span class="p">=</span> <span class="kc">true</span>
+  <span class="c"># Disqus 评论系统设置</span>
+  <span class="p">[</span><span class="nx">params</span><span class="p">.</span><span class="nx">page</span><span class="p">.</span><span class="nx">comment</span><span class="p">.</span><span class="nx">disqus</span><span class="p">]</span>
+    <span class="nx">enable</span> <span class="p">=</span> <span class="kc">true</span>
+    <span class="c"># Disqus 的 shortname</span>
+    <span class="nx">shortname</span> <span class="p">=</span> <span class="s2">&#34;kirito-blog&#34;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这是Disqus的配置，很简单。</p>
+<p>博客编写的部分请直接去看hugo的<a href="https://www.gohugo.org/" target="_blank" rel="noopener noreffer">文档</a></p>
+<p>博客有内容后，本地看效果使用下面命令：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-sh" data-lang="sh"><span class="nb">cd</span> site
+<span class="c1"># 本地预览（不会展示gitalk）</span>
+../bin/hugo server
+<span class="c1"># 本地预览，但是使用生产环境(会展示gitalk，但不建议)</span>
+../bin/hugo server -e production
+</code></pre></td></tr></table>
+</div>
+</div><p>hugo生成静态站点的方式是直接在site目录执行：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-sh" data-lang="sh">../bin/hugo
+</code></pre></td></tr></table>
+</div>
+</div><p>完成后将生成<code>public</code>文件夹，注意不要提交到仓库中。</p>
+<p>下面把生成的静态站点，提交到gh-page仓库，就能展示博客了，当然也可以使用其他静态托管服务。</p>
+<h3 id="配置ci部署">配置CI部署</h3>
+<p>回到仓库根目录，创建Action文件：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-sh" data-lang="sh">mkdir -p .github/workflows
+touch .github/workflows/main.yml
+</code></pre></td></tr></table>
+</div>
+</div><p>CI配置参考<a href="https://docs.github.com/en/actions/quickstart" target="_blank" rel="noopener noreffer">文档</a></p>
+<p>我的<a href="https://github.com/kirito41dd/blog/blob/main/.github/workflows/main.yml" target="_blank" rel="noopener noreffer">CI配置</a>中需要说明的几行：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-yml" data-lang="yml">- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">init blog</span><span class="w">
+</span><span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p">|</span><span class="sd">
+</span><span class="sd">    git submodule init 
+</span><span class="sd">    git submodule update
+</span><span class="sd">    sh script/get-hugo.sh
+</span><span class="sd">    cd site
+</span><span class="sd">    ../bin/hugo</span><span class="w">    
+</span><span class="w">
+</span><span class="w"></span><span class="c"># 部署blog</span><span class="w">
+</span><span class="w"></span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">deploy blog</span><span class="w">
+</span><span class="w">  </span><span class="nt">env</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="nt">GITHUB_REPO</span><span class="p">:</span><span class="w"> </span><span class="l">github.com/zshorz/zshorz.github.io</span><span class="w">
+</span><span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p">|</span><span class="sd">
+</span><span class="sd">    cd site/public
+</span><span class="sd">    git init &amp;&amp; git add .
+</span><span class="sd">    git config user.name &#34;xxxx&#34;
+</span><span class="sd">    git config user.email &#34;xxxx@mail.com&#34;
+</span><span class="sd">    git commit -m &#34;GitHub Actions Auto Builder at $(date +&#39;%Y-%m-%d %H:%M:%S&#39;)&#34;
+</span><span class="sd">    git push --force --quiet &#34;https://${{ secrets.ACCESS_TOKEN }}@$GITHUB_REPO&#34; master:master</span><span class="w">    
+</span></code></pre></td></tr></table>
+</div>
+</div><p>还记得在仓库中配置了secret环境变量，而在CI中访问那些环境变量的方法就是<code>${{secrets.NAME}}</code></p>
+<p>CI的脚本有两部分，首先初始化blog，然后将生成的静态网站，部署到<code>xxx.github.io</code></p>
+<p>我把脚本抽出来单独注释（注意这是在CI的docker自动执行的，不是本地环境）</p>
+<p>第一部分</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># 初始化submodule，拉取LoveIt主题</span>
+git submodule init 
+git submodule update
+<span class="c1"># 执行脚本安装hugo环境</span>
+sh script/get-hugo.sh
+<span class="nb">cd</span> site
+<span class="c1"># 生成站点，输出到public目录</span>
+../bin/hugo
+</code></pre></td></tr></table>
+</div>
+</div><p>第二部分</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># 进入生成的静态站点目录</span>
+<span class="nb">cd</span> site/public
+<span class="c1"># 初始化为git仓库</span>
+git init <span class="o">&amp;&amp;</span> git add .
+git config user.name <span class="s2">&#34;xxxx&#34;</span>
+git config user.email <span class="s2">&#34;xxxx@qq.com&#34;</span>
+<span class="c1"># 本地提交</span>
+git commit -m <span class="s2">&#34;GitHub Actions Auto Builder at </span><span class="k">$(</span>date +<span class="s1">&#39;%Y-%m-%d %H:%M:%S&#39;</span><span class="k">)</span><span class="s2">&#34;</span>
+<span class="c1"># 强制推送到远端仓库</span>
+git push --force --quiet <span class="s2">&#34;https://</span><span class="si">${</span><span class="p">{ secrets.ACCESS_TOKEN </span><span class="si">}</span><span class="s2">}@</span><span class="nv">$GITHUB_REPO</span><span class="s2">&#34;</span> master:master
+</code></pre></td></tr></table>
+</div>
+</div><p>到此CI就配置好了。</p>
+<h3 id="push仓库">push仓库</h3>
+<p>直接将你的仓库push到远端，会自动触发CI，你可以在这里查看执行情况
+</p>
+<p>待CI执行成功后，打开在浏览器中输入<code>xxx.github.io</code>查看博客站点，就是你现在看到的样子了。</p>
+<h2 id="可选项目">可选项目</h2>
+<h3 id="配置域名">配置域名</h3>
+<p>比如域名是<code>kirito41dd.cn</code>，你想当你访问<code>www.kirito41dd.cn</code>的时候，就是你的博客站点。</p>
+<p>添加文件<code>site/static/CNAME</code>，在里面写上<code>www.kirito41dd.cn</code>，push让CI再次构建</p>
+<p>然后打开你的域名控制台，为<code>www.kirito41dd.cn</code>添加一个CNAME记录，记录值为<code>xxx.github.io</code></p>
+<p>稍后浏览器输入域名网址，你就又看到这个页面了</p>
+<h3 id="cdn加速">CDN加速</h3>
+<p>我用的阿里云的cdn，不知道为啥还没收我钱(</p>
+<h2 id="最后">最后</h2>
+<p>git push 享受下 CI 部署的丝滑(</p>
+]]></description>
+</item></channel>
+</rss>

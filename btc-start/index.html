@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>写给小白的比特币入门 - kirito&#39;s blog</title><meta name="Description" content="kirito&#39;s blog"><meta property="og:title" content="写给小白的比特币入门" />
+<meta property="og:description" content="说明 为了给小白说清： 私钥 公钥 地址 钱包 交易所 咋获得比特币 简单粗暴，不讲原理，不讲原理，不讲原理 定理(雾 说了不讲原理，就当这是定理 私钥 →公钥 → 地" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.kirito41dd.cn/btc-start/" />
+<meta property="og:image" content="https://www.kirito41dd.cn/logo.png"/>
+<meta property="article:published_time" content="2020-12-04T21:22:14+08:00" />
+<meta property="article:modified_time" content="2020-12-04T21:22:14+08:00" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://www.kirito41dd.cn/logo.png"/>
+
+<meta name="twitter:title" content="写给小白的比特币入门"/>
+<meta name="twitter:description" content="说明 为了给小白说清： 私钥 公钥 地址 钱包 交易所 咋获得比特币 简单粗暴，不讲原理，不讲原理，不讲原理 定理(雾 说了不讲原理，就当这是定理 私钥 →公钥 → 地"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://www.kirito41dd.cn/btc-start/" /><link rel="prev" href="https://www.kirito41dd.cn/blog-with-gitpage-and-ci/" /><link rel="next" href="https://www.kirito41dd.cn/btc-wallet/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><meta name="google-site-verification" content="5J8bsg9tKySrpONjEV2nAOqQ08TCVjsooCRIuDsxhD4" /><meta name="baidu-site-verification" content="code-NY7bFlUK92" /><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "写给小白的比特币入门",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/www.kirito41dd.cn\/btc-start\/"
+        },"image": ["https:\/\/blog-1256556944.file.myqcloud.com\/kirito.jpg"],"genre": "posts","keywords": "btc","wordcount":  1285 ,
+        "url": "https:\/\/www.kirito41dd.cn\/btc-start\/","datePublished": "2020-12-04T21:22:14+08:00","dateModified": "2020-12-04T21:22:14+08:00","publisher": {
+            "@type": "Organization",
+            "name": "kirito","logo": "https:\/\/blog-1256556944.file.myqcloud.com\/kirito.jpg"},"author": {
+                "@type": "Person",
+                "name": "kirito"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="kirito&#39;s blog">kirito</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><a class="menu-item" href="https://travellings.link" rel="noopener noreffer" target="_blank"><i class='fas fa-fw fa-subway'> </i> 开往 </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="kirito&#39;s blog">kirito</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a class="menu-item" href="https://travellings.link" title="" rel="noopener noreffer" target="_blank"><i class='fas fa-fw fa-subway'> </i>开往</a><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content always-active" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">写给小白的比特币入门</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>kirito</a></span>&nbsp;<span class="post-category">收录于 <a href="/categories/btc/"><i class="far fa-folder fa-fw"></i>btc</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2020-12-04">2020-12-04</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1285 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 3 分钟&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#说明">说明</a></li>
+    <li><a href="#定理雾">定理(雾</a></li>
+    <li><a href="#比特币是如何交易的">比特币是如何交易的</a></li>
+    <li><a href="#什么是钱包">什么是钱包</a></li>
+    <li><a href="#如何生成地址">如何生成地址</a></li>
+    <li><a href="#交易所">交易所</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h2 id="说明">说明</h2>
+<p>为了给小白说清：</p>
+<p>私钥 公钥 地址 钱包 交易所 咋获得比特币</p>
+<p>简单粗暴，<strong>不讲原理</strong>，<strong>不讲原理</strong>，<strong>不讲原理</strong></p>
+<h2 id="定理雾">定理(雾</h2>
+<p>说了不讲原理，就当这是定理</p>
+<p><code>私钥</code>  →<code>公钥</code> → <code>地址</code></p>
+<p>按箭头方向，知道前面的，就能计算出后面的，<strong>反过来不行</strong></p>
+<p>因此 <code>私钥</code> <strong>最重要！</strong></p>
+<p>他们长啥样：</p>
+<ul>
+<li><code>私钥</code> -  <code>KwYC54hbaH6X5CrCfDK19oyJd2d1ivnSakbJxrW4ENbi2E2bJkbN</code></li>
+<li><code>公钥</code> -  <code>2f6e7sUQhP6z6mTMhh...(略)...16ME6Y18QSM</code></li>
+<li><code>地址</code> -  <code>16PXzomhwDovGRHaN6WGZXxk5BB1e78dn7</code></li>
+</ul>
+<p>公钥很长不方便记忆，所以都用地址</p>
+<h2 id="比特币是如何交易的">比特币是如何交易的</h2>
+<p>一个<code>地址</code>相当于一个账户，比特币通过<code>地址</code>互相转账</p>
+<p>谁都可以向一个<code>地址</code>转账，但是要花<code>地址</code>里的钱，必须知道<code>私钥</code></p>
+<p>这就是为什么<code>私钥</code><strong>最重要</strong></p>
+<p>比特币的区块链上记录的就是<code>地址</code>之间的转账记录</p>
+<p>有转账记录，就能算出<code>地址</code>里有多少钱</p>
+<h2 id="什么是钱包">什么是钱包</h2>
+<p>一个<code>地址</code>就是一个账户，每个人名下都可能有很多账户</p>
+<p>但是有一个<code>地址</code>就肯定有一个<code>私钥</code></p>
+<p>钱包就是帮你管理私钥的</p>
+<p>钱包一般都有一下功能：</p>
+<ul>
+<li>
+<p>帮你计算你拥有多少钱（就是从区块链上计算地的地址里有多少比特币）</p>
+</li>
+<li>
+<p>备份，如果你手机或电脑丢了，有备份就能找回你的私钥</p>
+</li>
+<li>
+<p>交易，给别的地址转账</p>
+</li>
+<li>
+<p>帮你自动生成私钥（也就是地址）</p>
+</li>
+</ul>
+<p>为什么每个人要有很多地址，而不是一个：</p>
+<p>谁都可以从区块链上计算出某个<code>地址</code>的交易记录，如果你一直使用一个<code>地址</code>，你的隐私可能就暴漏了</p>
+<p>一般是不能从<code>地址</code>推算出拥有这个<code>地址</code>的人是谁的，但如果你用的时间长了，比如从某个网址买东西用这个<code>地址</code>转账了，就能吧<code>地址</code>和你这个人联系起来，就知道你是谁了</p>
+<p>由于<code>地址</code>可以凭空产生，谁都可以轻易生成(后面讲)</p>
+<p>所以转账都用很多不同地址，不过这些事情钱包帮你做了，小白可能感觉不到</p>
+<p>你可能担心钱包安全性，但他们大多是安全的，前提是知名钱包，官网上推荐的钱包一般都安全</p>
+<p><a href="https://bitcoin.org" target="_blank" rel="noopener noreffer">https://bitcoin.org</a></p>
+<p>(也可以看我写的另一篇钱包推荐</p>
+<h2 id="如何生成地址">如何生成地址</h2>
+<p>谁都可以生成一个<code>私钥</code>，从而生成<code>地址</code></p>
+<p><code>私钥</code>本质上是256个0和1组成的二进制串，然后编码成字符串</p>
+<p>这256个0和1是随机的，所以你连续抛256次硬币，就能得到一个地址</p>
+<p>这里<strong>随机</strong>非常重要，如果你只是凭喜好写出了256个0和1，那和你有相同习惯的人也可能写出来跟你一样的0和1,等于你的私钥被别人知道了。</p>
+<p>没人会去抛硬币吧应该，大家都用软件生成<code>私钥</code>，这些软件都有自己的随机方法</p>
+<p>这是一个安全的网站：<a href="https://www.bitaddress.org" target="_blank" rel="noopener noreffer">www.bitaddress.org</a></p>
+<p>根据你的鼠标位置取样，生成随机的<code>私钥</code></p>
+<p>冷钱包：</p>
+<p>在离线的安全的环境下生成一个<code>私钥</code>，这个<code>私钥</code>只有你知道。</p>
+<p>如果还能在离线环境签名交易，这个操作就是冷钱包的功能</p>
+<p>只要你不联网，就没有泄漏的可能(流氓软件太多)，冷钱包就是一套离线解决方案</p>
+<p>当然发布交易还是需要网络，可以把签名后的信息生成二维码，让联网设备读取、发布。</p>
+<p>（用市面上常见的钱包已经很安全了</p>
+<h2 id="交易所">交易所</h2>
+<p>如果你在币圈没有熟人，可以到交易所买比特币</p>
+<p>交易所和股票那个交易所的职能差不多</p>
+<p>你在上面买的比特币都被存在交易所里，可以提出来，但有手续费</p>
+<p>交易所不会吧私钥给你，也就是说你只能通过交易所把比特币提出来，如果交易所跑路了，你币没了(概率极低)</p>
+<p>知名交易所都很安全：我一般用火币 ，(火币打钱<code>1KiritobkMPpaWBjTDHSoiP5icv8PEFNdR</code>)</p>
+<p>交易所注册邀请码：(使用邀请码双方都会获得奖励)</p>
+<ul>
+<li>火币 -
+<ul>
+<li>邀请链接 - <a href="https://www.huobi.me/topic/invited/?invite_code=6a995" target="_blank" rel="noopener noreffer">www.huobi.me/topic/invited/?invite_code=6a995</a></li>
+<li>邀请码 - <code>6a995</code></li>
+</ul>
+</li>
+</ul>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2020-12-04</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/btc/">btc</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/blog-with-gitpage-and-ci/" class="prev" rel="prev" title="使用github page和CI(github action)创建博客"><i class="fas fa-angle-left fa-fw"></i>使用github page和CI(github action)创建博客</a>
+            <a href="/btc-wallet/" class="next" rel="next" title="比特币钱包推荐">比特币钱包推荐<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="disqus_thread" class="comment"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://disqus.com/?ref_noscript">Disqus</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line"><small>1KiritobkMPpaWBjTDHSoiP5icv8PEFNdR</small></div><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.77.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.10"><i class="far fa-kiss-wink-heart fa-fw"></i> LoveIt</a>
+                </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2020 - 2021</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">kirito</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><script type="text/javascript" src="https://kirito-blog.disqus.com/embed.js" defer></script><script type="text/javascript" src="/lib/smooth-scroll/smooth-scroll.min.js"></script><script type="text/javascript" src="/lib/autocomplete/autocomplete.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.stemmer.support.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.zh.min.js"></script><script type="text/javascript" src="/lib/lazysizes/lazysizes.min.js"></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js"></script><script type="text/javascript" src="/lib/katex/auto-render.min.js"></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js"></script><script type="text/javascript" src="/lib/katex/mhchem.min.js"></script><script type="text/javascript" src="/lib/cookieconsent/cookieconsent.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":30},"comment":{},"cookieconsent":{"content":{"dismiss":"同意","link":"了解更多","message":"本网站使用 Cookies 来改善您的浏览体验."},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrIndexURL":"/index.json","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50,"type":"lunr"}};</script><script type="text/javascript" src="/js/theme.min.js"></script><script type="text/javascript">
+            window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());
+            gtag('config', 'G-ZKPP127E4F');
+        </script><script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id=G-ZKPP127E4F" async></script><script type="text/javascript">var _hmt = _hmt || [];</script><script type="text/javascript" src="https://hm.baidu.com/hm.js?2004ef75aa13d757f75bf6f1f3add242" async></script></body>
+</html>

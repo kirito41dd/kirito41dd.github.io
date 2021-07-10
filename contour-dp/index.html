@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>轮廓线dp - kirito&#39;s blog</title><meta name="Description" content="kirito&#39;s blog"><meta property="og:title" content="轮廓线dp" />
+<meta property="og:description" content="哈尔滨理工大学软件与微电子学院第八届程序设计竞赛同步赛（高年级） 小乐乐搭积木 链接：https://ac.nowcoder.com/acm/c" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.kirito41dd.cn/contour-dp/" />
+<meta property="og:image" content="https://www.kirito41dd.cn/logo.png"/>
+<meta property="article:published_time" content="2018-12-06T11:11:52+08:00" />
+<meta property="article:modified_time" content="2018-12-06T11:11:52+08:00" />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://www.kirito41dd.cn/logo.png"/>
+
+<meta name="twitter:title" content="轮廓线dp"/>
+<meta name="twitter:description" content="哈尔滨理工大学软件与微电子学院第八届程序设计竞赛同步赛（高年级） 小乐乐搭积木 链接：https://ac.nowcoder.com/acm/c"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://www.kirito41dd.cn/contour-dp/" /><link rel="prev" href="https://www.kirito41dd.cn/cpp-note/" /><link rel="next" href="https://www.kirito41dd.cn/manacher/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><meta name="google-site-verification" content="5J8bsg9tKySrpONjEV2nAOqQ08TCVjsooCRIuDsxhD4" /><meta name="baidu-site-verification" content="code-NY7bFlUK92" /><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "轮廓线dp",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/www.kirito41dd.cn\/contour-dp\/"
+        },"image": ["https:\/\/blog-1256556944.file.myqcloud.com\/kirito.jpg"],"genre": "posts","keywords": "algorithm, dp","wordcount":  1394 ,
+        "url": "https:\/\/www.kirito41dd.cn\/contour-dp\/","datePublished": "2018-12-06T11:11:52+08:00","dateModified": "2018-12-06T11:11:52+08:00","publisher": {
+            "@type": "Organization",
+            "name": "kirito","logo": "https:\/\/blog-1256556944.file.myqcloud.com\/kirito.jpg"},"author": {
+                "@type": "Person",
+                "name": "kirito"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="kirito&#39;s blog">kirito</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><a class="menu-item" href="https://travellings.link" rel="noopener noreffer" target="_blank"><i class='fas fa-fw fa-subway'> </i> 开往 </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="kirito&#39;s blog">kirito</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a class="menu-item" href="https://travellings.link" title="" rel="noopener noreffer" target="_blank"><i class='fas fa-fw fa-subway'> </i>开往</a><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content always-active" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">轮廓线dp</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>kirito</a></span>&nbsp;<span class="post-category">收录于 <a href="/categories/algorithm/"><i class="far fa-folder fa-fw"></i>algorithm</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2018-12-06">2018-12-06</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1394 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 3 分钟&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#题目描述">题目描述</a></li>
+    <li><a href="#输入描述">输入描述:</a></li>
+    <li><a href="#输出描述">输出描述:</a></li>
+    <li><a href="#示例">示例</a></li>
+    <li><a href="#ac代码">ac代码</a></li>
+    <li><a href="#思路">思路</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>哈尔滨理工大学软件与微电子学院第八届程序设计竞赛同步赛（高年级）</p>
+<p>小乐乐搭积木</p>
+<p>链接：<a href="https://ac.nowcoder.com/acm/contest/301/B" target="_blank" rel="noopener noreffer">https://ac.nowcoder.com/acm/contest/301/B</a></p>
+<p>来源：牛客网</p>
+<h2 id="题目描述">题目描述</h2>
+<blockquote>
+<p>小乐乐想要给自己搭建一个积木城堡。
+积木城堡我们假设为n*m的平面矩形。
+小乐乐现在手里有 1*2，2*1两种地砖。
+小乐乐想知道自己有多少种组合方案。</p>
+</blockquote>
+<h2 id="输入描述">输入描述:</h2>
+<blockquote>
+<p>第一行输入整数 n,m。(1&lt;=n,m&lt;=10)</p>
+</blockquote>
+<h2 id="输出描述">输出描述:</h2>
+<blockquote>
+<p>输出组合方案数。</p>
+</blockquote>
+<h2 id="示例">示例</h2>
+<p>输入</p>
+<blockquote>
+<p>2 3</p>
+</blockquote>
+<p>输出</p>
+<blockquote>
+<p>3</p>
+</blockquote>
+<h2 id="ac代码">ac代码</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span><span class="cp"></span><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">dp</span><span class="p">[</span><span class="mi">2</span><span class="p">][(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="mi">11</span><span class="p">)],</span><span class="n">cur</span><span class="p">,</span><span class="n">mask</span><span class="p">;</span>  <span class="c1">//mask 掩码
+</span><span class="c1"></span>
+<span class="kt">void</span> <span class="nf">update</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">,</span><span class="kt">int</span> <span class="n">b</span><span class="p">){</span>
+    <span class="n">dp</span><span class="p">[</span><span class="n">cur</span><span class="p">][</span><span class="n">b</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dp</span><span class="p">[</span><span class="n">cur</span><span class="o">^</span><span class="mi">1</span><span class="p">][</span><span class="n">a</span><span class="p">];</span>  <span class="c1">//更新状态方案数
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(){</span>
+    <span class="n">cin</span><span class="o">&gt;&gt;</span><span class="n">n</span><span class="o">&gt;&gt;</span><span class="n">m</span><span class="p">;</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="n">m</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="c1">//设置掩码
+</span><span class="c1"></span>    <span class="n">memset</span><span class="p">(</span><span class="n">dp</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="k">sizeof</span><span class="p">(</span><span class="n">dp</span><span class="p">));</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">//滚动数组
+</span><span class="c1"></span>    <span class="n">dp</span><span class="p">[</span><span class="n">cur</span><span class="p">][(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="n">m</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">//初始化
+</span><span class="c1"></span>    <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">;</span><span class="n">i</span><span class="o">++</span><span class="p">){</span>
+        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span><span class="n">j</span> <span class="o">&lt;</span> <span class="n">m</span><span class="p">;</span><span class="n">j</span><span class="o">++</span><span class="p">){</span><span class="c1">//当前处理位置(i,j)
+</span><span class="c1"></span>            <span class="n">cur</span> <span class="o">^=</span> <span class="mi">1</span><span class="p">;</span> 
+            <span class="n">memset</span><span class="p">(</span><span class="n">dp</span><span class="p">[</span><span class="n">cur</span><span class="p">],</span><span class="mi">0</span><span class="p">,</span><span class="k">sizeof</span><span class="p">(</span><span class="n">dp</span><span class="p">[</span><span class="n">cur</span><span class="p">]));</span>
+            <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span><span class="n">k</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="n">m</span><span class="p">);</span><span class="n">k</span><span class="o">++</span><span class="p">){</span><span class="c1">//枚举当前状态
+</span><span class="c1"></span>
+                <span class="c1">//当前和上都放  上有空位就不能往左，也不能不放
+</span><span class="c1"></span>                <span class="k">if</span><span class="p">(</span><span class="n">i</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="p">(</span><span class="n">k</span><span class="o">&amp;</span><span class="p">(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span><span class="p">))))</span><span class="c1">//不是第一行，且正上方为空
+</span><span class="c1"></span>                <span class="p">{</span>
+                    <span class="n">update</span><span class="p">(</span><span class="n">k</span><span class="p">,((</span><span class="n">k</span><span class="o">&lt;&lt;</span><span class="mi">1</span><span class="p">)</span><span class="o">^</span><span class="mi">1</span><span class="p">)</span><span class="o">&amp;</span><span class="n">mask</span><span class="p">);</span><span class="c1">//新状态尾部置1
+</span><span class="c1"></span>                <span class="p">}</span><span class="k">else</span>
+                <span class="p">{</span>
+                    <span class="c1">//当前和左放
+</span><span class="c1"></span>                    <span class="k">if</span><span class="p">(</span><span class="n">j</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">k</span><span class="o">&amp;</span><span class="mi">1</span><span class="p">)))</span><span class="c1">//不是第一列并且左边为空 
+</span><span class="c1"></span>                        <span class="n">update</span><span class="p">(</span><span class="n">k</span><span class="p">,((</span><span class="n">k</span><span class="o">&lt;&lt;</span><span class="mi">1</span><span class="p">)</span><span class="o">^</span><span class="mi">3</span><span class="p">)</span><span class="o">&amp;</span><span class="n">mask</span><span class="p">);</span><span class="c1">//新状态尾两个11
+</span><span class="c1"></span>
+                    <span class="c1">//不放
+</span><span class="c1"></span>                    <span class="n">update</span><span class="p">(</span><span class="n">k</span><span class="p">,(</span><span class="n">k</span><span class="o">&lt;&lt;</span><span class="mi">1</span><span class="p">)</span><span class="o">&amp;</span><span class="n">mask</span><span class="p">);</span>
+                                        <span class="c1">//掩码是只取低m位作为状态
+</span><span class="c1"></span>                <span class="p">}</span>
+
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">dp</span><span class="p">[</span><span class="n">cur</span><span class="p">][(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="n">m</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="思路">思路</h2>
+<p>轮廓线dp，状压</p>
+<p>在这道题中，假设我们有一个 5*5 的格子要填充(如图)，黑色部分不是格子的一部分，只是作为虚拟出来的&quot;顶&quot;。</p>
+<p>图1中蓝色部分表示已经填充好的部分；黄色部分是状态压缩表示的状态，已经填充为1，没有为0；红色表示当前处理的位置。</p>
+<p>图2中我们用状态01111表示当前的&quot;轮廓&quot;。这个状态的&quot;头&quot;总是在&quot;当前&quot;的上面，这个状态的&quot;尾&quot;大部分时候在&quot;当前&quot;的左边(图4的情况不是)。</p>
+<p>图3中，我们&quot;当前&quot;的处理方式只能是填充&quot;当前&quot;和&quot;头&quot;(竖着放)，因为如果我们不这样，上方的空位就无法被填充，会被忽略过去。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://blog-1256556944.file.myqcloud.com/public/contour-dp.png"
+        data-srcset="https://blog-1256556944.file.myqcloud.com/public/contour-dp.png, https://blog-1256556944.file.myqcloud.com/public/contour-dp.png 1.5x, https://blog-1256556944.file.myqcloud.com/public/contour-dp.png 2x"
+        data-sizes="auto"
+        alt="https://blog-1256556944.file.myqcloud.com/public/contour-dp.png"
+        title="轮廓线dp示意图" /></p>
+<p>图4中，&ldquo;当前&quot;的左边没有格子，而且上方是0，不可能往左放，只能往上放(竖着放)。处理过之后就变成下面的新状态了。</p>
+<p>图5中，有两种选择，往左放或者不放。</p>
+<p>特别的，如何初始化？</p>
+<p>处理第一行的时候，假设上面还有一层，并且都填充了(就是图中黑色部分)，这样就可以像其他位置一样处理。</p>
+<p>怎么记录方案数？</p>
+<p>每一个状态都是由另一个状态得到的，状态1 —&gt;状态2  ;  状态3 —&gt; 状态2;
+可能很多状态都能到状态2，那么状态2的方案数就是： 状态1方案数 + 状态2方案数 + &hellip;</p>
+<p>设dp[cur][state]表示cur(当前)位置为state状态的方案数。last为上一个位置。</p>
+<p>设 k 表示处理当前位置前的状态(轮廓)，new为处理当前位置后的状态(轮廓)</p>
+<p>转移方程有</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="n">dp</span><span class="p">[</span><span class="n">cur</span><span class="p">][</span><span class="k">new</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dp</span><span class="p">[</span><span class="n">last</span><span class="p">][</span><span class="n">k</span><span class="p">];</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><del>我先去上课 。。。。</del></p>
+<p>具体实现可以看代码。</p>
+<p>需要注意的几点：</p>
+<p>初始化是当上面有一行不存在的，已经填充好的一行</p>
+<p><code>dp[cur][(1&lt;&lt;m)-1] = 1</code></p>
+<p><code>cur ^= 1</code> 是滚动数组的操作，因为当前位置状态只和它之前位置状态有关</p>
+<p>任何时候，上方有空位就不能选择左或者不填。</p>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2018-12-06</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/algorithm/">algorithm</a>,&nbsp;<a href="/tags/dp/">dp</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/cpp-note/" class="prev" rel="prev" title="CPP知识点笔记"><i class="fas fa-angle-left fa-fw"></i>CPP知识点笔记</a>
+            <a href="/manacher/" class="next" rel="next" title="最长回文子串-马拉车">最长回文子串-马拉车<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="disqus_thread" class="comment"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://disqus.com/?ref_noscript">Disqus</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line"><small>1KiritobkMPpaWBjTDHSoiP5icv8PEFNdR</small></div><div class="footer-line">由 <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.77.0">Hugo</a> 强力驱动 | 主题 - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.10"><i class="far fa-kiss-wink-heart fa-fw"></i> LoveIt</a>
+                </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2020 - 2021</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">kirito</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><script type="text/javascript" src="https://kirito-blog.disqus.com/embed.js" defer></script><script type="text/javascript" src="/lib/smooth-scroll/smooth-scroll.min.js"></script><script type="text/javascript" src="/lib/autocomplete/autocomplete.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.stemmer.support.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.zh.min.js"></script><script type="text/javascript" src="/lib/lazysizes/lazysizes.min.js"></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js"></script><script type="text/javascript" src="/lib/katex/auto-render.min.js"></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js"></script><script type="text/javascript" src="/lib/katex/mhchem.min.js"></script><script type="text/javascript" src="/lib/cookieconsent/cookieconsent.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":30},"comment":{},"cookieconsent":{"content":{"dismiss":"同意","link":"了解更多","message":"本网站使用 Cookies 来改善您的浏览体验."},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrIndexURL":"/index.json","lunrLanguageCode":"zh","lunrSegmentitURL":"/lib/lunr/lunr.segmentit.js","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50,"type":"lunr"}};</script><script type="text/javascript" src="/js/theme.min.js"></script><script type="text/javascript">
+            window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());
+            gtag('config', 'G-ZKPP127E4F');
+        </script><script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id=G-ZKPP127E4F" async></script><script type="text/javascript">var _hmt = _hmt || [];</script><script type="text/javascript" src="https://hm.baidu.com/hm.js?2004ef75aa13d757f75bf6f1f3add242" async></script></body>
+</html>
