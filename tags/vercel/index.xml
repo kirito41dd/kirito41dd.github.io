@@ -1,0 +1,373 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>vercel - 标签 - kirito&#39;s blog</title>
+        <link>https://www.kirito.info/tags/vercel/</link>
+        <description>vercel - 标签 - kirito&#39;s blog</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sat, 04 Feb 2023 11:57:58 &#43;0800</lastBuildDate><atom:link href="https://www.kirito.info/tags/vercel/" rel="self" type="application/rss+xml" /><item>
+    <title>Nostr账号Nip05验证方法</title>
+    <link>https://www.kirito.info/nostr-nip05-verification/</link>
+    <pubDate>Sat, 04 Feb 2023 11:57:58 &#43;0800</pubDate><author>
+        <name>kirito</name>
+    </author><guid>https://www.kirito.info/nostr-nip05-verification/</guid>
+    <description><![CDATA[<p>最近<a href="https://apps.apple.com/ca/app/damus/id1628663131" target="_blank" rel="noopener noreferrer">Damus App</a>很火，写一篇教程教大家如何在App中获得紫v图标认证。</p>
+<h2 id="nip05简介" class="headerLink">
+    <a href="#nip05%e7%ae%80%e4%bb%8b" class="header-mark"></a>NIP05简介</h2><p>NIP是<strong><ruby>Nostr改进提议<rt>Nostr Improvement Proposal</rt></ruby></strong>，<a href="https://github.com/nostr-protocol/nips/blob/master/05.md" target="_blank" rel="noopener noreferrer">NIP05</a>描述了一种账号验证方法。可以想象成telegram或者twitter上的蓝色V标记，在Damus里是一个紫V图标，客户端展示这个图标，就说明该用户通过了NIP05验证。</p>
+<p>该验证由客户端发起，当发现用户设置了用户名和NIP05验证地址，会发送一个https请求。</p>
+<p>比如用户名<code>kirito</code>和验证地址<code>kirito@dogdogback.com</code>，客户端会发送如下请求：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">https://dogdogback.com/.well-known/nostr.json?name=kirito
+</code></pre></td></tr></table>
+</div>
+</div><p>如果验证成功，<code>dogdogback.com</code>应该返回如下结果：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
+  <span class="nt">&#34;names&#34;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">&#34;kirito&#34;</span><span class="p">:</span> <span class="s2">&#34;2f7caa968b0ec9bacd55a07cfaf6206aab5a62387c76303c311db949dec8bc57&#34;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>你也可以调用这个请求观察下返回: <a href="https://dogdogback.com/.well-known/nostr.json?name=kirito" target="_blank" rel="noopener noreferrer">https://dogdogback.com/.well-known/nostr.json?name=kirito</a></p>
+<p>客户端对比返回结果里的公钥和用户的公钥，如果一致则验证完成，Damus会在你头像后展示紫V图标。
+<figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/public/nostr/%E7%B4%ABv.jpg" title="https://blog-1256556944.file.myqcloud.com/public/nostr/%E7%B4%ABv.jpg" data-thumbnail="https://blog-1256556944.file.myqcloud.com/public/nostr/%E7%B4%ABv.jpg">
+        
+    </a></figure></p>
+<h2 id="验证方法" class="headerLink">
+    <a href="#%e9%aa%8c%e8%af%81%e6%96%b9%e6%b3%95" class="header-mark"></a>验证方法</h2><p>有两种路线：</p>
+<ol>
+<li>找提供验证服务的社区项目，直接用他们的服务，这个自己找吧，缺点是可能不稳定，也不受自己控制</li>
+<li>用自己的域名进行验证，前提是你<strong>拥有一个域名的控制权</strong>，本文主要讲解这种方式</li>
+</ol>
+<h3 id="静态文件" class="headerLink">
+    <a href="#%e9%9d%99%e6%80%81%e6%96%87%e4%bb%b6" class="header-mark"></a>静态文件</h3><p>如果你已经有自己的网站了，并且支持https，那么直接在你的网站根目录放置一个静态文件即可。
+文件名为<code>.well-known/nostr.json</code>，内容写上你的用户名和公钥：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">{
+  &#34;names&#34;: {
+    &#34;kirito&#34;: &#34;2f7caa968b0ec9bacd55a07cfaf6206aab5a62387c76303c311db949dec8bc57&#34;
+  }
+}
+</code></pre></td></tr></table>
+</div>
+</div><p>可以写多行，为你的小伙伴也提供验证。</p>
+<h3 id="云函数" class="headerLink">
+    <a href="#%e4%ba%91%e5%87%bd%e6%95%b0" class="header-mark"></a>云函数</h3><p>当然有更好的方式，而且不需要服务器和证书，下面介绍下我使用的方式：<a href="https://vercel.com/dashboard" target="_blank" rel="noopener noreferrer">vercel</a>云函数（你自己会搭服务或者有其他云函数也行，原理一样）</p>
+<p>我之前写过一篇怎么用vercel云函数的文章，可以<a href="/use-vercel-as-free-faas/" rel="">参考</a>，当你弄好后，<strong>绑定自己的域名</strong>，就可以通过自己的域名访问云函数了，这是一个例子: <a href="https://dogdogback.com/api/list" target="_blank" rel="noopener noreferrer">https://dogdogback.com/api/list</a></p>
+<p>代码如果不会写直接克隆我的仓库即可<a href="https://github.com/kirito41dd/vercel-faas" target="_blank" rel="noopener noreferrer">vercel-faas</a>。</p>
+<p>具体操作：</p>
+<ol>
+<li>修改代码仓库中的文件<code>vercel.json</code>，添加NIP05接口的重定向，这样访问路径<code>/.well-known/nostr.json?name=xxx</code>的请求会被交给<code>/api/entrypoint.go</code>文件处理：
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
+<span class="nt">&#34;trailingSlash&#34;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+<span class="nt">&#34;rewrites&#34;</span><span class="p">:</span>
+<span class="p">[</span>
+    <span class="p">{</span>
+    <span class="nt">&#34;source&#34;</span><span class="p">:</span> <span class="s2">&#34;/api/(.*)&#34;</span><span class="p">,</span>
+    <span class="nt">&#34;destination&#34;</span><span class="p">:</span> <span class="s2">&#34;/api/entrypoint.go&#34;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+    <span class="nt">&#34;source&#34;</span><span class="p">:</span> <span class="s2">&#34;/.well-known/nostr.json&#34;</span><span class="p">,</span>
+    <span class="nt">&#34;destination&#34;</span><span class="p">:</span> <span class="s2">&#34;/api/entrypoint.go&#34;</span>
+    <span class="p">}</span>
+<span class="p">]</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>添加处理认证请求的路由，修改<code>/api/entrypoint.go</code>：
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">registerRouter</span><span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">gin</span><span class="p">.</span><span class="nx">RouterGroup</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// ...
+</span><span class="c1"></span>    <span class="nx">r</span><span class="p">.</span><span class="nf">GET</span><span class="p">(</span><span class="s">&#34;/.well-known/nostr.json&#34;</span><span class="p">,</span> <span class="nx">handler</span><span class="p">.</span><span class="nx">Cors</span><span class="p">,</span> <span class="nx">handler</span><span class="p">.</span><span class="nx">NIP05</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>添加认证逻辑，修改<code>/handler/handler.go</code>:
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">NIP05</span><span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">gin</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">name2pubkey</span> <span class="o">:=</span> <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span>
+        <span class="s">&#34;kirito&#34;</span><span class="p">:</span> <span class="s">&#34;2f7caa968b0ec9bacd55a07cfaf6206aab5a62387c76303c311db949dec8bc57&#34;</span><span class="p">,</span>
+        <span class="c1">// 可以在这里添加更多的账号，为你的朋友提供验证
+</span><span class="c1"></span>        <span class="c1">// &#34;&lt;name1&gt;&#34;:&#34;pubkey1&#34;,
+</span><span class="c1"></span>        <span class="c1">// &#34;&lt;name2&gt;&#34;:&#34;pubkey2&#34;,
+</span><span class="c1"></span>    <span class="p">}</span>
+    <span class="nx">user</span> <span class="o">:=</span> <span class="nx">c</span><span class="p">.</span><span class="nf">Query</span><span class="p">(</span><span class="s">&#34;name&#34;</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;nip05 verify request&#34;</span><span class="p">,</span> <span class="nx">user</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nx">v</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">name2pubkey</span><span class="p">[</span><span class="nx">user</span><span class="p">];</span> <span class="nx">ok</span> <span class="p">{</span>
+        <span class="nx">resp</span> <span class="o">:=</span> <span class="nx">NIP05Resp</span><span class="p">{}</span>
+        <span class="nx">resp</span><span class="p">.</span><span class="nx">Names</span><span class="p">[</span><span class="nx">user</span><span class="p">]</span> <span class="p">=</span> <span class="nx">v</span>
+        <span class="nx">c</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">resp</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="nx">c</span><span class="p">.</span><span class="nf">Status</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusNotFound</span><span class="p">)</span>
+    <span class="k">return</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+</ol>
+<p>把代码push到你的仓库，vercel会自动重新部署，然后用你的域名访问看看效果，这是我的：</p>
+<ol>
+<li><a href="https://dogdogback.com/.well-known/nostr.json?name=kirito" target="_blank" rel="noopener noreferrer">https://dogdogback.com/.well-known/nostr.json?name=kirito</a></li>
+<li><a href="https://dogdogback.com/.well-known/nostr.json?name=shishi" target="_blank" rel="noopener noreferrer">https://dogdogback.com/.well-known/nostr.json?name=shishi</a></li>
+</ol>
+<h3 id="客户端设置" class="headerLink">
+    <a href="#%e5%ae%a2%e6%88%b7%e7%ab%af%e8%ae%be%e7%bd%ae" class="header-mark"></a>客户端设置</h3><p>以Damus举例，编辑资料，配置你的用户名和NIP05地址，就可以看到紫V图标了
+<figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/public/nostr/set-name.jpg" title="https://blog-1256556944.file.myqcloud.com/public/nostr/set-name.jpg" data-thumbnail="https://blog-1256556944.file.myqcloud.com/public/nostr/set-name.jpg">
+        
+    </a></figure>
+<figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/public/nostr/set-nip05.jpg" title="https://blog-1256556944.file.myqcloud.com/public/nostr/set-nip05.jpg" data-thumbnail="https://blog-1256556944.file.myqcloud.com/public/nostr/set-nip05.jpg">
+        
+    </a></figure></p>
+<p>到这里就成功了，有疑问可以评论区提。</p>
+<h2 id="一些提示" class="headerLink">
+    <a href="#%e4%b8%80%e4%ba%9b%e6%8f%90%e7%a4%ba" class="header-mark"></a>一些提示</h2><ol>
+<li>有些webapp请求是会受到浏览器跨域策略限制，在http返回header中设置<code>Access-Control-Allow-Origin: *</code>，我的代码中已经处理了，如果用静态文件的方式无法处理跨域。</li>
+<li>如何获取hex格式的公钥？在Damus中长按<strong>你自己</strong>发送的信息，选择<code>Copy Note JSON</code>然后粘贴到一个地方，就能看到了。</li>
+<li>vercel也是可以托管静态文件的，仓库里只留一个json文件就行。</li>
+<li><del>富哥V我50</del></li>
+</ol>
+]]></description>
+</item><item>
+    <title>白嫖vercel当FaaS用</title>
+    <link>https://www.kirito.info/use-vercel-as-free-faas/</link>
+    <pubDate>Sat, 24 Jul 2021 19:56:51 &#43;0800</pubDate><author>
+        <name>kirito</name>
+    </author><guid>https://www.kirito.info/use-vercel-as-free-faas/</guid>
+    <description><![CDATA[<p>FaaS即Function as a service，云函数，用来托管一些无状态服务，好处是可以动态扩缩，非常灵活。</p>
+<p><a href="https://vercel.com" target="_blank" rel="noopener noreferrer">vercel</a>是一个非常良心的免费的前端托管平台，我的博客目前也托管在这里。</p>
+<p>得知vercel还支持云函数，这里是<a href="https://vercel.com/docs/serverless-functions/introduction" target="_blank" rel="noopener noreferrer">文档</a>，而且runtime还支持Go，<del>这不白嫖一下说不过去</del></p>
+<p>简单用Go在上面部署了一个http服务，路由使用的是gin框架，成果：<a href="https://faas.kirito41dd.cn/api/1" target="_blank" rel="noopener noreferrer">https://faas.kirito41dd.cn/api/1</a></p>
+<h2 id="开始" class="headerLink">
+    <a href="#%e5%bc%80%e5%a7%8b" class="header-mark"></a>开始</h2><ol>
+<li>首先安装vercel的<a href="https://vercel.com/cli" target="_blank" rel="noopener noreferrer">cli工具</a>，方便本地调试
+<ul>
+<li>直接 <code>npm i -g vercel</code></li>
+</ul>
+</li>
+<li>新建个文件夹，初始化一个go项目
+<ul>
+<li><code>mkdir vercel-faas &amp;&amp; cd vercel-faas &amp;&amp; git init .</code></li>
+<li><code>go mod init xxx.github.com/vercel-faas</code></li>
+<li><code>mkdir api</code> - 代码必须放在<code>api/</code>目录下</li>
+</ul>
+</li>
+<li>cli工具本地部署下
+<ul>
+<li><code>vercel dev</code> - 跟着引导一路输入<code>y</code>就行</li>
+<li>部署成功会出现<code>Ready! Available at http://localhost:3000</code></li>
+<li>这时就可以本地浏览器调试了，由于目录下没有静态网页，所以会404</li>
+<li>不用关心，我们只使用云函数功能</li>
+</ul>
+</li>
+</ol>
+<h2 id="写代码" class="headerLink">
+    <a href="#%e5%86%99%e4%bb%a3%e7%a0%81" class="header-mark"></a>写代码</h2><p>根据vercel的文档，处理http请求的代码必须放在<code>api/</code>目录下，并且可以按文件名路由。</p>
+<p>比如：请求<code>/api/date</code>就会默认去找<code>api/date.go</code>文件执行代码，文件里必须写一个函数作为入口</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">Handler</span><span class="p">(</span><span class="nx">w</span> <span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span> <span class="nx">r</span> <span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// do ...
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>但是在每个文件里都写一个这样的函数好像很重复劳动，而且不好和框架配合，所以我只在<code>api/</code>目录下放了一个文件当作入口，再加上路由，然后在<code>handler/</code>下放处理每个路由的具体实现。</p>
+<p>完整代码见<a href="https://github.com/kirito41dd/vercel-faas" target="_blank" rel="noopener noreferrer">https://github.com/kirito41dd/vercel-faas</a></p>
+<p>分解：</p>
+<ol>
+<li>首先是在<code>api/</code>目录下提供一个入口
+<ul>
+<li>创建文件<code>entrypoint.go</code>，写上处理函数，请求交由gin框架处理</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">Handler</span><span class="p">(</span><span class="nx">w</span> <span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span> <span class="nx">r</span> <span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">app</span><span class="p">.</span><span class="nf">ServeHTTP</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span> <span class="nx">r</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>引入gin框架，创建实例，并初始化
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kn">import</span> <span class="s">&#34;github.com/gin-gonic/gin&#34;</span>
+
+<span class="kd">var</span> <span class="p">(</span>
+    <span class="nx">app</span> <span class="o">*</span><span class="nx">gin</span><span class="p">.</span><span class="nx">Engine</span>
+<span class="p">)</span>
+
+<span class="c1">// 初始化逻辑
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">init</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">app</span> <span class="p">=</span> <span class="nx">gin</span><span class="p">.</span><span class="nf">New</span><span class="p">()</span>
+
+    <span class="c1">// 创建路由 must /api/xxx
+</span><span class="c1"></span>    <span class="nx">r</span> <span class="o">:=</span> <span class="nx">app</span><span class="p">.</span><span class="nf">Group</span><span class="p">(</span><span class="s">&#34;/api&#34;</span><span class="p">)</span>
+
+    <span class="c1">// 注册路由
+</span><span class="c1"></span>    <span class="nf">registerRouter</span><span class="p">(</span><span class="nx">r</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>注册路由，简单实现个ping
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">registerRouter</span><span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">gin</span><span class="p">.</span><span class="nx">RouterGroup</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nf">GET</span><span class="p">(</span><span class="s">&#34;/ping&#34;</span><span class="p">,</span> <span class="nx">handler</span><span class="p">.</span><span class="nx">Ping</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li><code>handler/handler.go</code>里写具体的路由处理函数
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">Ping</span><span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">gin</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">c</span><span class="p">.</span><span class="nf">String</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="s">&#34;pong&#34;</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>本地验证下，在项目根目录执行 <code>vercel dev</code>
+<ul>
+<li><a href="https://faas.kirito41dd.cn/api/ping" target="_blank" rel="noopener noreferrer">https://faas.kirito41dd.cn/api/ping</a></li>
+<li>网页返回 pong</li>
+</ul>
+</li>
+</ol>
+<p>简单的ping/pong接口实现了，其他接口也是一个套路，塞更多的路由就行了</p>
+<h2 id="部署" class="headerLink">
+    <a href="#%e9%83%a8%e7%bd%b2" class="header-mark"></a>部署</h2><ol>
+<li>
+<p>首先将本地项目随便推送到一个github仓库</p>
+</li>
+<li>
+<p>进入vercel<a href="https://vercel.com/dashboard" target="_blank" rel="noopener noreferrer">主页</a></p>
+<ul>
+<li>点击 <strong>New Project</strong></li>
+<li>在 <strong>Import Git Repository</strong> 那里关联你的github账号，授权仓库访问权限</li>
+<li>找到你的仓库，点 <strong>Import</strong></li>
+</ul>
+</li>
+<li>
+<p>跳转到配置页面</p>
+<ul>
+<li><strong>Create a Team</strong> 可以跳过</li>
+<li><strong>Configure Project</strong> 这里</li>
+<li>Project Name 随便填</li>
+<li>Framework Preset 我们只用云函数可以选other</li>
+<li>剩下的默认即可，点 <strong>Deploy</strong></li>
+</ul>
+<p>如图
+<figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/public/vercel-config.png" title="https://blog-1256556944.file.myqcloud.com/public/vercel-config.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/public/vercel-config.png">
+        
+    </a></figure></p>
+</li>
+</ol>
+<p>部署完成后会给你分配个域名，可以用域名来访问你的云函数，也可以绑定自己的域名</p>
+<p>完</p>
+]]></description>
+</item></channel>
+</rss>

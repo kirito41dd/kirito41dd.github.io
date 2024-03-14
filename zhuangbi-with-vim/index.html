@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noodp" />
+    <title>vim装逼要点 - kirito&#39;s blog</title><meta name="Description" content="kirito&#39;s blog"><meta property="og:title" content="vim装逼要点" />
+<meta property="og:description" content="最近给IDE装了vim插件(ideaVim)，因为觉得写代码时候老是要去按上下左右，效率很低，更主要是low，不够装逼（ 但不建议独立使用vi" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.kirito.info/zhuangbi-with-vim/" /><meta property="og:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-07-14T10:54:48+08:00" />
+<meta property="article:modified_time" content="2021-07-14T10:54:48+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/>
+
+<meta name="twitter:title" content="vim装逼要点"/>
+<meta name="twitter:description" content="最近给IDE装了vim插件(ideaVim)，因为觉得写代码时候老是要去按上下左右，效率很低，更主要是low，不够装逼（ 但不建议独立使用vi"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt">
+
+<meta name="theme-color" content="#f8f8f8"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="canonical" href="https://www.kirito.info/zhuangbi-with-vim/" /><link rel="prev" href="https://www.kirito.info/rust-ownership-and-borrowing/" /><link rel="next" href="https://www.kirito.info/slice-chunking-in-go/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/color.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/fontawesome-free/all.min.css">
+        <noscript><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"></noscript><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/animate/animate.min.css">
+        <noscript><link rel="stylesheet" href="/lib/animate/animate.min.css"></noscript><meta name="google-site-verification" content="5J8bsg9tKySrpONjEV2nAOqQ08TCVjsooCRIuDsxhD4" /><meta name="baidu-site-verification" content="code-NY7bFlUK92" /><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "vim装逼要点",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/www.kirito.info\/zhuangbi-with-vim\/"
+        },"image": ["https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"],"genre": "posts","keywords": "vim","wordcount":  1036 ,
+        "url": "https:\/\/www.kirito.info\/zhuangbi-with-vim\/","datePublished": "2021-07-14T10:54:48+08:00","dateModified": "2021-07-14T10:54:48+08:00","publisher": {
+            "@type": "Organization",
+            "name": "kirito","logo": "https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"},"author": {
+                "@type": "Person",
+                "name": "kirito"
+            },"description": ""
+    }
+    </script><script src="//instant.page/5.1.1" defer type="module" integrity="sha384-MWfCL6g1OTGsbSwfuMHc8+8J2u71/LA8dzlIN3ycajckxuZZmF+DNjdm7O6H3PSq"></script>
+</head>
+
+<body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">
+        function setTheme(theme) {document.body.setAttribute('theme', theme); document.documentElement.style.setProperty('color-scheme', theme === 'light' ? 'light' : 'dark'); window.theme = theme; }
+        function saveTheme(theme) {window.localStorage && localStorage.setItem('theme', theme);}
+        function getMeta(metaName) {const metas = document.getElementsByTagName('meta'); for (let i = 0; i < metas.length; i++) if (metas[i].getAttribute('name') === metaName) return metas[i]; return '';}
+        if (window.localStorage && localStorage.getItem('theme')) {let theme = localStorage.getItem('theme');theme === 'light' || theme === 'dark' || theme === 'black' ? setTheme(theme) : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light')); } else { if ('auto' === 'light' || 'auto' === 'dark' || 'auto' === 'black') setTheme('auto'), saveTheme('auto'); else saveTheme('auto'), window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light');}
+        let metaColors = {'light': '#f8f8f8','dark': '#252627','black': '#000000'}
+        getMeta('theme-color').content = metaColors[document.body.getAttribute('theme')];
+    </script>
+    <div id="back-to-top"></div>
+    <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="kirito&#39;s blog">kirito</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="#" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="kirito&#39;s blog">kirito</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a href="#" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+            <div class="container"><div class="toc" id="toc-auto">
+        <h2 class="toc-title">目录</h2>
+        <div class="toc-content always-active" id="toc-content-auto"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#move">move</a></li>
+    <li><a href="#编辑">编辑</a></li>
+    <li><a href="#入场">入场</a></li>
+  </ul>
+</nav></div>
+    </div><script>document.getElementsByTagName("main")[0].setAttribute("pageStyle", "normal")</script><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "true")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">vim装逼要点</h1><div class="post-meta">
+            <div class="post-meta-line">
+                <span class="post-author"><i class="author fas fa-user-circle fa-fw"></i><a href="/" title="Author" rel=" author" class="author">kirito</a>
+                </span>&nbsp;<span class="post-category">收录于 </span>&nbsp;<span class="post-category">类别 <a href="/categories/default/"><i class="far fa-folder fa-fw"></i>default</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2021-07-14">2021-07-14</time>&nbsp;<i class="far fa-edit fa-fw"></i>&nbsp;<time datetime="2021-07-14">2021-07-14</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1036 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 3 分钟&nbsp;<span id="/zhuangbi-with-vim/" class="leancloud_visitors" data-flag-title="vim装逼要点">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class="leancloud-visitors-count" id=twikoo_visitors></span>&nbsp;次阅读
+                    </span>&nbsp;<span id="/zhuangbi-with-vim/" class="comment_count" data-flag-title="vim装逼要点">
+                        <i class="far fa-comments fa-fw"></i>&nbsp;<span class="twikoo-comment-count" id="twikoo-comment-count"></span>&nbsp;条评论
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#move">move</a></li>
+    <li><a href="#编辑">编辑</a></li>
+    <li><a href="#入场">入场</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>最近给IDE装了vim插件(ideaVim)，因为觉得写代码时候老是要去按上下左右，效率很低，更主要是low，不够装逼（</p>
+<p>但不建议独立使用vim，因为要大量练习才行，和IDE配合使用，可以把重点放在光标移动上，其余功能让IDE来负责。<del>低成本装逼</del></p>
+<h2 id="move" class="headerLink">
+    <a href="#move" class="header-mark"></a>move</h2><p><code>h</code> <code>j</code> <code>k</code> <code>l</code> - <code>⬅️</code> <code>⬇️</code> <code>⬆️</code> <code>➡️</code></p>
+<p><code>w</code>/<code>e</code> - 跳转到下一个词 开头/末尾（按符号或空白分词）</p>
+<ul>
+<li>助记 word / end</li>
+</ul>
+<p><code>W</code>/<code>E</code> - 同上（按空白分词）</p>
+<p><code>b</code>/<code>ge</code> - 跳转到上一个词 开头/末尾（按符号或空白分词）</p>
+<p><code>B</code>/<code>gE</code> - 同上（按空白分词）</p>
+<p><code>f&lt;?&gt;</code>/<code>t&lt;?&gt;</code> - 跳转到光标位置后指定 字符上/字符前，不跨行</p>
+<ul>
+<li>比如 <small>1</small><strong>2</strong><small>345</small>，使用<code>f4</code>后变为 <small>123</small><strong>4</strong><small>5</small>，使用<code>t4</code>则为 <small>12</small><strong>3</strong><small>45</small></li>
+<li>助记 find / to，<code>;</code>可以重复执行</li>
+</ul>
+<p><code>F&lt;?&gt;</code>/<code>T&lt;?&gt;</code> - 跳转到光标位置前指定 字符上/字符前，不夸行</p>
+<p><code>%</code> - 当前行如果有括号，移动到它的另一半</p>
+<p><code>gg</code>/<code>G</code> - 跳转到文件 开头/结尾</p>
+<p><code>&lt;n&gt;gg</code>/<code>&lt;n&gt;G</code> - 跳转到指定行号</p>
+<p><code>0</code>/<code>&amp;</code> - 移动到 行开头/末尾</p>
+<p><code>^</code>、<code>_</code>/<code>g_</code> - 移动到 行开头/末尾 第一个非空白字符</p>
+<p><code>&lt;Ctrl+b&gt;</code>/<code>&lt;Ctrl+f&gt;</code> - 向 上/下 滚一个屏幕</p>
+<ul>
+<li>助记 back front</li>
+</ul>
+<p><code>&lt;Ctrl+u&gt;</code>/<code>&lt;Ctrl+d&gt;</code> - 向 上/下 滚半个屏幕</p>
+<ul>
+<li>助记 up down</li>
+</ul>
+<p><code>zz</code>/<code>zt</code>/<code>zb</code> - 令光标行处于屏幕 中间/顶部/底部</p>
+<ul>
+<li>助记 zoom zoom/top/bottom</li>
+</ul>
+<p><code>&lt;Ctrl+o&gt;</code>/<code>&lt;Ctrl+i&gt;</code> - 光标跳转到jump list的 上一个位置/下一个位置</p>
+<ul>
+<li>jump list里只记录跳转历史，简单移动光标不会被记录</li>
+<li><code>:jump</code>可以查看所有位置</li>
+</ul>
+<p><code>m&lt;a-zA-Z&gt;</code> - 如<code>ma</code>，标记当前光标位置，并起名为<code>a</code></p>
+<ul>
+<li>小写的名字只在当前缓冲区可见，大写可以跨缓冲区</li>
+<li><code>:marks</code>查看所有标记位置，你也会看到其他非字母的标记</li>
+</ul>
+<p><code>'&lt;a-zA-Z&gt;</code>/<code> `&lt;a-zA-Z&gt;</code> - 如<code>'a</code>回到<code>a</code>位置所在在行首/<code> `a</code>回到<code>a</code>位置</p>
+<ul>
+<li>一个是单引号，一个是反引号，<code>''</code>永远返回上一个位置</li>
+</ul>
+<p><code>zo</code>/<code>zc</code> - 打开折叠/关闭折叠</p>
+<p><code>zO</code>/<code>zC</code> - 打开折叠/关闭折叠，递归</p>
+<p><code>zM</code>/<code>zR</code> - 关闭/打开 所有折叠</p>
+<p><code>gd</code>、<code>&lt;Ctrl+]&gt;</code> - 跳转到定义，<code>&lt;Ctrl+t&gt;</code>返回(用的是tag stack)</p>
+<ul>
+<li><a href="https://stackoverflow.com/questions/8381415/what-is-the-difference-between-ctrl-t-and-ctrl-o-in-vim" target="_blank" rel="noopener noreferrer">Crtl+t 与 Ctrl+o 区别</a></li>
+</ul>
+<h2 id="编辑" class="headerLink">
+    <a href="#%e7%bc%96%e8%be%91" class="header-mark"></a>编辑</h2><p><code>dd</code>/ <code>&lt;n&gt;dd</code> - 删除当前行 / 删除n行</p>
+<p><code>df&lt;?&gt;</code>/<code>dt&lt;?&gt;</code> - 向后删除光标位置到指定字符 / 删除到指定字符前，不跨行</p>
+<p><code>dF&lt;?&gt;</code>/<code>dT&lt;?&gt;</code> - 反向，向前删除，同上</p>
+<p><code>d$</code>/<code>d^</code> - 从光标删除到 行尾/行开头，用其他位置符也行</p>
+<p><code>yy</code>/<code>&lt;n&gt;yy</code> - 复制当前行/复制n行</p>
+<p><code>p</code>/<code>P</code> - 粘贴到当前 行后/行前，<code>&lt;n&gt;p</code>就是重复做n次</p>
+<p><code>&quot;&lt;reg&gt;y</code>/<code>&quot;&lt;reg&gt;p</code> - 复制到指定寄存器/从指定寄存器粘贴</p>
+<ul>
+<li>命令模式<code>:reg</code> 可以看各个<a href="https://harttle.land/2016/07/25/vim-registers.html" target="_blank" rel="noopener noreferrer">寄存器</a>的内容</li>
+<li><code>+</code>寄存器通常与系统剪切板互通</li>
+</ul>
+<p><code>di&quot;</code>/<code>da&quot;</code> - 删除引号内的内容/连引号一起删，必须单行</p>
+<ul>
+<li>助记 delete in &quot;&quot; /  delete all &quot;&quot;</li>
+<li>还有<code>di(</code>、<code>di{</code>等</li>
+</ul>
+<p><code>x</code> - 删除光标字符</p>
+<p><code>r&lt;?&gt;</code> - 用指定字符替换光标字符</p>
+<h2 id="入场" class="headerLink">
+    <a href="#%e5%85%a5%e5%9c%ba" class="header-mark"></a>入场</h2><p>三连入场，神清气爽。从normal模式进入编辑模式</p>
+<p><code>i</code>/<code>a</code> - 在当前光标字符 前/后 插入</p>
+<p><code>I</code>/<code>A</code> - 在当前行 开头第一非空白字符前插入/结尾最后一个非空白字符后插入</p>
+<p><code>o</code>/<code>O</code> - 当前行 下面/上面 起新行</p>
+<p><code>s</code> - 删除当前字符并从该位置插入</p>
+</div>
+
+        <div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2021-07-14</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/vim/">vim</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/rust-ownership-and-borrowing/" class="prev" rel="prev" title="Rust所有权与借用"><i class="fas fa-angle-left fa-fw"></i>Rust所有权与借用</a>
+            <a href="/slice-chunking-in-go/" class="next" rel="next" title="Go反射: 将切片按指定大小分块">Go反射: 将切片按指定大小分块<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="twikoo"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://twikoo.js.org/">Twikoo</a>.
+            </noscript></div></article></div>
+        </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">      <a href="https://travellings.link/" target="_blank" rel="noopener" title="开往-友链接力"><img src="https://travellings.link/assets/logo.gif" alt="开往-友链接力" width="120"></a><a href="https://www.foreverblog.cn/go.html" target="_blank" > <img src="https://img.foreverblog.cn/wormhole_3.gif" alt="" style="width:auto;height:32px;" title="穿梭虫洞-随机访问十年之约友链博客"> </a>
+      </br><small>1KiritobkMPpaWBjTDHSoiP5icv8PEFNdR</small>
+      </br><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+      </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2020 - 2024</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank" rel="noopener noreferrer">kirito</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+            <div class="footer-line"></div>
+            <div class="footer-line">
+            </div>
+        </div></footer></div>
+
+    <div id="fixed-buttons"><a href="#back-to-top" id="back-to-top-button" class="fixed-button" title="回到顶部">
+            <i class="fas fa-arrow-up fa-fw"></i>
+        </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+            <i class="fas fa-comment fa-fw"></i>
+        </a>
+    </div><div id="cookieconsent-container"></div><div class="assets"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/katex/copy-tex.min.css">
+        <noscript><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"></noscript><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":30},"comment":{"twikoo":{"commentCount":true,"el":"#twikoo","envId":"https://comment-liard.vercel.app/","lang":"zh-cn"}},"cookieconsent":{"content":{"dismiss":"同意","link":"了解更多","message":"本网站使用 Cookies 来改善您的浏览体验."},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"distance":null,"findAllMatches":null,"fuseIndexURL":"/index.json","highlightTag":"em","ignoreFieldNorm":null,"ignoreLocation":null,"isCaseSensitive":null,"location":null,"maxResultLength":10,"minMatchCharLength":null,"noResultsFound":"没有找到结果","snippetLength":50,"threshold":null,"type":"fuse","useExtendedSearch":null}};</script><script type="text/javascript" src="/lib/twikoo/twikoo.all.min.js" defer></script><script type="text/javascript" src="/js/twikoo.min.js" defer></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js" defer></script><script type="text/javascript" src="/lib/katex/auto-render.min.js" defer></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js" defer></script><script type="text/javascript" src="/lib/katex/mhchem.min.js" defer></script><script type="text/javascript" src="/js/katex.min.js" defer></script><script type="text/javascript" src="/lib/cookieconsent/cookieconsent.min.js" defer></script><script type="text/javascript" src="/js/cookieconsent.min.js" defer></script><script type="text/javascript" src="/js/theme.min.js" defer></script><script type="text/javascript">
+            window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());
+            gtag('config', 'G-ZKPP127E4F');
+        </script><script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id=G-ZKPP127E4F" async></script><script>
+			var _hmt = _hmt || [];
+			(function() {
+			  var hm = document.createElement("script");
+			  hm.src = "https://hm.baidu.com/hm.js?2004ef75aa13d757f75bf6f1f3add242";
+			  var s = document.getElementsByTagName("script")[0]; 
+			  s.parentNode.insertBefore(hm, s);
+			})();
+		</script><script>
+         
+         
+        var $cdnPrefix = "https://blog-1256556944.file.myqcloud.com";
+    </script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@2.1.3/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-backstretch@2.1.18/jquery.backstretch.min.js"></script>
+    <script type="text/javascript" src="/js/custom.js"></script>
+</div>
+</body>
+
+</html>

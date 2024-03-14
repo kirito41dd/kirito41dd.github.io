@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# 这些爬虫对提升网站运营没有任何帮助，反而给服务器增加负担
+User-agent: MJ12bot
+Disallow: /
+User-agent: AhrefsBot
+Disallow: /
+User-agent: BLEXBot
+Disallow: /
+User-Agent: SemrushBot
+Disallow: /
+
+Sitemap: https://www.kirito41dd.cn/sitemap.xml

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noodp" />
+    <title>Compiler0_概览 - kirito&#39;s blog</title><meta name="Description" content="kirito&#39;s blog"><meta property="og:title" content="Compiler0_概览" />
+<meta property="og:description" content="编译原理课程的一系列笔记（大三下学期） 编译器结构 主要阶段： 词法分析 语法分析 语义分析 代码生成 前端后端 前端 后端 参考 《编译原理及实践》 华保健老师的" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.kirito.info/compiler0-overview/" /><meta property="og:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2020-05-15T12:33:59+08:00" />
+<meta property="article:modified_time" content="2020-05-15T12:33:59+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/>
+
+<meta name="twitter:title" content="Compiler0_概览"/>
+<meta name="twitter:description" content="编译原理课程的一系列笔记（大三下学期） 编译器结构 主要阶段： 词法分析 语法分析 语义分析 代码生成 前端后端 前端 后端 参考 《编译原理及实践》 华保健老师的"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt">
+
+<meta name="theme-color" content="#f8f8f8"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="canonical" href="https://www.kirito.info/compiler0-overview/" /><link rel="prev" href="https://www.kirito.info/computer-networks/" /><link rel="next" href="https://www.kirito.info/compiler1-lexical-analysis/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/color.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/fontawesome-free/all.min.css">
+        <noscript><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"></noscript><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/animate/animate.min.css">
+        <noscript><link rel="stylesheet" href="/lib/animate/animate.min.css"></noscript><meta name="google-site-verification" content="5J8bsg9tKySrpONjEV2nAOqQ08TCVjsooCRIuDsxhD4" /><meta name="baidu-site-verification" content="code-NY7bFlUK92" /><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Compiler0_概览",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/www.kirito.info\/compiler0-overview\/"
+        },"image": ["https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"],"genre": "posts","keywords": "compiler","wordcount":  91 ,
+        "url": "https:\/\/www.kirito.info\/compiler0-overview\/","datePublished": "2020-05-15T12:33:59+08:00","dateModified": "2020-05-15T12:33:59+08:00","publisher": {
+            "@type": "Organization",
+            "name": "kirito","logo": "https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"},"author": {
+                "@type": "Person",
+                "name": "kirito"
+            },"description": ""
+    }
+    </script><script src="//instant.page/5.1.1" defer type="module" integrity="sha384-MWfCL6g1OTGsbSwfuMHc8+8J2u71/LA8dzlIN3ycajckxuZZmF+DNjdm7O6H3PSq"></script>
+</head>
+
+<body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">
+        function setTheme(theme) {document.body.setAttribute('theme', theme); document.documentElement.style.setProperty('color-scheme', theme === 'light' ? 'light' : 'dark'); window.theme = theme; }
+        function saveTheme(theme) {window.localStorage && localStorage.setItem('theme', theme);}
+        function getMeta(metaName) {const metas = document.getElementsByTagName('meta'); for (let i = 0; i < metas.length; i++) if (metas[i].getAttribute('name') === metaName) return metas[i]; return '';}
+        if (window.localStorage && localStorage.getItem('theme')) {let theme = localStorage.getItem('theme');theme === 'light' || theme === 'dark' || theme === 'black' ? setTheme(theme) : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light')); } else { if ('auto' === 'light' || 'auto' === 'dark' || 'auto' === 'black') setTheme('auto'), saveTheme('auto'); else saveTheme('auto'), window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light');}
+        let metaColors = {'light': '#f8f8f8','dark': '#252627','black': '#000000'}
+        getMeta('theme-color').content = metaColors[document.body.getAttribute('theme')];
+    </script>
+    <div id="back-to-top"></div>
+    <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="kirito&#39;s blog">kirito</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="#" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="kirito&#39;s blog">kirito</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a href="#" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+            <div class="container"><div class="toc" id="toc-auto">
+        <h2 class="toc-title">目录</h2>
+        <div class="toc-content always-active" id="toc-content-auto"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#编译器结构">编译器结构</a></li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav></div>
+    </div><script>document.getElementsByTagName("main")[0].setAttribute("pageStyle", "normal")</script><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "true")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Compiler0_概览</h1><div class="post-meta">
+            <div class="post-meta-line">
+                <span class="post-author"><i class="author fas fa-user-circle fa-fw"></i><a href="/" title="Author" rel=" author" class="author">kirito</a>
+                </span>&nbsp;<span class="post-category">收录于 </span>&nbsp;<span class="post-category">类别 <a href="/categories/compiler/"><i class="far fa-folder fa-fw"></i>compiler</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2020-05-15">2020-05-15</time>&nbsp;<i class="far fa-edit fa-fw"></i>&nbsp;<time datetime="2020-05-15">2020-05-15</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 91 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 1 分钟&nbsp;<span id="/compiler0-overview/" class="leancloud_visitors" data-flag-title="Compiler0_概览">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class="leancloud-visitors-count" id=twikoo_visitors></span>&nbsp;次阅读
+                    </span>&nbsp;<span id="/compiler0-overview/" class="comment_count" data-flag-title="Compiler0_概览">
+                        <i class="far fa-comments fa-fw"></i>&nbsp;<span class="twikoo-comment-count" id="twikoo-comment-count"></span>&nbsp;条评论
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#编译器结构">编译器结构</a></li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>编译原理课程的一系列笔记（大三下学期）</p>
+<h2 id="编译器结构" class="headerLink">
+    <a href="#%e7%bc%96%e8%af%91%e5%99%a8%e7%bb%93%e6%9e%84" class="header-mark"></a>编译器结构</h2><p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/compiler/phase.png" title="阶段" data-thumbnail="https://blog-1256556944.file.myqcloud.com/compiler/phase.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/compiler/phase.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/compiler/phase.png, https://blog-1256556944.file.myqcloud.com/compiler/phase.png 1.5x, https://blog-1256556944.file.myqcloud.com/compiler/phase.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/compiler/phase.png">
+    </a></figure></p>
+<p>主要阶段：</p>
+<ul>
+<li>词法分析</li>
+<li>语法分析</li>
+<li>语义分析</li>
+<li>代码生成</li>
+</ul>
+<p>前端后端</p>
+<p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/compiler/fontback.png" title="https://blog-1256556944.file.myqcloud.com/compiler/fontback.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/compiler/fontback.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/compiler/fontback.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/compiler/fontback.png, https://blog-1256556944.file.myqcloud.com/compiler/fontback.png 1.5x, https://blog-1256556944.file.myqcloud.com/compiler/fontback.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/compiler/fontback.png">
+    </a></figure></p>
+<p>前端</p>
+<p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/compiler/front.png" title="https://blog-1256556944.file.myqcloud.com/compiler/front.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/compiler/front.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/compiler/front.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/compiler/front.png, https://blog-1256556944.file.myqcloud.com/compiler/front.png 1.5x, https://blog-1256556944.file.myqcloud.com/compiler/front.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/compiler/front.png">
+    </a></figure></p>
+<p>后端</p>
+<p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/compiler/back.png" title="https://blog-1256556944.file.myqcloud.com/compiler/back.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/compiler/back.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/compiler/back.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/compiler/back.png, https://blog-1256556944.file.myqcloud.com/compiler/back.png 1.5x, https://blog-1256556944.file.myqcloud.com/compiler/back.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/compiler/back.png">
+    </a></figure></p>
+<h2 id="参考" class="headerLink">
+    <a href="#%e5%8f%82%e8%80%83" class="header-mark"></a>参考</h2><ul>
+<li><a href="https://book.douban.com/subject/6982310/" target="_blank" rel="noopener noreferrer">《编译原理及实践》</a></li>
+<li><a href="https://mooc.study.163.com/learn/1000002001#/learn/announce" target="_blank" rel="noopener noreferrer">华保健老师的网易云公开课</a></li>
+<li><a href="https://www.bilibili.com/video/BV1RW411v7R7" target="_blank" rel="noopener noreferrer">陈意云老师的公开课及PPT课件</a></li>
+</ul>
+</div>
+
+        <div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2020-05-15</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/compiler/">compiler</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/computer-networks/" class="prev" rel="prev" title="计算机网络"><i class="fas fa-angle-left fa-fw"></i>计算机网络</a>
+            <a href="/compiler1-lexical-analysis/" class="next" rel="next" title="Compiler1_词法分析">Compiler1_词法分析<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="twikoo"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://twikoo.js.org/">Twikoo</a>.
+            </noscript></div></article></div>
+        </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">      <a href="https://travellings.link/" target="_blank" rel="noopener" title="开往-友链接力"><img src="https://travellings.link/assets/logo.gif" alt="开往-友链接力" width="120"></a><a href="https://www.foreverblog.cn/go.html" target="_blank" > <img src="https://img.foreverblog.cn/wormhole_3.gif" alt="" style="width:auto;height:32px;" title="穿梭虫洞-随机访问十年之约友链博客"> </a>
+      </br><small>1KiritobkMPpaWBjTDHSoiP5icv8PEFNdR</small>
+      </br><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+      </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2020 - 2024</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank" rel="noopener noreferrer">kirito</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+            <div class="footer-line"></div>
+            <div class="footer-line">
+            </div>
+        </div></footer></div>
+
+    <div id="fixed-buttons"><a href="#back-to-top" id="back-to-top-button" class="fixed-button" title="回到顶部">
+            <i class="fas fa-arrow-up fa-fw"></i>
+        </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+            <i class="fas fa-comment fa-fw"></i>
+        </a>
+    </div><div id="cookieconsent-container"></div><div class="assets"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/katex/copy-tex.min.css">
+        <noscript><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"></noscript><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":30},"comment":{"twikoo":{"commentCount":true,"el":"#twikoo","envId":"https://comment-liard.vercel.app/","lang":"zh-cn"}},"cookieconsent":{"content":{"dismiss":"同意","link":"了解更多","message":"本网站使用 Cookies 来改善您的浏览体验."},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"distance":null,"findAllMatches":null,"fuseIndexURL":"/index.json","highlightTag":"em","ignoreFieldNorm":null,"ignoreLocation":null,"isCaseSensitive":null,"location":null,"maxResultLength":10,"minMatchCharLength":null,"noResultsFound":"没有找到结果","snippetLength":50,"threshold":null,"type":"fuse","useExtendedSearch":null}};</script><script type="text/javascript" src="/lib/twikoo/twikoo.all.min.js" defer></script><script type="text/javascript" src="/js/twikoo.min.js" defer></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js" defer></script><script type="text/javascript" src="/lib/katex/auto-render.min.js" defer></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js" defer></script><script type="text/javascript" src="/lib/katex/mhchem.min.js" defer></script><script type="text/javascript" src="/js/katex.min.js" defer></script><script type="text/javascript" src="/lib/cookieconsent/cookieconsent.min.js" defer></script><script type="text/javascript" src="/js/cookieconsent.min.js" defer></script><script type="text/javascript" src="/js/theme.min.js" defer></script><script type="text/javascript">
+            window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());
+            gtag('config', 'G-ZKPP127E4F');
+        </script><script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id=G-ZKPP127E4F" async></script><script>
+			var _hmt = _hmt || [];
+			(function() {
+			  var hm = document.createElement("script");
+			  hm.src = "https://hm.baidu.com/hm.js?2004ef75aa13d757f75bf6f1f3add242";
+			  var s = document.getElementsByTagName("script")[0]; 
+			  s.parentNode.insertBefore(hm, s);
+			})();
+		</script><script>
+         
+         
+        var $cdnPrefix = "https://blog-1256556944.file.myqcloud.com";
+    </script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@2.1.3/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-backstretch@2.1.18/jquery.backstretch.min.js"></script>
+    <script type="text/javascript" src="/js/custom.js"></script>
+</div>
+</body>
+
+</html>
