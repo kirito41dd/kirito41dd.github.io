@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noodp" />
+    <title>AT&amp;T汇编-x86 - kirito&#39;s blog</title><meta name="Description" content="kirito&#39;s blog"><meta property="og:title" content="AT&amp;T汇编-x86" />
+<meta property="og:description" content="x86CPU下AT&amp;T汇编 与AT&amp;T汇编对应的是inter汇编，还有go的plan9 c语言中基本数据类型得大小（byets）" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.kirito.info/att-assembly-x86/" /><meta property="og:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2019-12-21T19:16:17+08:00" />
+<meta property="article:modified_time" content="2019-12-21T19:16:17+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/>
+
+<meta name="twitter:title" content="AT&amp;T汇编-x86"/>
+<meta name="twitter:description" content="x86CPU下AT&amp;T汇编 与AT&amp;T汇编对应的是inter汇编，还有go的plan9 c语言中基本数据类型得大小（byets）"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt">
+
+<meta name="theme-color" content="#f8f8f8"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="canonical" href="https://www.kirito.info/att-assembly-x86/" /><link rel="prev" href="https://www.kirito.info/linux-system-programming/" /><link rel="next" href="https://www.kirito.info/computer-networks/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/color.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/fontawesome-free/all.min.css">
+        <noscript><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"></noscript><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/animate/animate.min.css">
+        <noscript><link rel="stylesheet" href="/lib/animate/animate.min.css"></noscript><meta name="google-site-verification" content="5J8bsg9tKySrpONjEV2nAOqQ08TCVjsooCRIuDsxhD4" /><meta name="baidu-site-verification" content="code-NY7bFlUK92" /><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "AT\u0026T汇编-x86",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/www.kirito.info\/att-assembly-x86\/"
+        },"image": ["https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"],"genre": "posts","keywords": "assembly","wordcount":  4844 ,
+        "url": "https:\/\/www.kirito.info\/att-assembly-x86\/","datePublished": "2019-12-21T19:16:17+08:00","dateModified": "2019-12-21T19:16:17+08:00","publisher": {
+            "@type": "Organization",
+            "name": "kirito","logo": "https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"},"author": {
+                "@type": "Person",
+                "name": "kirito"
+            },"description": ""
+    }
+    </script><script src="//instant.page/5.1.1" defer type="module" integrity="sha384-MWfCL6g1OTGsbSwfuMHc8+8J2u71/LA8dzlIN3ycajckxuZZmF+DNjdm7O6H3PSq"></script>
+</head>
+
+<body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">
+        function setTheme(theme) {document.body.setAttribute('theme', theme); document.documentElement.style.setProperty('color-scheme', theme === 'light' ? 'light' : 'dark'); window.theme = theme; }
+        function saveTheme(theme) {window.localStorage && localStorage.setItem('theme', theme);}
+        function getMeta(metaName) {const metas = document.getElementsByTagName('meta'); for (let i = 0; i < metas.length; i++) if (metas[i].getAttribute('name') === metaName) return metas[i]; return '';}
+        if (window.localStorage && localStorage.getItem('theme')) {let theme = localStorage.getItem('theme');theme === 'light' || theme === 'dark' || theme === 'black' ? setTheme(theme) : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light')); } else { if ('auto' === 'light' || 'auto' === 'dark' || 'auto' === 'black') setTheme('auto'), saveTheme('auto'); else saveTheme('auto'), window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light');}
+        let metaColors = {'light': '#f8f8f8','dark': '#252627','black': '#000000'}
+        getMeta('theme-color').content = metaColors[document.body.getAttribute('theme')];
+    </script>
+    <div id="back-to-top"></div>
+    <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="kirito&#39;s blog">kirito</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="#" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="kirito&#39;s blog">kirito</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a href="#" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+            <div class="container"><div class="toc" id="toc-auto">
+        <h2 class="toc-title">目录</h2>
+        <div class="toc-content always-active" id="toc-content-auto"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#c语言中基本数据类型得大小byets">c语言中基本数据类型得大小（byets）</a></li>
+    <li><a href="#数据传送指令mov">数据传送指令（mov）</a></li>
+    <li><a href="#寻址模式">寻址模式</a></li>
+    <li><a href="#整数计算指令">整数计算指令</a></li>
+    <li><a href="#x86-64的通用寄存器">x86-64的通用寄存器</a></li>
+    <li><a href="#条件码">条件码</a>
+      <ul>
+        <li><a href="#读取条件码">读取条件码</a></li>
+        <li><a href="#跳转指令">跳转指令</a></li>
+      </ul>
+    </li>
+    <li><a href="#switch的汇编表示">switch的汇编表示</a>
+      <ul>
+        <li><a href="#表结构">表结构</a></li>
+      </ul>
+    </li>
+    <li><a href="#程序运行栈">程序运行栈</a>
+      <ul>
+        <li><a href="#过程调用指令call">过程调用指令：call</a></li>
+        <li><a href="#栈帧ebp">栈帧：%ebp</a></li>
+        <li><a href="#寄存器使用惯例">寄存器使用惯例</a></li>
+      </ul>
+    </li>
+    <li><a href="#x86-64过程调用与运行栈">x86-64过程调用与运行栈</a></li>
+    <li><a href="#数组的存储">数组的存储</a></li>
+    <li><a href="#8086汇编与c语言">8086汇编与c语言</a>
+      <ul>
+        <li><a href="#结构struct">结构struct</a></li>
+        <li><a href="#数据存储位置对齐">数据存储位置对齐</a></li>
+      </ul>
+    </li>
+    <li><a href="#80x86-32汇编编程">80x86-32汇编编程</a>
+      <ul>
+        <li><a href="#hello-world">hello world</a></li>
+        <li><a href="#汇编指示">汇编指示</a></li>
+        <li><a href="#linux汇编命令系统调用">linux汇编命令&amp;系统调用</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+    </div><script>document.getElementsByTagName("main")[0].setAttribute("pageStyle", "normal")</script><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "true")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">AT&amp;T汇编-x86</h1><div class="post-meta">
+            <div class="post-meta-line">
+                <span class="post-author"><i class="author fas fa-user-circle fa-fw"></i><a href="/" title="Author" rel=" author" class="author">kirito</a>
+                </span>&nbsp;<span class="post-category">收录于 </span>&nbsp;<span class="post-category">类别 <a href="/categories/program/"><i class="far fa-folder fa-fw"></i>program</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2019-12-21">2019-12-21</time>&nbsp;<i class="far fa-edit fa-fw"></i>&nbsp;<time datetime="2019-12-21">2019-12-21</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 4844 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 10 分钟&nbsp;<span id="/att-assembly-x86/" class="leancloud_visitors" data-flag-title="AT&amp;T汇编-x86">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class="leancloud-visitors-count" id=twikoo_visitors></span>&nbsp;次阅读
+                    </span>&nbsp;<span id="/att-assembly-x86/" class="comment_count" data-flag-title="AT&amp;T汇编-x86">
+                        <i class="far fa-comments fa-fw"></i>&nbsp;<span class="twikoo-comment-count" id="twikoo-comment-count"></span>&nbsp;条评论
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#c语言中基本数据类型得大小byets">c语言中基本数据类型得大小（byets）</a></li>
+    <li><a href="#数据传送指令mov">数据传送指令（mov）</a></li>
+    <li><a href="#寻址模式">寻址模式</a></li>
+    <li><a href="#整数计算指令">整数计算指令</a></li>
+    <li><a href="#x86-64的通用寄存器">x86-64的通用寄存器</a></li>
+    <li><a href="#条件码">条件码</a>
+      <ul>
+        <li><a href="#读取条件码">读取条件码</a></li>
+        <li><a href="#跳转指令">跳转指令</a></li>
+      </ul>
+    </li>
+    <li><a href="#switch的汇编表示">switch的汇编表示</a>
+      <ul>
+        <li><a href="#表结构">表结构</a></li>
+      </ul>
+    </li>
+    <li><a href="#程序运行栈">程序运行栈</a>
+      <ul>
+        <li><a href="#过程调用指令call">过程调用指令：call</a></li>
+        <li><a href="#栈帧ebp">栈帧：%ebp</a></li>
+        <li><a href="#寄存器使用惯例">寄存器使用惯例</a></li>
+      </ul>
+    </li>
+    <li><a href="#x86-64过程调用与运行栈">x86-64过程调用与运行栈</a></li>
+    <li><a href="#数组的存储">数组的存储</a></li>
+    <li><a href="#8086汇编与c语言">8086汇编与c语言</a>
+      <ul>
+        <li><a href="#结构struct">结构struct</a></li>
+        <li><a href="#数据存储位置对齐">数据存储位置对齐</a></li>
+      </ul>
+    </li>
+    <li><a href="#80x86-32汇编编程">80x86-32汇编编程</a>
+      <ul>
+        <li><a href="#hello-world">hello world</a></li>
+        <li><a href="#汇编指示">汇编指示</a></li>
+        <li><a href="#linux汇编命令系统调用">linux汇编命令&amp;系统调用</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>x86CPU下AT&amp;T汇编</p>
+<p>与AT&amp;T汇编对应的是inter汇编，还有go的plan9</p>
+<h2 id="c语言中基本数据类型得大小byets" class="headerLink">
+    <a href="#c%e8%af%ad%e8%a8%80%e4%b8%ad%e5%9f%ba%e6%9c%ac%e6%95%b0%e6%8d%ae%e7%b1%bb%e5%9e%8b%e5%be%97%e5%a4%a7%e5%b0%8fbyets" class="header-mark"></a>c语言中基本数据类型得大小（byets）</h2><table>
+<thead>
+<tr>
+<th style="text-align:left">c data type</th>
+<th>typical 32-bit</th>
+<th>x86-32</th>
+<th>x86-64</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">char</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td style="text-align:left">short</td>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+</tr>
+<tr>
+<td style="text-align:left">int</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+</tr>
+<tr>
+<td style="text-align:left">long</td>
+<td>4</td>
+<td>4</td>
+<td>8</td>
+</tr>
+<tr>
+<td style="text-align:left">long long</td>
+<td>8</td>
+<td>8</td>
+<td>8</td>
+</tr>
+<tr>
+<td style="text-align:left">float</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+</tr>
+<tr>
+<td style="text-align:left">double</td>
+<td>8</td>
+<td>8</td>
+<td>8</td>
+</tr>
+<tr>
+<td style="text-align:left">long double</td>
+<td>8</td>
+<td>10/12</td>
+<td>10/16</td>
+</tr>
+<tr>
+<td style="text-align:left">cahr *</td>
+<td>4</td>
+<td>4</td>
+<td>8</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>at&amp;t汇编语言数据格式</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>c声明</th>
+<th>inter数据类型</th>
+<th>汇编代码后缀</th>
+<th>大小（byte）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>char</td>
+<td>字节</td>
+<td>b</td>
+<td>1</td>
+</tr>
+<tr>
+<td>short</td>
+<td>字</td>
+<td>w</td>
+<td>2</td>
+</tr>
+<tr>
+<td>int</td>
+<td>双字</td>
+<td>l</td>
+<td>4</td>
+</tr>
+<tr>
+<td>long</td>
+<td>双字</td>
+<td>l</td>
+<td>4</td>
+</tr>
+<tr>
+<td>long long</td>
+<td></td>
+<td></td>
+<td>4</td>
+</tr>
+<tr>
+<td>char *</td>
+<td>双字</td>
+<td>l</td>
+<td>4</td>
+</tr>
+<tr>
+<td>float</td>
+<td>单精度</td>
+<td>s</td>
+<td>4</td>
+</tr>
+<tr>
+<td>double</td>
+<td>双精度</td>
+<td>l</td>
+<td>8</td>
+</tr>
+<tr>
+<td>long double</td>
+<td>扩展精度</td>
+<td>t</td>
+<td>10/12</td>
+</tr>
+</tbody>
+</table>
+<h2 id="数据传送指令mov" class="headerLink">
+    <a href="#%e6%95%b0%e6%8d%ae%e4%bc%a0%e9%80%81%e6%8c%87%e4%bb%a4mov" class="header-mark"></a>数据传送指令（mov）</h2><p><code>mov? S,D</code></p>
+<ul>
+<li>将S传送到D</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>mov  S,D</th>
+<th>S→D</th>
+<th>传送</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>movb</td>
+<td>传送字节</td>
+<td></td>
+</tr>
+<tr>
+<td>movw</td>
+<td>传送字</td>
+<td></td>
+</tr>
+<tr>
+<td>movl</td>
+<td>传送双字</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>movs  S,D</th>
+<th>符号扩展(S)→D</th>
+<th>高位填充符号位</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>movsbw</td>
+<td>扩展字节为字</td>
+<td></td>
+</tr>
+<tr>
+<td>movsbl</td>
+<td>扩展字节为双字</td>
+<td></td>
+</tr>
+<tr>
+<td>movswl</td>
+<td>扩展字为双字</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>movz  S,D</th>
+<th>零扩展(S)→D</th>
+<th>高位充零</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>movzbw</td>
+<td>扩展字节为字</td>
+<td></td>
+</tr>
+<tr>
+<td>movzbl</td>
+<td>扩展字节为双字</td>
+<td></td>
+</tr>
+<tr>
+<td>movzwl</td>
+<td>扩展字为双字</td>
+<td></td>
+</tr>
+<tr>
+<td>pushl S</td>
+<td>R[%esp]-4 → R[%esp]      S→M[R[%esp]]</td>
+<td>双字压栈</td>
+</tr>
+<tr>
+<td>popl D</td>
+<td>M[R[%esp]] → D   R[%esp]+4→R[%esp]</td>
+<td>双字出栈</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>注意栈是从高地址到低地址增长</li>
+</ul>
+<p>允许操作的类型：</p>
+<ol>
+<li>立即数：长整数
+<ul>
+<li>如：￥0x400,$-533</li>
+</ul>
+</li>
+<li>寄存器：8个通用寄存器之一
+<ul>
+<li>%eax</li>
+<li>%edx</li>
+<li>%ecx</li>
+<li>%ebx</li>
+<li>%esi</li>
+<li>%edi</li>
+<li>%esp</li>
+<li>%ebp</li>
+</ul>
+</li>
+<li>存储器：4个连续字节</li>
+<li>不能从内存到内存</li>
+</ol>
+<h2 id="寻址模式" class="headerLink">
+    <a href="#%e5%af%bb%e5%9d%80%e6%a8%a1%e5%bc%8f" class="header-mark"></a>寻址模式</h2><p><code>D(RB,RI,S)  =  Mem[Reg[RB]+S*REG[Ri]+D]</code></p>
+<p>D:常量（地址偏移量）</p>
+<p>Rb:基址寄存器：8个通用寄存器之一</p>
+<p>RI:索引寄存器：%esp不作为索引寄存器，一般%ebp也不用作这个用途</p>
+<p>S:比例因子 1,2,4,or 8</p>
+<p>其他变形：</p>
+<p><code>(RB,Ri) = Mem[Reg[RB]+REG[Ri]</code></p>
+<p><code>D(RB,Ri) = Mem[Reg[RB]+REG[Ri]+D</code></p>
+<p><code>(RB,Ri,S) = Mem[Reg[RB]+S*REG[Ri]</code></p>
+<ul>
+<li>地址计算指令leal</li>
+<li>lea 不解引用， leaq (%rsp) %rax   == movq %rsp %rax  而不是 movq (%rsp) %rax</li>
+</ul>
+<p><code>leal src,dest   </code></p>
+<p>计算出来得地址赋给dest</p>
+<h2 id="整数计算指令" class="headerLink">
+    <a href="#%e6%95%b4%e6%95%b0%e8%ae%a1%e7%ae%97%e6%8c%87%e4%bb%a4" class="header-mark"></a>整数计算指令</h2><ul>
+<li>以寄存器之间操作举例</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">addl %eax,%ebx  # ebx += eax
+subl %eax,%ebx  # ebx -= eax
+imull %eax,%ebx # ebx *= eax
+sall %eax,%ebx 	# ebx &lt;&lt; eax 等价shll
+sarl %eax,%ebx 	# ebx &gt;&gt; eax 算术右移
+shrl %eax,%ebx 	# ebx &gt;&gt; eax 逻辑右移
+xorl %eax,%ebx	# ebx ^= eax
+andl %eax,%ebx	# ebx &amp;= eax
+orl %eax,%ebx 	# ebx |= eax
+incl %eax	# eax++
+decl %eax	# eax--
+negl %eax	# eax = -eax
+notl %eax	# eax = ~eax
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>补充</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">imull S # R[%edx]:R[%eax]=S*R[%eax] 有符号乘，结果64位
+mull  S # R[%edx]:R[%eax]=S*R[%eax] 无符号乘，结果64位
+cltd S  # R[%edx]:R[%eax]=符号为扩展[%eax] 转换为8字节
+idivl S # R[edx]=R[%edx]:R[%eax]%S
+		# R[eax]=R[%edx]:R[%eax]/S  有符号除法，保存余数和商
+divl S  # R[edx]=R[%edx]:R[%eax]%S
+		# R[eax]=R[%edx]:R[%eax]/S  无符号除法，保存余数和商
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="x86-64的通用寄存器" class="headerLink">
+    <a href="#x86-64%e7%9a%84%e9%80%9a%e7%94%a8%e5%af%84%e5%ad%98%e5%99%a8" class="header-mark"></a>x86-64的通用寄存器</h2><table>
+<thead>
+<tr>
+<th>name</th>
+<th>name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>[%rax [%eax] ]</td>
+<td>[%r8 [%r8d] ]</td>
+</tr>
+<tr>
+<td>[%rdx [%edx] ]</td>
+<td>[%r9 [%r9d] ]</td>
+</tr>
+<tr>
+<td>[%rcx [%ecx] ]</td>
+<td>[%r10 [%r10d] ]</td>
+</tr>
+<tr>
+<td>[%rbx [%ebx] ]</td>
+<td>[%r11 [%r11d] ]</td>
+</tr>
+<tr>
+<td>[%rsi [%esi] ]</td>
+<td>[%r12 [%r12d] ]</td>
+</tr>
+<tr>
+<td>[%rdi [%edi] ]</td>
+<td>[%r13 [%r13d] ]</td>
+</tr>
+<tr>
+<td>[%rsp [%esp] ]</td>
+<td>[%r14 [%r14d] ]</td>
+</tr>
+<tr>
+<td>[%rbp [%ebp] ]</td>
+<td>[%r15 [%r15d] ]</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>
+<p>兼容32位下的寄存器（e开头）,仍然可以使用，%eax也兼容16位下ah,al寄存器</p>
+</li>
+<li>
+<p>64位传参：少于等于6个时放入寄存器rdi,rsi,rdx,rcx,r8,r9。多出的放入栈中</p>
+</li>
+<li>
+<p>32位传参：放在栈中</p>
+</li>
+</ul>
+<h2 id="条件码" class="headerLink">
+    <a href="#%e6%9d%a1%e4%bb%b6%e7%a0%81" class="header-mark"></a>条件码</h2><p><code>CF</code>:carry flag</p>
+<p><code>SF</code>:sign flag</p>
+<p><code>ZF</code>:zero flag</p>
+<p><code>OF</code>:overflow flag</p>
+<ul>
+<li>条件码由算术指令隐含设置<code>addl src,edst</code></li>
+</ul>
+<p>如果产生进位，CF被设置，可以检测无符号数运算溢出</p>
+<p>结果为0，ZF被设置</p>
+<p>结果小于0，SF</p>
+<p>补码运算溢出，OF，可以看作符号数运算溢出（两个大于0的数相加为负）</p>
+<ul>
+<li>比较指令<code>cmpl src2,src1   </code></li>
+</ul>
+<p>cmpl b,a 类似 a-b</p>
+<p>相等ZF置1</p>
+<p>结果小于0,SF置1</p>
+<p>溢出OF置1（a&gt;0&amp;&amp;b&lt;0&amp;&amp;(a-b)&lt;0）||（a&lt;0&amp;&amp;b&gt;0&amp;&amp;(a-b)&gt;0）</p>
+<ul>
+<li>测试指令<code>testl src2,src1</code></li>
+</ul>
+<p>testl b,a   类似a&amp;b</p>
+<p>当为0，ZF置1</p>
+<p>当&lt;0，SF置1</p>
+<p>test使 CF,OF 置0</p>
+<h3 id="读取条件码" class="headerLink">
+    <a href="#%e8%af%bb%e5%8f%96%e6%9d%a1%e4%bb%b6%e7%a0%81" class="header-mark"></a>读取条件码</h3><ul>
+<li>setX指令  读取当前条件码（组合）到目的字节寄存器</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>setX</th>
+<th>condition</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sete</td>
+<td>ZF</td>
+<td>equal/zero</td>
+</tr>
+<tr>
+<td>setne</td>
+<td>~ZF</td>
+<td>not equal/not zero</td>
+</tr>
+<tr>
+<td>sets</td>
+<td>SF</td>
+<td>Negative</td>
+</tr>
+<tr>
+<td>setns</td>
+<td>~SF</td>
+<td>nonnegative</td>
+</tr>
+<tr>
+<td>setg</td>
+<td>~(SF^OF)&amp;~ZF</td>
+<td>greater(signed)</td>
+</tr>
+<tr>
+<td>setge</td>
+<td>~(SF^OF)</td>
+<td>greater or equal(signed)</td>
+</tr>
+<tr>
+<td>setl</td>
+<td>(SF^OF)</td>
+<td>less(signed)</td>
+</tr>
+<tr>
+<td>setle</td>
+<td>(SF^OF)|ZF</td>
+<td>less or equal(signed)</td>
+</tr>
+<tr>
+<td>seta</td>
+<td>~CF&amp;~ZF</td>
+<td>above(unsigned)</td>
+</tr>
+<tr>
+<td>setb</td>
+<td>CF</td>
+<td>below(unsigned)</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//a.c
+</span><span class="c1"></span><span class="kt">int</span> <span class="nf">gt</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span><span class="kt">int</span> <span class="n">y</span><span class="p">){</span>
+	<span class="k">return</span> <span class="n">x</span><span class="o">&gt;</span><span class="n">y</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="cm">/* gcc -S -m32 a.c -o a.asm32  摘要
+</span><span class="cm">	movl	8(%ebp), %eax    #get x   
+</span><span class="cm">	cmpl	12(%ebp), %eax	 #x-y
+</span><span class="cm">	setg	%al				 #取标记
+</span><span class="cm">	movzbl	%al, %eax		 #结果放到eax
+</span><span class="cm"> */</span>
+<span class="c1">//-fno-omit-frame-pointer 不优化指针框架
+</span></code></pre></td></tr></table>
+</div>
+</div><h3 id="跳转指令" class="headerLink">
+    <a href="#%e8%b7%b3%e8%bd%ac%e6%8c%87%e4%bb%a4" class="header-mark"></a>跳转指令</h3><ul>
+<li>依赖当前条件码选择下一条执行语句</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>jX</th>
+<th>condition</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>jmp</td>
+<td>1</td>
+<td>unconditional</td>
+</tr>
+<tr>
+<td>je</td>
+<td>ZF</td>
+<td>equal/zero</td>
+</tr>
+<tr>
+<td>jne</td>
+<td>~ZF</td>
+<td>not equal/not zero</td>
+</tr>
+<tr>
+<td>js</td>
+<td>SF</td>
+<td>negative</td>
+</tr>
+<tr>
+<td>jns</td>
+<td>~SF</td>
+<td>nonnegative</td>
+</tr>
+<tr>
+<td>jg</td>
+<td>~(SF^OF)&amp;~ZF</td>
+<td>greater(signed)</td>
+</tr>
+<tr>
+<td>jge</td>
+<td>~(SF^OF)</td>
+<td>greater or equal(signed)</td>
+</tr>
+<tr>
+<td>jl</td>
+<td>(SF^OF)</td>
+<td>less(signed)</td>
+</tr>
+<tr>
+<td>jle</td>
+<td>(SF^OF)|ZF</td>
+<td>less or equal(signed)</td>
+</tr>
+<tr>
+<td>ja</td>
+<td>~CF&amp;~ZF</td>
+<td>above(unsigned)</td>
+</tr>
+<tr>
+<td>jb</td>
+<td>CF</td>
+<td>below(unsigned)</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">//a.cpp
+</span><span class="c1"></span><span class="kt">int</span> <span class="nf">absdiff</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span><span class="kt">int</span> <span class="n">y</span><span class="p">){</span>
+	<span class="kt">int</span> <span class="n">res</span><span class="p">;</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">x</span><span class="o">&gt;</span><span class="n">y</span><span class="p">){</span>
+		<span class="n">res</span> <span class="o">=</span> <span class="n">x</span><span class="o">-</span><span class="n">y</span><span class="p">;</span>
+	<span class="p">}</span><span class="k">else</span><span class="p">{</span>
+		<span class="n">res</span> <span class="o">=</span> <span class="n">y</span><span class="o">-</span><span class="n">x</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="n">res</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="cm">/* gcc -S -m32 -fno-omit-frame-pointer a.c -o a.asm32
+</span><span class="cm">	movl	8(%ebp), %eax
+</span><span class="cm">	cmpl	12(%ebp), %eax
+</span><span class="cm">	jle	.L2
+</span><span class="cm">	movl	8(%ebp), %eax
+</span><span class="cm">	subl	12(%ebp), %eax
+</span><span class="cm">	movl	%eax, -4(%ebp)
+</span><span class="cm">	jmp	.L3
+</span><span class="cm">.L2:
+</span><span class="cm">	movl	12(%ebp), %eax
+</span><span class="cm">	subl	8(%ebp), %eax
+</span><span class="cm">	movl	%eax, -4(%ebp)
+</span><span class="cm">.L3:
+</span><span class="cm">	movl	-4(%ebp), %eax
+</span><span class="cm">	leave
+</span><span class="cm">	ret
+</span><span class="cm">*/</span>
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>x86-64 下条件传送指令  比较新的机器有这个指令（比如i686）</li>
+<li>cmovC src,dest</li>
+<li>如果C成立，将数据从src移动到dest</li>
+</ul>
+<h2 id="switch的汇编表示" class="headerLink">
+    <a href="#switch%e7%9a%84%e6%b1%87%e7%bc%96%e8%a1%a8%e7%a4%ba" class="header-mark"></a>switch的汇编表示</h2><h3 id="表结构" class="headerLink">
+    <a href="#%e8%a1%a8%e7%bb%93%e6%9e%84" class="header-mark"></a>表结构</h3><p>基地址是 <code>.L62</code></p>
+<p>通过jump table来进行跳转</p>
+<p>取值比较稀疏通过二叉树表示</p>
+<h2 id="程序运行栈" class="headerLink">
+    <a href="#%e7%a8%8b%e5%ba%8f%e8%bf%90%e8%a1%8c%e6%a0%88" class="header-mark"></a>程序运行栈</h2><p><code>%esp</code>存储栈顶地址,栈网低地址延伸</p>
+<ul>
+<li><code>pushl src</code></li>
+</ul>
+<ol>
+<li>从src取得操作数</li>
+<li><code>%esp=%esp-4</code>，32位汇编下</li>
+<li>数据写入栈顶地址<code>%esp</code></li>
+</ol>
+<ul>
+<li><code>popl dest</code></li>
+</ul>
+<ol>
+<li>读取栈顶<code>%esp</code>数据</li>
+<li><code>%esp=%esp+4</code></li>
+<li>数据写入dest</li>
+</ol>
+<h3 id="过程调用指令call" class="headerLink">
+    <a href="#%e8%bf%87%e7%a8%8b%e8%b0%83%e7%94%a8%e6%8c%87%e4%bb%a4call" class="header-mark"></a>过程调用指令：call</h3><ul>
+<li>
+<p><code>call label</code> 将返回地址压入栈，跳转至label</p>
+</li>
+<li>
+<p>返回地址是指：call指令的下一条指令地址</p>
+</li>
+<li>
+<p><code>ret</code> 跳转至栈顶的返回地址</p>
+</li>
+</ul>
+<h3 id="栈帧ebp" class="headerLink">
+    <a href="#%e6%a0%88%e5%b8%a7ebp" class="header-mark"></a>栈帧：%ebp</h3><ul>
+<li>
+<p>存储的内容，自”顶“（栈顶）向下</p>
+<ul>
+<li>子过程参数</li>
+<li>局部变量，因为寄存器个数有限</li>
+<li>被保存的寄存器值</li>
+<li>父过程的栈帧起始地址（old <code>%ebp</code>）</li>
+</ul>
+</li>
+<li>
+<p>栈帧的分配与释放</p>
+<ul>
+<li>进入过程后先分配栈帧空间</li>
+<li>过程返回时释放</li>
+</ul>
+</li>
+</ul>
+<p><code>%ebp</code>指向当前栈帧起始地址，与<code>%esp</code>永远指向当前活跃栈帧的头尾</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">swap</span><span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="n">xp</span><span class="p">,</span> <span class="kt">int</span> <span class="o">*</span><span class="n">yp</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">t0</span> <span class="o">=</span> <span class="o">*</span><span class="n">xp</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">t1</span> <span class="o">=</span> <span class="o">*</span><span class="n">yp</span><span class="p">;</span>
+    <span class="o">*</span><span class="n">xp</span> <span class="o">=</span> <span class="n">t1</span><span class="p">;</span>
+    <span class="o">*</span><span class="n">yp</span> <span class="o">=</span> <span class="n">t0</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="kt">int</span> <span class="n">zip1</span> <span class="o">=</span> <span class="mi">15213</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">zip2</span> <span class="o">=</span> <span class="mi">91125</span><span class="p">;</span>
+<span class="kt">void</span> <span class="nf">call_swap</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="n">swap</span><span class="p">(</span><span class="o">&amp;</span><span class="n">zip1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">zip2</span><span class="p">);</span>
+<span class="p">}</span>
+
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">call_swap:
+	#...
+	pushl $zip2 #传参,从右往左压栈，变量加$表示取地址
+	pushl $zip1
+	call swap
+	/*栈
+		...     &lt;- %ebp
+		&amp;zip2
+		&amp;zip1
+		rtn adr  &lt;- %esp
+	*/
+swap:
+	pushl %ebp			#记录 old ebp
+	movl %esp,%ebp		#设置自己的ebp
+	pushl %ebx			#存一下寄存器信息
+	
+	movl 12(%ebp),%ecx
+	movl 8(%ebp),%edx
+	movl (%ecx),%eax
+	movl (%edx),%ebx
+	movl %eax,(%edx)
+	movl %ebx,(%ecx)
+	
+	movl -4(%ebp),%ebx 	#恢复%ebx原来的值
+	movl %ebp,%esp		#esp重置到ebp位置
+	popl %ebp			#esp指向 rtn adr 返回地址
+	ret					#根据esp返回
+	#set up
+	/*栈
+		...     &lt;- %ebp  
+	+12	yp
+	+8	xp
+	+4	rtn adr  
+	ebp	old %ebp  #pushl %ebp  &lt;- %ebp #movl %esp,%ebp
+	-4	old %ebx  #pushl %ebx
+	
+	*/
+	#为什么我们只保存了old ebx？
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="寄存器使用惯例" class="headerLink">
+    <a href="#%e5%af%84%e5%ad%98%e5%99%a8%e4%bd%bf%e7%94%a8%e6%83%af%e4%be%8b" class="header-mark"></a>寄存器使用惯例</h3><ul>
+<li>
+<p>这是一个软件层的约定</p>
+</li>
+<li>
+<p>使用惯例&mdash;通用寄存器分为两类</p>
+<ul>
+<li>调用者负责保存
+<ul>
+<li>%eax %edx %ecx</li>
+<li>%eax 用于保存过程返回值</li>
+</ul>
+</li>
+<li>被调用者负责保存
+<ul>
+<li>%ebx %esi %edi</li>
+<li>%ebp其实也是</li>
+</ul>
+</li>
+<li>特殊
+<ul>
+<li>%ebp %esp</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="x86-64过程调用与运行栈" class="headerLink">
+    <a href="#x86-64%e8%bf%87%e7%a8%8b%e8%b0%83%e7%94%a8%e4%b8%8e%e8%bf%90%e8%a1%8c%e6%a0%88" class="header-mark"></a>x86-64过程调用与运行栈</h2><p>过程参数（不超过6个）通过寄存器传参，大于部分使用栈传</p>
+<p>当参数少于7个时， 参数从左到右放入寄存器: rdi, rsi, rdx, rcx, r8, r9。
+当参数为7个以上时， 前 6 个与前面一样， 但后面的依次从 “右向左” 放入栈中，即和32位汇编一样。</p>
+<p>所有对于栈帧内容的访问都是基于%rsp，%rbp完全当作通用寄存器</p>
+<p>x86-64下的栈帧有一些不用操作特性</p>
+<ul>
+<li>一次性分配整个帧
+<ul>
+<li>将%rsp减去某个值（栈帧的大小）</li>
+<li>对于栈帧内容的访问都是基于%rsp完成</li>
+<li>可以延迟分配,可以访问(%esp)128字节的栈上空间</li>
+</ul>
+</li>
+<li>释放简单
+<ul>
+<li>%rsp直接加上某个值</li>
+</ul>
+</li>
+</ul>
+<h2 id="数组的存储" class="headerLink">
+    <a href="#%e6%95%b0%e7%bb%84%e7%9a%84%e5%ad%98%e5%82%a8" class="header-mark"></a>数组的存储</h2><p><code>T A[L];</code></p>
+<p>基本数据类型：T  数组长度：L</p>
+<p>连续存储在大小为L*sizeof(T)字节的空间内</p>
+<p>int a[5];</p>
+<p>寄存器edx赋值为数组的起始地址，寄存器%eax赋值为下标，对应的元素地址为edx+4*eax</p>
+<ul>
+<li>(%edx,%eax,4)</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">// a[5];
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">zincr_p</span><span class="p">(</span><span class="kt">int</span> <span class="o">*</span> <span class="n">z</span><span class="p">){</span>
+    <span class="kt">int</span> <span class="o">*</span><span class="n">zend</span> <span class="o">=</span> <span class="n">z</span><span class="o">+</span><span class="mi">5</span><span class="p">;</span>
+    <span class="k">do</span><span class="p">{</span>
+        <span class="p">(</span><span class="o">*</span><span class="n">z</span><span class="p">)</span><span class="o">++</span><span class="p">;</span>
+        <span class="n">z</span><span class="o">++</span><span class="p">;</span>
+    <span class="p">}</span><span class="k">while</span><span class="p">(</span><span class="n">z</span><span class="o">!=</span><span class="n">zend</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">//edx = z
+movl $0,%eax		#i=0;
+.L8:				#loop
+addl $1,(%edx,%eax)	# *(z+i)++  注意汇编里面指针加都是加1
+addl $4,%eax		# i+=4
+cmpl $20,%eax		# compare i:20
+jne  .L8			# if != ,goto loop
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="8086汇编与c语言" class="headerLink">
+    <a href="#8086%e6%b1%87%e7%bc%96%e4%b8%8ec%e8%af%ad%e8%a8%80" class="header-mark"></a>8086汇编与c语言</h2><h3 id="结构struct" class="headerLink">
+    <a href="#%e7%bb%93%e6%9e%84struct" class="header-mark"></a>结构struct</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">struct</span> <span class="nc">rec</span><span class="p">{</span>
+    <span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">a</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span>
+    <span class="kt">int</span> <span class="o">*</span><span class="n">p</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="c1">// 连续分配的内存区域，内部元素通过名字访问，元素类型可以不同
+</span><span class="c1">//访问
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">set_i</span><span class="p">(</span><span class="k">struct</span> <span class="nc">rec</span> <span class="o">*</span><span class="n">r</span><span class="p">,</span><span class="kt">int</span> <span class="n">val</span><span class="p">){</span>
+    <span class="n">r</span><span class="o">-&gt;</span><span class="n">i</span> <span class="o">=</span> <span class="n">val</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="kt">int</span> <span class="o">*</span> <span class="nf">find_a</span><span class="p">(</span><span class="k">struct</span> <span class="nc">rec</span> <span class="o">*</span><span class="n">r</span><span class="p">,</span><span class="kt">int</span> <span class="n">idx</span><span class="p">){</span>
+    <span class="k">return</span> <span class="o">&amp;</span><span class="n">r</span><span class="o">-&gt;</span><span class="n">a</span><span class="p">[</span><span class="n">idx</span><span class="p">];</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>相应汇编代码</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"># set_i
+# %eax = val
+# %edx = r
+movl %eax,(%edx) #mem[r]=val
+
+#find_a
+# %ecx = idx
+# %edx = r
+leal 0(,%ecx,4),%eax # 4*idx
+leal 4(%eax,%edx),eax # r+4*idx+4   r+4是a[0],r+4+idx*4是a[idx]
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="数据存储位置对齐" class="headerLink">
+    <a href="#%e6%95%b0%e6%8d%ae%e5%ad%98%e5%82%a8%e4%bd%8d%e7%bd%ae%e5%af%b9%e9%bd%90" class="header-mark"></a>数据存储位置对齐</h3><p>对齐的一般原则</p>
+<ul>
+<li>已知某种基本类型的大小为k字节</li>
+<li>那么，其存储地址必须是k的整数倍</li>
+<li>x86-64的对齐要求基本上就是这样
+<ul>
+<li>但是32位系统，linux与windows系统的要求都略有不同</li>
+</ul>
+</li>
+</ul>
+<p>为何需要对齐</p>
+<ul>
+<li>计算机访问内存一般是以内存块为单位的，块的大小是地址对齐的，如4，8，16字节对齐等</li>
+<li>如果数据访问地址跨越“块”边界会引起额外的内存访问</li>
+</ul>
+<p>编译器的工作</p>
+<ul>
+<li>在结构的各个元素间插入额外空间来满足不同元素的对齐要求</li>
+</ul>
+<p>x86-32下不同元素的对齐要求</p>
+<ul>
+<li>基本数据类型
+<ul>
+<li>1 byte  （char） 无要求</li>
+<li>2 byte （short）2字节对齐 地址最后一位为0</li>
+<li>4 byte （int,float,char *） 4字节对齐 地址后两位为0</li>
+<li>8 byte （double） win（及大多数） 8字节对齐，3位0，linux 四字节对齐，2位0</li>
+<li>12 byte （long double） win，linux 四字节对齐 两位0</li>
+</ul>
+</li>
+</ul>
+<p>x86-64下不同元素的对齐要求</p>
+<ul>
+<li>基本数据类型
+<ul>
+<li>1，2，4 byte同32位一样</li>
+<li>8 bytes (double ,char *) win&amp;linux 8字节对齐，地址后三位为0</li>
+<li>16 bytes （long double）linux 8位对齐</li>
+</ul>
+</li>
+</ul>
+<p>结构的存储对齐要求</p>
+<ul>
+<li>必须满足结构中各个元素的对齐要求</li>
+<li>结构自身的对齐要求等于其各个元素中对齐要求最高的那个，设为k字节</li>
+<li>结构的起始地址与结构长度必须是k的整数倍</li>
+</ul>
+<h2 id="80x86-32汇编编程" class="headerLink">
+    <a href="#80x86-32%e6%b1%87%e7%bc%96%e7%bc%96%e7%a8%8b" class="header-mark"></a>80x86-32汇编编程</h2><h3 id="hello-world" class="headerLink">
+    <a href="#hello-world" class="header-mark"></a>hello world</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span><span class="cp"></span><span class="kt">int</span> <span class="nf">main</span><span class="p">(){</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;hellow world</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+    <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="c1">// gcc -S -O2 helloworld.c  这个是64位的汇编，我加-m32找不见头文件
+</span><span class="c1"></span>
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">.file	&#34;helloworld.c&#34;
+	.text
+	.section	.rodata
+.LC0:
+	.string	&#34;hello world&#34;
+	.text
+	.globl	main
+	.type	main, @function
+main:
+.LFB5:
+	.cfi_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	leaq	.LC0(%rip), %rdi
+	call	puts@PLT
+	movl	$0, %edi
+	call	exit@PLT
+	.cfi_endproc
+.LFE5:
+	.size	main, .-main
+	.ident	&#34;GCC: (Ubuntu 7.3.0-27ubuntu1~18.04) 7.3.0&#34;
+	.section	.note.GNU-stack,&#34;&#34;,@progbits
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="汇编指示" class="headerLink">
+    <a href="#%e6%b1%87%e7%bc%96%e6%8c%87%e7%a4%ba" class="header-mark"></a>汇编指示</h3><ul>
+<li>汇编代码中以<code>.</code>开头的都是汇编指示（Directives），如<code>.file</code>，<code>.def</code>，<code>.text</code>等，用以指导汇编器如何进行汇编。其中<code>.file</code> <code>.def</code>均用于调试（可以将其忽略）</li>
+<li>以<code>:</code>结尾的字符串，如<code>_main:</code> 是用以表示变量或函数地址的符号（Symbol）</li>
+<li>其他均为汇编指令</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">.globl _main 	#指示汇编器表示符号_main是全局的
+				#没有.globl标明的都是局部的
+.text 		 	#代码段
+.p2align 4,,15 	#指定下一行代码的对齐方式，参数1：按2的多少次幂对齐
+									  #参数2：对齐是额外空间用什么数据填充
+									  #参数3：最多允许额外填充多少字节
+.section .rodata	#只读数据段
+.LC0:
+	.ascii &#34;hello world\12\0&#34; 		#.ascii是类型 文本字符串
+									#.asciz 以空字符结尾的字符串
+									#.byte 字节值
+				#.double .float .single .int .long .octa .quad .short 
+				#双精度	单精度			4byte       16	  8	    16
+ages: #一行可以声明多个值
+	.int 20,10,30,40
+
+.section .bss #未初始化代码段
+	.lcomm buffer,1000  #声明未初始化本地内存区域 symbol,size
+	
+.type power,@function #告诉linker power是一个函数
+
+#.equ 用于把常量设置为可以在程序中使用的symbol
+.equ factor,3
+.equ LINUX_SYS_CALL,0x80
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="linux汇编命令系统调用" class="headerLink">
+    <a href="#linux%e6%b1%87%e7%bc%96%e5%91%bd%e4%bb%a4%e7%b3%bb%e7%bb%9f%e8%b0%83%e7%94%a8" class="header-mark"></a>linux汇编命令&amp;系统调用</h3><p><code>as -o my-object-file.o  helloworld.s</code></p>
+<ul>
+<li>-gstabs  产生带调试信息的object文件</li>
+<li>64位环境下使用32位汇编，加参数：&ndash;32</li>
+</ul>
+<p><code>ld -o my-exe-file  my-object-file.o</code></p>
+<ul>
+<li>可以有多个.o文件</li>
+<li>64位下生成32位可执行程序加参数：-m elf_i386</li>
+</ul>
+<p>如果有什么找不见：<code>sudo apt-get install g++-multilib</code></p>
+<ul>
+<li>helloworld程序</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">.data #数据段
+msg:
+	.ascii &#34;hellow world\n&#34;
+	len = .-msg   # . 表示当前地址
+.text 
+.globl _start #汇编程序入口
+_start:
+	movl $len,%edx
+	movl $msg,%ecx
+	movl $1,%ebx #系统输出
+	movl $4,%eax
+	int  $0x80
+	
+	movl $0,%ebx  #程序退出
+	movl $1,%eax
+	int $0x80
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>x86-linux 下的系统调用是通过中断指令（int 0X80）来实现的。</li>
+<li>在执行int $0x80指令时
+<ul>
+<li>寄存器eax中存放的是系统调用的功能号，而传给系统调用的参数则必须按顺序放到寄存器ebx,ecx,edx,esi,edi中</li>
+<li>系统调用完成之后，返回值可以在eax中获得</li>
+<li>当系统调用需要参数大于5个，功能号保存在eax，全部参数依次存在一块连续内存中，同时在寄存器ebx中保存指向该内存区域的指针</li>
+</ul>
+</li>
+</ul>
+<p>查看系统调用功能号列表：<code>locate unistd_32</code>或<code>locate unistd_32</code></p>
+<p>或者http://codelab.shiyanlou.com/xref/linux-3.18.6/arch/x86/syscalls/syscall_32.tbl</p>
+<p><a href="http://syscalls.kernelgrok.com/" target="_blank" rel="noopener noreferrer">http://syscalls.kernelgrok.com/</a></p>
+<ul>
+<li>处理命令行参数: 将参数按行输出</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">.text
+.globl _start
+
+_start:
+	popl %ecx  #argc
+vnext:
+	popl %ecx 	#argv
+	test %ecx,%ecx #空指针表示结束
+	jz exit
+	movl %ecx,%ebx #argv起始指针
+	xorl %edx,%edx
+strlen:
+	movb (%ebx),%al
+	inc %edx #edx++
+	inc %ebx #ebx++
+	test %al,%al
+	jnz strlen
+	movb $10,-1(%ebx) #10是换行符
+	movl $4,%eax #系统调用sys_write
+	movl $1,%ebx #参数1：fd  参数2：ecx字符串开始地址 参数3：edx 字符串长度
+	int $0x80
+	jmp vnext
+exit:
+	movl $1,%eax #系统调用号sys_exit
+	xorl %ebx,%ebx #参数1：退出代码
+	int $0x80
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>调用libc库函数:打印cpu信息</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">.section .data
+output:
+	.asciz &#34;The processor vendor id is &#39;%s&#39;\n&#34; #.asciz 自动末尾加0
+.section .bss #可读可写且没有初始化的数据区
+	.lcomm buffer,12
+.section .text
+.globl _start
+_start:
+	movl $0,%eax
+	cpuid  #参数放入eax，获取cpu特定信息，填0时，厂商id字符串反回到ebx,ecx,edx
+		   #一共12个字符
+	movl $buffer,%edi #buffer地址放入edi
+	movl %ebx,(%edi)
+	movl %edx,4(%edi)
+	movl %ecx,8(%edi) #cpu信息放入buffer
+	push $buffer #printf的参数，从右往左压栈
+	push $output
+	call printf #libc
+	addl $8,%esp #栈中弹出参数
+	push $0
+	call exit
+# ld -lc dynamic-linker /lib/ld-linux.so.2 -o cpuid.exe cpuid.o
+</code></pre></td></tr></table>
+</div>
+</div><p>go p88</p>
+</div>
+
+        <div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2019-12-21</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/assembly/">assembly</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/linux-system-programming/" class="prev" rel="prev" title="Linux系统编程"><i class="fas fa-angle-left fa-fw"></i>Linux系统编程</a>
+            <a href="/computer-networks/" class="next" rel="next" title="计算机网络">计算机网络<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="twikoo"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://twikoo.js.org/">Twikoo</a>.
+            </noscript></div></article></div>
+        </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">      <a href="https://www.travellings.cn/go.html" target="_blank" rel="noopener" title="开往-友链接力"><img src="https://www.travellings.cn/assets/logo.gif" alt="开往-友链接力" width="120"></a><a href="https://www.foreverblog.cn/go.html" target="_blank" > <img src="https://img.foreverblog.cn/wormhole_3.gif" alt="" style="width:auto;height:32px;" title="穿梭虫洞-随机访问十年之约友链博客"> </a>
+      </br><small>1KiritobkMPpaWBjTDHSoiP5icv8PEFNdR</small>
+      </br><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+      </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2020 - 2024</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank" rel="noopener noreferrer">kirito</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+            <div class="footer-line"></div>
+            <div class="footer-line">
+            </div>
+        </div></footer></div>
+
+    <div id="fixed-buttons"><a href="#back-to-top" id="back-to-top-button" class="fixed-button" title="回到顶部">
+            <i class="fas fa-arrow-up fa-fw"></i>
+        </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+            <i class="fas fa-comment fa-fw"></i>
+        </a>
+    </div><div id="cookieconsent-container"></div><div class="assets"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/katex/copy-tex.min.css">
+        <noscript><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"></noscript><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":30},"comment":{"twikoo":{"commentCount":true,"el":"#twikoo","envId":"https://comment-liard.vercel.app/","lang":"zh-cn"}},"cookieconsent":{"content":{"dismiss":"同意","link":"了解更多","message":"本网站使用 Cookies 来改善您的浏览体验."},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"distance":null,"findAllMatches":null,"fuseIndexURL":"/index.json","highlightTag":"em","ignoreFieldNorm":null,"ignoreLocation":null,"isCaseSensitive":null,"location":null,"maxResultLength":10,"minMatchCharLength":null,"noResultsFound":"没有找到结果","snippetLength":50,"threshold":null,"type":"fuse","useExtendedSearch":null}};</script><script type="text/javascript" src="/lib/twikoo/twikoo.all.min.js" defer></script><script type="text/javascript" src="/js/twikoo.min.js" defer></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js" defer></script><script type="text/javascript" src="/lib/katex/auto-render.min.js" defer></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js" defer></script><script type="text/javascript" src="/lib/katex/mhchem.min.js" defer></script><script type="text/javascript" src="/js/katex.min.js" defer></script><script type="text/javascript" src="/lib/cookieconsent/cookieconsent.min.js" defer></script><script type="text/javascript" src="/js/cookieconsent.min.js" defer></script><script type="text/javascript" src="/js/theme.min.js" defer></script><script type="text/javascript">
+            window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());
+            gtag('config', 'G-ZKPP127E4F');
+        </script><script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id=G-ZKPP127E4F" async></script><script>
+			var _hmt = _hmt || [];
+			(function() {
+			  var hm = document.createElement("script");
+			  hm.src = "https://hm.baidu.com/hm.js?2004ef75aa13d757f75bf6f1f3add242";
+			  var s = document.getElementsByTagName("script")[0]; 
+			  s.parentNode.insertBefore(hm, s);
+			})();
+		</script><script>
+         
+         
+        var $cdnPrefix = "https://blog-1256556944.file.myqcloud.com";
+    </script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@2.1.3/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-backstretch@2.1.18/jquery.backstretch.min.js"></script>
+    <script type="text/javascript" src="/js/custom.js"></script>
+</div>
+</body>
+
+</html>

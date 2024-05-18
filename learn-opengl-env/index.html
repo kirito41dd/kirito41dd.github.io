@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noodp" />
+    <title>LearnOpenGL环境搭建 - kirito&#39;s blog</title><meta name="Description" content="kirito&#39;s blog"><meta property="og:title" content="LearnOpenGL环境搭建" />
+<meta property="og:description" content="2020年2月春节期间我刷完过一遍LearnOpenGL，这是一个很好的入门openGL良心教程，一直没时间记录。最近打游戏荒废了好久，刚好" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.kirito.info/learn-opengl-env/" /><meta property="og:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-12-12T14:40:51+08:00" />
+<meta property="article:modified_time" content="2021-12-12T14:40:51+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/>
+
+<meta name="twitter:title" content="LearnOpenGL环境搭建"/>
+<meta name="twitter:description" content="2020年2月春节期间我刷完过一遍LearnOpenGL，这是一个很好的入门openGL良心教程，一直没时间记录。最近打游戏荒废了好久，刚好"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt">
+
+<meta name="theme-color" content="#f8f8f8"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="canonical" href="https://www.kirito.info/learn-opengl-env/" /><link rel="prev" href="https://www.kirito.info/pratt-parsing/" /><link rel="next" href="https://www.kirito.info/tinyrenderer-note-0/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/color.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/fontawesome-free/all.min.css">
+        <noscript><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"></noscript><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/animate/animate.min.css">
+        <noscript><link rel="stylesheet" href="/lib/animate/animate.min.css"></noscript><meta name="google-site-verification" content="5J8bsg9tKySrpONjEV2nAOqQ08TCVjsooCRIuDsxhD4" /><meta name="baidu-site-verification" content="code-NY7bFlUK92" /><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "LearnOpenGL环境搭建",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/www.kirito.info\/learn-opengl-env\/"
+        },"image": ["https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"],"genre": "posts","keywords": "openGL","wordcount":  3698 ,
+        "url": "https:\/\/www.kirito.info\/learn-opengl-env\/","datePublished": "2021-12-12T14:40:51+08:00","dateModified": "2021-12-12T14:40:51+08:00","publisher": {
+            "@type": "Organization",
+            "name": "kirito","logo": "https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"},"author": {
+                "@type": "Person",
+                "name": "kirito"
+            },"description": ""
+    }
+    </script><script src="//instant.page/5.1.1" defer type="module" integrity="sha384-MWfCL6g1OTGsbSwfuMHc8+8J2u71/LA8dzlIN3ycajckxuZZmF+DNjdm7O6H3PSq"></script>
+</head>
+
+<body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">
+        function setTheme(theme) {document.body.setAttribute('theme', theme); document.documentElement.style.setProperty('color-scheme', theme === 'light' ? 'light' : 'dark'); window.theme = theme; }
+        function saveTheme(theme) {window.localStorage && localStorage.setItem('theme', theme);}
+        function getMeta(metaName) {const metas = document.getElementsByTagName('meta'); for (let i = 0; i < metas.length; i++) if (metas[i].getAttribute('name') === metaName) return metas[i]; return '';}
+        if (window.localStorage && localStorage.getItem('theme')) {let theme = localStorage.getItem('theme');theme === 'light' || theme === 'dark' || theme === 'black' ? setTheme(theme) : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light')); } else { if ('auto' === 'light' || 'auto' === 'dark' || 'auto' === 'black') setTheme('auto'), saveTheme('auto'); else saveTheme('auto'), window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light');}
+        let metaColors = {'light': '#f8f8f8','dark': '#252627','black': '#000000'}
+        getMeta('theme-color').content = metaColors[document.body.getAttribute('theme')];
+    </script>
+    <div id="back-to-top"></div>
+    <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="kirito&#39;s blog">kirito</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="#" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="kirito&#39;s blog">kirito</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a href="#" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+            <div class="container"><div class="toc" id="toc-auto">
+        <h2 class="toc-title">目录</h2>
+        <div class="toc-content always-active" id="toc-content-auto"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#工具安装">工具安装</a>
+      <ul>
+        <li><a href="#mingw-w64">mingw-w64</a></li>
+        <li><a href="#cmake">cmake</a></li>
+      </ul>
+    </li>
+    <li><a href="#依赖库安装">依赖库安装</a>
+      <ul>
+        <li><a href="#glfw">GLFW</a></li>
+        <li><a href="#glad">GLAD</a></li>
+      </ul>
+    </li>
+    <li><a href="#创建项目">创建项目</a>
+      <ul>
+        <li><a href="#创建窗口">创建窗口</a>
+          <ul>
+            <li><a href="#1主cmakeliststxt">1.主CMakeLists.txt</a></li>
+            <li><a href="#2findglfwcmake">2.FindGLFW.cmake</a></li>
+            <li><a href="#3创建窗口">3.创建窗口</a></li>
+            <li><a href="#4子cmakeliststxt">4.子CMakeLists.txt</a></li>
+            <li><a href="#5编译">5.编译</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#终">终</a></li>
+  </ul>
+</nav></div>
+    </div><script>document.getElementsByTagName("main")[0].setAttribute("pageStyle", "normal")</script><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "true")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">LearnOpenGL环境搭建</h1><div class="post-meta">
+            <div class="post-meta-line">
+                <span class="post-author"><i class="author fas fa-user-circle fa-fw"></i><a href="/" title="Author" rel=" author" class="author">kirito</a>
+                </span>&nbsp;<span class="post-category">收录于 </span>&nbsp;<span class="post-category">类别 <a href="/categories/program/"><i class="far fa-folder fa-fw"></i>program</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2021-12-12">2021-12-12</time>&nbsp;<i class="far fa-edit fa-fw"></i>&nbsp;<time datetime="2021-12-12">2021-12-12</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 3698 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 8 分钟&nbsp;<span id="/learn-opengl-env/" class="leancloud_visitors" data-flag-title="LearnOpenGL环境搭建">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class="leancloud-visitors-count" id=twikoo_visitors></span>&nbsp;次阅读
+                    </span>&nbsp;<span id="/learn-opengl-env/" class="comment_count" data-flag-title="LearnOpenGL环境搭建">
+                        <i class="far fa-comments fa-fw"></i>&nbsp;<span class="twikoo-comment-count" id="twikoo-comment-count"></span>&nbsp;条评论
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#工具安装">工具安装</a>
+      <ul>
+        <li><a href="#mingw-w64">mingw-w64</a></li>
+        <li><a href="#cmake">cmake</a></li>
+      </ul>
+    </li>
+    <li><a href="#依赖库安装">依赖库安装</a>
+      <ul>
+        <li><a href="#glfw">GLFW</a></li>
+        <li><a href="#glad">GLAD</a></li>
+      </ul>
+    </li>
+    <li><a href="#创建项目">创建项目</a>
+      <ul>
+        <li><a href="#创建窗口">创建窗口</a>
+          <ul>
+            <li><a href="#1主cmakeliststxt">1.主CMakeLists.txt</a></li>
+            <li><a href="#2findglfwcmake">2.FindGLFW.cmake</a></li>
+            <li><a href="#3创建窗口">3.创建窗口</a></li>
+            <li><a href="#4子cmakeliststxt">4.子CMakeLists.txt</a></li>
+            <li><a href="#5编译">5.编译</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#终">终</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>2020年2月春节期间我刷完过一遍<a href="https://learnopengl-cn.github.io/intro/" target="_blank" rel="noopener noreferrer">LearnOpenGL</a>，这是一个很好的入门openGL良心教程，一直没时间记录。最近打游戏荒废了好久，刚好换了电脑，重新装下环境顺便记录下LearnOpenGL的环境搭建。</p>
+<p>教程中使用的环境是Visual Studios + CMake + MSVC，我没用过也没安装过Visual Studio。所以我选择的环境是vscode + CMake + MinGW-w64，在linux直接gcc就行了，mac用gcc、clang都可以。这样的好处是在win、linux、mac上都能搭建这套环境。</p>
+<h2 id="工具安装" class="headerLink">
+    <a href="#%e5%b7%a5%e5%85%b7%e5%ae%89%e8%a3%85" class="header-mark"></a>工具安装</h2><p>我的系统是win，因为要打游戏（</p>
+<ul>
+<li><a href="https://code.visualstudio.com/" target="_blank" rel="noopener noreferrer">vscode</a> 就不多说了，用其他编辑器/IDE也行</li>
+</ul>
+<h3 id="mingw-w64" class="headerLink">
+    <a href="#mingw-w64" class="header-mark"></a>mingw-w64</h3><p>编译器肯定是必须的，我没用过msvc，只用过gcc，mingw-w64就是win上的gcc。</p>
+<ul>
+<li>
+<p>下载地址：<a href="https://www.mingw-w64.org/downloads/" target="_blank" rel="noopener noreferrer">https://www.mingw-w64.org/downloads/</a></p>
+</li>
+<li>
+<p>双击打开，选择native windows，x86_64，如果是32位系统则选i686。设置好安装目录</br>
+<figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/public/mingw-install.png" title="https://blog-1256556944.file.myqcloud.com/public/mingw-install.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/public/mingw-install.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/public/mingw-install.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/public/mingw-install.png, https://blog-1256556944.file.myqcloud.com/public/mingw-install.png 1.5x, https://blog-1256556944.file.myqcloud.com/public/mingw-install.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/public/mingw-install.png">
+    </a></figure></p>
+</li>
+<li>
+<p>直接点process安装</br>
+<figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/public/mingw-install2.png" title="https://blog-1256556944.file.myqcloud.com/public/mingw-install2.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/public/mingw-install2.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/public/mingw-install2.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/public/mingw-install2.png, https://blog-1256556944.file.myqcloud.com/public/mingw-install2.png 1.5x, https://blog-1256556944.file.myqcloud.com/public/mingw-install2.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/public/mingw-install2.png">
+    </a></figure></p>
+</li>
+<li>
+<p>完成后，安装目录的bin文件夹里就有gcc了</br>
+<figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/public/mingw-install3.png" title="https://blog-1256556944.file.myqcloud.com/public/mingw-install3.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/public/mingw-install3.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/public/mingw-install3.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/public/mingw-install3.png, https://blog-1256556944.file.myqcloud.com/public/mingw-install3.png 1.5x, https://blog-1256556944.file.myqcloud.com/public/mingw-install3.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/public/mingw-install3.png">
+    </a></figure></p>
+</li>
+<li>
+<p>最后吧bin目录添加到系统环境变量PATH里：此电脑-属性-高级系统设置-环境变量-PATH-添加<code>D:\app\mingw-w64\bin</code></p>
+</li>
+</ul>
+<h3 id="cmake" class="headerLink">
+    <a href="#cmake" class="header-mark"></a>cmake</h3><p>c++在编译的时候，需要引用各种头文件，链接这个那个的各种动态库、静态库。项目复杂的时候编译会很麻烦，cmake相当于一个构建系统，用不怎么简洁的语法，描述如何编译目标，帮我们生成makefile文件，自动编译项目。</p>
+<ul>
+<li>下载地址：<a href="https://cmake.org/download/" target="_blank" rel="noopener noreferrer">https://cmake.org/download/</a>，选择<code>.msi</code>安装</li>
+<li>一路点next，安装路径无所谓，记得加入PATH就行</br>
+<figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/public/cmake-install.png" title="https://blog-1256556944.file.myqcloud.com/public/cmake-install.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/public/cmake-install.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/public/cmake-install.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/public/cmake-install.png, https://blog-1256556944.file.myqcloud.com/public/cmake-install.png 1.5x, https://blog-1256556944.file.myqcloud.com/public/cmake-install.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/public/cmake-install.png">
+    </a></figure></li>
+<li>完事检查下安装成功</br>
+<figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/public/cmake-install2.png" title="https://blog-1256556944.file.myqcloud.com/public/cmake-install2.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/public/cmake-install2.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/public/cmake-install2.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/public/cmake-install2.png, https://blog-1256556944.file.myqcloud.com/public/cmake-install2.png 1.5x, https://blog-1256556944.file.myqcloud.com/public/cmake-install2.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/public/cmake-install2.png">
+    </a></figure></li>
+</ul>
+<h2 id="依赖库安装" class="headerLink">
+    <a href="#%e4%be%9d%e8%b5%96%e5%ba%93%e5%ae%89%e8%a3%85" class="header-mark"></a>依赖库安装</h2><p>需要用到以下库：</p>
+<ul>
+<li>GLFW - 负责创建OpenGL上下文并显示窗口</li>
+<li>GLAD - 查找openGL函数指针</li>
+</ul>
+<h3 id="glfw" class="headerLink">
+    <a href="#glfw" class="header-mark"></a>GLFW</h3><blockquote>
+<p>在画出出色的效果之前，首先要做的就是创建一个OpenGL上下文(Context)和一个用于显示的窗口。然而，这些操作在每个系统上都是不一样的，OpenGL有目的地从这些操作抽象(Abstract)出去。这意味着我们不得不自己处理创建窗口，定义OpenGL上下文以及处理用户输入。</p>
+</blockquote>
+<p>GLFW就是帮我们在不同平台做这个事情</p>
+<ul>
+<li>获取源代码：<a href="www.glfw.org/download.html" rel="">www.glfw.org/download.html</a>，下载source package</li>
+<li>记得看看官方编译指南<a href="https://www.glfw.org/docs/latest/compile.html" target="_blank" rel="noopener noreferrer">https://www.glfw.org/docs/latest/compile.html</a></li>
+<li>解压后进入目录</br>
+<figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/public/GLFW-install.png" title="https://blog-1256556944.file.myqcloud.com/public/GLFW-install.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/public/GLFW-install.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/public/GLFW-install.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/public/GLFW-install.png, https://blog-1256556944.file.myqcloud.com/public/GLFW-install.png 1.5x, https://blog-1256556944.file.myqcloud.com/public/GLFW-install.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/public/GLFW-install.png">
+    </a></figure></li>
+<li>在此目录执行<code>cmake -S . -B build -G &quot;MinGW Makefiles&quot; -DBUILD_SHARED_LIBS=ON</code>，其中<code>-S</code>指定源码所在目录，<code>-B</code>指定构建/输出目录，<code>-G</code>指定我们是给MinGW生产makefile，最后一个参数是告诉CMake，我们要动态库</br>
+<figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/public/GLFW-install2.png" title="https://blog-1256556944.file.myqcloud.com/public/GLFW-install2.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/public/GLFW-install2.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/public/GLFW-install2.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/public/GLFW-install2.png, https://blog-1256556944.file.myqcloud.com/public/GLFW-install2.png 1.5x, https://blog-1256556944.file.myqcloud.com/public/GLFW-install2.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/public/GLFW-install2.png">
+    </a></figure></li>
+<li>最后，进入<code>build/</code>目录，执行<code>mingw32-make.exe -j4</code>，<code>-j4</code>指定我们用4个cpu核心，注意由于我们装的mingw，所以<code>make</code>命令变成了<code>mingw32-make.exe</code></br>
+<figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/public/GLFW-install3.png" title="https://blog-1256556944.file.myqcloud.com/public/GLFW-install3.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/public/GLFW-install3.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/public/GLFW-install3.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/public/GLFW-install3.png, https://blog-1256556944.file.myqcloud.com/public/GLFW-install3.png 1.5x, https://blog-1256556944.file.myqcloud.com/public/GLFW-install3.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/public/GLFW-install3.png">
+    </a></figure></li>
+<li>完事后我们就得到了lib文件</br>
+<figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/public/GLFW-install4.png" title="https://blog-1256556944.file.myqcloud.com/public/GLFW-install4.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/public/GLFW-install4.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/public/GLFW-install4.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/public/GLFW-install4.png, https://blog-1256556944.file.myqcloud.com/public/GLFW-install4.png 1.5x, https://blog-1256556944.file.myqcloud.com/public/GLFW-install4.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/public/GLFW-install4.png">
+    </a></figure></li>
+<li>GLFW就编译完了，关键目录只有两个
+<ul>
+<li>头文件<code>path\to\glfw-3.3.6\include</code></li>
+<li>lib文件<code>path\to\glfw-3.3.6\build\src</code></li>
+</ul>
+</li>
+<li>在<code>path\to\glfw-3.3.6\build</code>目录执行<code>mingw32-make.exe install</code>(需要管理员权限)，文件会被安装到<code>C:/Program Files (x86)/GLFW/</code>下</li>
+<li>最后手动复制<code>glfw3.dll</code>到<code>C:\Windows\System32</code>下，不然运行程序会报找不到dll，其他库类似</li>
+</ul>
+<h3 id="glad" class="headerLink">
+    <a href="#glad" class="header-mark"></a>GLAD</h3><blockquote>
+<p>OpenGL只是一个标准/规范，具体的实现是由驱动开发商针对特定显卡实现的。由于OpenGL驱动版本众多，它大多数函数的位置都无法在编译时确定下来，需要在运行时查询。</p>
+</blockquote>
+<p>GLAD会帮我们找到函数位置</p>
+<ul>
+<li>使用在线服务定制我们需要的源代码：<a href="https://glad.dav1d.de/" target="_blank" rel="noopener noreferrer">https://glad.dav1d.de/</a></br>
+<figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/public/GLAD.png" title="https://blog-1256556944.file.myqcloud.com/public/GLAD.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/public/GLAD.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/public/GLAD.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/public/GLAD.png, https://blog-1256556944.file.myqcloud.com/public/GLAD.png 1.5x, https://blog-1256556944.file.myqcloud.com/public/GLAD.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/public/GLAD.png">
+    </a></figure></li>
+<li>下载解压后，<code>include</code>目录里是俩头文件，<code>src</code>目录里面就一个<code>glad.c</code></li>
+<li>这个<code>glad.c</code>后面会直接和程序一起参与编译</li>
+</ul>
+<p>到这里就可以创建项目了</p>
+<h2 id="创建项目" class="headerLink">
+    <a href="#%e5%88%9b%e5%bb%ba%e9%a1%b9%e7%9b%ae" class="header-mark"></a>创建项目</h2><p>建立一个名为<code>LearnOpenGL</code>的文件夹作为项目根目录。整个项目结构是这样的：</p>
+<ul>
+<li>root(LearnOpenGL)
+<ul>
+<li><code>CMakeLists.txt</code> - cmake构建文件</li>
+<li>cmake/modules/ - 存放cmake自动查找库的find文件</li>
+<li>include/ - 存放头文件</li>
+<li>src/ - 存放源代码</li>
+</ul>
+</li>
+</ul>
+<p>可以参考：<a href="https://github.com/kirito41dd/LearnOpenGL" target="_blank" rel="noopener noreferrer">https://github.com/kirito41dd/LearnOpenGL</a></p>
+<h3 id="创建窗口" class="headerLink">
+    <a href="#%e5%88%9b%e5%bb%ba%e7%aa%97%e5%8f%a3" class="header-mark"></a>创建窗口</h3><p>先给出目录细节再详细说，所有参与文件如下：</p>
+<ul>
+<li><code>CMakeLists.txt</code> - cmake构建文件</li>
+<li>cmake/modules/ - 存放cmake自动查找库的find文件
+<ul>
+<li><code>FindGLFW3.cmake</code> - 负责自动查找glfw的头文件路径和lib路径</li>
+</ul>
+</li>
+<li>include/ - 存放头文件
+<ul>
+<li><code>glad.c</code> - 把安装GLAD时的文件复制过来</li>
+<li>glad/ - 安装GLAD时的头文件目录，复制过来
+<ul>
+<li><code>glad.h</code></li>
+</ul>
+</li>
+<li>KHR/ - 安装GLAD时的头文件目录，复制过来
+<ul>
+<li><code>khrplatform.h</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>src/ - 存放源代码
+<ul>
+<li>start/ - 存放LearnOpenGL教程第一部分源码
+<ul>
+<li><code>CMakeLists.txt</code> - 子目录构建文件</li>
+<li><code>HelloWindow.cpp</code> - 创建窗口示例程序</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="1主cmakeliststxt" class="headerLink">
+    <a href="#1%e4%b8%bbcmakeliststxt" class="header-mark"></a>1.主CMakeLists.txt</h4><p>根目录下的<code>CMakeLists.txt</code>文件是引导cmake的入口，主要做一些项目设置，和头文件，lib等查找工作，详细如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cmake" data-lang="cmake"><span class="nb">cmake_minimum_required</span><span class="p">(</span><span class="s">VERSION</span> <span class="s">2.9</span><span class="p">)</span> <span class="c"># 指定cmake最小版本
+</span><span class="c"></span><span class="err">
+</span><span class="err"></span><span class="nb">project</span><span class="p">(</span><span class="s">learnopengl</span><span class="p">)</span> <span class="c"># 设置项目名
+</span><span class="c"></span><span class="err">
+</span><span class="err"></span><span class="c"># 依赖环境
+</span><span class="c"># ------------------------------------------------------------------------------
+</span><span class="c"></span><span class="nb">set</span><span class="p">(</span><span class="s">CMAKE_MODULE_PATH</span> <span class="o">${</span><span class="nv">CMAKE_MODULE_PATH</span><span class="o">}</span> <span class="s2">&#34;${CMAKE_SOURCE_DIR}/cmake/modules/&#34;</span><span class="p">)</span><span class="err">
+</span><span class="err"></span><span class="nb">find_package</span><span class="p">(</span><span class="s">GLFW3</span> <span class="s">REQUIRED</span><span class="p">)</span><span class="err">
+</span><span class="err"></span><span class="nb">include_directories</span><span class="p">(</span><span class="o">${</span><span class="nv">GLFW3_INCLUDE_DIR</span><span class="o">}</span><span class="p">)</span><span class="err">
+</span><span class="err"></span><span class="nb">add_library</span><span class="p">(</span><span class="s">glad</span> <span class="s">include/glad.c</span><span class="p">)</span><span class="err">
+</span><span class="err"></span><span class="c"># ------------------------------------------------------------------------------
+</span><span class="c"></span><span class="err">
+</span><span class="err"></span><span class="nb">include_directories</span><span class="p">(</span><span class="s">./include</span><span class="p">)</span> <span class="c"># 添加头文件搜索目录
+</span><span class="c"></span><span class="err">
+</span><span class="err"></span><span class="c"># 子目录
+</span><span class="c"></span><span class="nb">add_subdirectory</span><span class="p">(</span><span class="s">src/start</span><span class="p">)</span> <span class="c"># 子目录也会有CMakeLists.txt文件，环境是相通的
+</span></code></pre></td></tr></table>
+</div>
+</div><p>主要来看依赖环境部分：</p>
+<p><code>set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} &quot;${CMAKE_SOURCE_DIR}/cmake/modules/&quot;)</code> 这句是往<code>CMAKE_MODULE_PATH</code>里追加一个目录，
+这些目录里存放着各种find文件，命名为<code>Find${LIB}.cmake</code></p>
+<p><code>find_package(GLFW3 REQUIRED)</code>表示调用<code>FindGLFW3.cmake</code>查找GLFW3的头文件和lib，而且是必须找到，否则构建终止。
+如果找到了，会设置<code>GLFW3_XXX</code>等一系列变量</p>
+<p><code>include_directories(${GLFW3_INCLUDE_DIR})</code>，find执行成功才会执行这句，变量<code>GLFW3_INCLUDE_DIR</code>里存放着GLFW头文件的路径，然后添加头文件搜索目录</p>
+<p><code>add_library(glad include/glad.c)</code>声明一个名为<code>glad</code>的lib，后面可以指定链接它，<code>glad.c</code>就会参与编译</p>
+<h4 id="2findglfwcmake" class="headerLink">
+    <a href="#2findglfwcmake" class="header-mark"></a>2.FindGLFW.cmake</h4><p>看下项目里GLFW的搜索文件<code>cmake/modules/FindGLFW3.cmake</code>，这个文件可以在网上找到很多例子，cmake本身也会预装很多find文件。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cmake" data-lang="cmake"><span class="nb">set</span><span class="p">(</span> <span class="s">_glfw3_HEADER_SEARCH_DIRS</span>
+<span class="s2">&#34;/usr/include&#34;</span>
+<span class="s2">&#34;/usr/local/include&#34;</span>
+<span class="s2">&#34;${CMAKE_SOURCE_DIR}/includes&#34;</span>
+<span class="s2">&#34;C:/Program Files (x86)/glfw/include&#34;</span> 
+<span class="s2">&#34;C:/Program Files (x86)/GLFW/include&#34;</span><span class="p">)</span> <span class="c"># 注意这里，就是我们安装的目录
+</span><span class="c"></span><span class="nb">set</span><span class="p">(</span> <span class="s">_glfw3_LIB_SEARCH_DIRS</span>
+<span class="s2">&#34;/usr/lib&#34;</span>
+<span class="s2">&#34;/usr/local/lib&#34;</span>
+<span class="s2">&#34;${CMAKE_SOURCE_DIR}/lib&#34;</span>
+<span class="s2">&#34;C:/Program Files (x86)/glfw/lib-msvc110&#34;</span>
+<span class="s2">&#34;C:/Program Files (x86)/GLFW/lib&#34;</span><span class="p">)</span> <span class="c"># 注意这里
+</span><span class="c"></span><span class="err">
+</span><span class="err"></span><span class="c"># Check environment for root search directory
+</span><span class="c"></span><span class="nb">set</span><span class="p">(</span> <span class="s">_glfw3_ENV_ROOT</span> <span class="o">$ENV{</span><span class="nv">GLFW3_ROOT</span><span class="o">}</span> <span class="p">)</span><span class="err">
+</span><span class="err"></span><span class="nb">if</span><span class="p">(</span> <span class="s">NOT</span> <span class="s">GLFW3_ROOT</span> <span class="s">AND</span> <span class="s">_glfw3_ENV_ROOT</span> <span class="p">)</span><span class="err">
+</span><span class="err"></span>	<span class="nb">set</span><span class="p">(</span><span class="s">GLFW3_ROOT</span> <span class="o">${</span><span class="nv">_glfw3_ENV_ROOT</span><span class="o">}</span> <span class="p">)</span><span class="err">
+</span><span class="err"></span><span class="nb">endif</span><span class="p">()</span><span class="err">
+</span><span class="err">
+</span><span class="err"></span><span class="c"># Put user specified location at beginning of search
+</span><span class="c"></span><span class="nb">if</span><span class="p">(</span> <span class="s">GLFW3_ROOT</span> <span class="p">)</span><span class="err">
+</span><span class="err"></span>	<span class="nb">list</span><span class="p">(</span> <span class="s">INSERT</span> <span class="s">_glfw3_HEADER_SEARCH_DIRS</span> <span class="s">0</span> <span class="s2">&#34;${GLFW3_ROOT}/include&#34;</span> <span class="p">)</span><span class="err">
+</span><span class="err"></span>	<span class="nb">list</span><span class="p">(</span> <span class="s">INSERT</span> <span class="s">_glfw3_LIB_SEARCH_DIRS</span> <span class="s">0</span> <span class="s2">&#34;${GLFW3_ROOT}/lib&#34;</span> <span class="p">)</span><span class="err">
+</span><span class="err"></span><span class="nb">endif</span><span class="p">()</span><span class="err">
+</span><span class="err">
+</span><span class="err"></span><span class="c"># Search for the header
+</span><span class="c"></span><span class="nb">FIND_PATH</span><span class="p">(</span><span class="s">GLFW3_INCLUDE_DIR</span> <span class="s2">&#34;GLFW/glfw3.h&#34;</span> <span class="c"># 头文件目录的变量
+</span><span class="c"></span><span class="s">PATHS</span> <span class="o">${</span><span class="nv">_glfw3_HEADER_SEARCH_DIRS</span><span class="o">}</span> <span class="p">)</span><span class="err">
+</span><span class="err">
+</span><span class="err"></span><span class="c"># Search for the library
+</span><span class="c"></span><span class="nb">FIND_LIBRARY</span><span class="p">(</span><span class="s">GLFW3_LIBRARY</span> <span class="s">NAMES</span> <span class="s">glfw3</span> <span class="s">glfw</span> <span class="s">glfw3dll</span>
+<span class="s">PATHS</span> <span class="o">${</span><span class="nv">_glfw3_LIB_SEARCH_DIRS</span><span class="o">}</span> <span class="p">)</span><span class="err">
+</span><span class="err"></span><span class="nb">INCLUDE</span><span class="p">(</span><span class="s">FindPackageHandleStandardArgs</span><span class="p">)</span><span class="err">
+</span><span class="err"></span><span class="nb">FIND_PACKAGE_HANDLE_STANDARD_ARGS</span><span class="p">(</span><span class="s">GLFW3</span> <span class="s">DEFAULT_MSG</span>
+<span class="s">GLFW3_LIBRARY</span> <span class="s">GLFW3_INCLUDE_DIR</span><span class="p">)</span> <span class="c"># 注意这里
+</span><span class="c"></span><span class="err">
+</span><span class="err">
+</span><span class="err"></span><span class="nb">IF</span><span class="p">(</span><span class="s">GLFW3_FOUND</span><span class="p">)</span><span class="err">
+</span><span class="err"></span>	<span class="nb">IF</span><span class="p">(</span><span class="s">NOT</span> <span class="s">GLFW3_FIND_QUIETLY</span><span class="p">)</span><span class="err">
+</span><span class="err"></span>	<span class="nb">MESSAGE</span><span class="p">(</span><span class="s">STATUS</span> <span class="s2">&#34;Found ASSIMP: ${GLFW3_LIBRARY}&#34;</span><span class="p">)</span><span class="err">
+</span><span class="err"></span>	<span class="nb">ENDIF</span><span class="p">(</span><span class="s">NOT</span> <span class="s">GLFW3_FIND_QUIETLY</span><span class="p">)</span><span class="err">
+</span><span class="err"></span><span class="nb">ELSE</span><span class="p">(</span><span class="s">GLFW3_FOUND</span><span class="p">)</span><span class="err">
+</span><span class="err"></span>	<span class="nb">IF</span><span class="p">(</span><span class="s">GLFW3_FIND_REQUIRED</span><span class="p">)</span><span class="err">
+</span><span class="err"></span>	<span class="nb">MESSAGE</span><span class="p">(</span><span class="s">FATAL_ERROR</span> <span class="s2">&#34;Could not find GLFW3&#34;</span><span class="p">)</span><span class="err">
+</span><span class="err"></span>	<span class="nb">ENDIF</span><span class="p">(</span><span class="s">GLFW3_FIND_REQUIRED</span><span class="p">)</span><span class="err">
+</span><span class="err"></span><span class="nb">ENDIF</span><span class="p">(</span><span class="s">GLFW3_FOUND</span><span class="p">)</span><span class="err">
+</span></code></pre></td></tr></table>
+</div>
+</div><h4 id="3创建窗口" class="headerLink">
+    <a href="#3%e5%88%9b%e5%bb%ba%e7%aa%97%e5%8f%a3" class="header-mark"></a>3.创建窗口</h4><p>这里和LearnOpenGL里教的一样了就，<code>src/start/HelloWindow.cpp</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">// 你好，窗口
+</span><span class="c1"></span><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;glad/glad.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;GLFW/glfw3.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span><span class="cp"></span>
+
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="kt">void</span> <span class="nf">framebuffer_size_callback</span><span class="p">(</span><span class="n">GLFWwindow</span><span class="o">*</span> <span class="n">window</span><span class="p">,</span> <span class="kt">int</span> <span class="n">width</span><span class="p">,</span> <span class="kt">int</span> <span class="n">height</span><span class="p">);</span>
+
+<span class="kt">void</span> <span class="nf">processInput</span><span class="p">(</span><span class="n">GLFWwindow</span> <span class="o">*</span><span class="n">window</span><span class="p">);</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;hellow&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+    <span class="n">glfwInit</span><span class="p">();</span> <span class="c1">// 初始化库
+</span><span class="c1"></span>    <span class="n">glfwWindowHint</span><span class="p">(</span><span class="n">GLFW_CONTEXT_VERSION_MAJOR</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span> <span class="c1">// 配置主版本号
+</span><span class="c1"></span>    <span class="n">glfwWindowHint</span><span class="p">(</span><span class="n">GLFW_CONTEXT_VERSION_MINOR</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span> <span class="c1">// 配置次版本号
+</span><span class="c1"></span>    <span class="n">glfwWindowHint</span><span class="p">(</span><span class="n">GLFW_OPENGL_PROFILE</span><span class="p">,</span> <span class="n">GLFW_OPENGL_CORE_PROFILE</span><span class="p">);</span> <span class="c1">// 使用核心模式
+</span><span class="c1"></span>    <span class="c1">//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // Mac OS X 使用
+</span><span class="c1"></span>
+    <span class="c1">// 创建一个窗口
+</span><span class="c1"></span>    <span class="n">GLFWwindow</span><span class="o">*</span> <span class="n">window</span> <span class="o">=</span> <span class="n">glfwCreateWindow</span><span class="p">(</span><span class="mi">800</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span> <span class="s">&#34;LearnOpenGL&#34;</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">window</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Failed to create GLFW window&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+        <span class="n">glfwTerminate</span><span class="p">();</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">glfwMakeContextCurrent</span><span class="p">(</span><span class="n">window</span><span class="p">);</span> <span class="c1">// 设置为当前上下文
+</span><span class="c1"></span>
+    <span class="c1">// glad
+</span><span class="c1"></span>    <span class="c1">// GLAD是用来管理OpenGL的函数指针的，所以在调用任何OpenGL的函数之前我们需要初始化GLAD。
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">gladLoadGLLoader</span><span class="p">((</span><span class="n">GLADloadproc</span><span class="p">)</span><span class="n">glfwGetProcAddress</span><span class="p">))</span>
+    <span class="p">{</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Failed to initialize GLAD&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// 设置窗口的维度
+</span><span class="c1"></span>    <span class="c1">// glViewport函数前两个参数控制窗口左下角的位置。第三个和第四个参数控制渲染窗口的宽度和高度（像素）。
+</span><span class="c1"></span>    <span class="n">glViewport</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">800</span><span class="p">,</span> <span class="mi">600</span><span class="p">);</span>
+
+    <span class="c1">// 设置一个回调，当用户改变窗口的大小的时候，视口也应该被调整。
+</span><span class="c1"></span>    <span class="n">glfwSetFramebufferSizeCallback</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">framebuffer_size_callback</span><span class="p">);</span>
+
+    <span class="c1">// 渲染循环 render loop
+</span><span class="c1"></span>    <span class="k">while</span><span class="p">(</span><span class="o">!</span><span class="n">glfwWindowShouldClose</span><span class="p">(</span><span class="n">window</span><span class="p">))</span>
+    <span class="p">{</span>
+        <span class="n">processInput</span><span class="p">(</span><span class="n">window</span><span class="p">);</span> <span class="c1">// 处理输入
+</span><span class="c1"></span>
+        <span class="n">glClearColor</span><span class="p">(</span><span class="mf">0.2f</span><span class="p">,</span> <span class="mf">0.3f</span><span class="p">,</span> <span class="mf">0.3f</span><span class="p">,</span> <span class="mf">1.0f</span><span class="p">);</span> <span class="c1">// 设置清空屏幕所用的颜色
+</span><span class="c1"></span>        <span class="n">glClear</span><span class="p">(</span><span class="n">GL_COLOR_BUFFER_BIT</span><span class="p">);</span> <span class="c1">// 清除颜色缓冲之后，整个颜色缓冲都会被填充为glClearColor里所设置的颜色
+</span><span class="c1"></span>
+        <span class="n">glfwSwapBuffers</span><span class="p">(</span><span class="n">window</span><span class="p">);</span> <span class="c1">// 交换颜色缓冲（它是一个储存着GLFW窗口每一个像素颜色值的大缓冲）
+</span><span class="c1"></span>        <span class="n">glfwPollEvents</span><span class="p">();</span> <span class="c1">// 函数检查有没有触发什么事件（比如键盘输入、鼠标移动等）、更新窗口状态，并调用对应的回调函数（可以通过回调方法手动设置）。
+</span><span class="c1"></span>    <span class="p">}</span>
+
+    <span class="c1">// 释放之前分配的资源
+</span><span class="c1"></span>    <span class="n">glfwTerminate</span><span class="p">();</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">framebuffer_size_callback</span><span class="p">(</span><span class="n">GLFWwindow</span><span class="o">*</span> <span class="n">window</span><span class="p">,</span> <span class="kt">int</span> <span class="n">width</span><span class="p">,</span> <span class="kt">int</span> <span class="n">height</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">glViewport</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">processInput</span><span class="p">(</span><span class="n">GLFWwindow</span> <span class="o">*</span><span class="n">window</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="c1">// 如果按下 esc ， 窗口在下次循环将会退出
+</span><span class="c1"></span>    <span class="k">if</span><span class="p">(</span><span class="n">glfwGetKey</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">GLFW_KEY_ESCAPE</span><span class="p">)</span> <span class="o">==</span> <span class="n">GLFW_PRESS</span><span class="p">)</span>
+        <span class="n">glfwSetWindowShouldClose</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="nb">true</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="4子cmakeliststxt" class="headerLink">
+    <a href="#4%e5%ad%90cmakeliststxt" class="header-mark"></a>4.子CMakeLists.txt</h4><p>最后来写下<code>src/start</code>目录里的<code>CMakeLists.txt</code>，来告诉cmake如何编译上面的cpp文件:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cmake" data-lang="cmake"><span class="c"># 你好，窗口
+</span><span class="c"></span><span class="nb">add_executable</span><span class="p">(</span><span class="s">HelloWindow</span> <span class="s">HelloWindow.cpp</span><span class="p">)</span> <span class="c"># 添加可执行程序
+</span><span class="c"></span><span class="nb">target_link_libraries</span><span class="p">(</span><span class="s">HelloWindow</span> <span class="o">${</span><span class="nv">GLFW3_LIBRARY</span><span class="o">}</span> <span class="s">glad</span><span class="p">)</span> <span class="c"># 链接lib glfw glad.c
+</span></code></pre></td></tr></table>
+</div>
+</div><h4 id="5编译" class="headerLink">
+    <a href="#5%e7%bc%96%e8%af%91" class="header-mark"></a>5.编译</h4><p>回到项目根目录执行：<code>cmake -S . -B build/ -G&quot;MinGW Makefiles&quot;</code></p>
+<p>进入build目录执行：<code>mingw32-make.exe</code></p>
+<p>编译结束后，在<code>build/src/start/</code>目录里能看到名为<code>HelloWindow.exe</code>的可执行程序，恭喜</p>
+<p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/public/HelloWindow.png" title="https://blog-1256556944.file.myqcloud.com/public/HelloWindow.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/public/HelloWindow.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/public/HelloWindow.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/public/HelloWindow.png, https://blog-1256556944.file.myqcloud.com/public/HelloWindow.png 1.5x, https://blog-1256556944.file.myqcloud.com/public/HelloWindow.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/public/HelloWindow.png">
+    </a></figure></p>
+<p>三角形也可以画出来了，具体跟着教程走吧</p>
+<p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/public/HelloTrigger.png" title="https://blog-1256556944.file.myqcloud.com/public/HelloTrigger.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/public/HelloTrigger.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/public/HelloTrigger.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/public/HelloTrigger.png, https://blog-1256556944.file.myqcloud.com/public/HelloTrigger.png 1.5x, https://blog-1256556944.file.myqcloud.com/public/HelloTrigger.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/public/HelloTrigger.png">
+    </a></figure></p>
+<h2 id="终" class="headerLink">
+    <a href="#%e7%bb%88" class="header-mark"></a>终</h2><ul>
+<li><a href="https://learnopengl-cn.github.io/06%20In%20Practice/2D-Game/11%20Final%20thoughts/" target="_blank" rel="noopener noreferrer">LearnOpenGL</a></li>
+<li>我的通关记录<a href="https://github.com/kirito41dd/LearnOpenGL" target="_blank" rel="noopener noreferrer">github</a></li>
+</ul>
+<p>希望你也能通关，终点等你。</p>
+<p>（依赖库安装还没写完，待续。。。</p>
+</div>
+
+        <div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2021-12-12</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/opengl/">openGL</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/pratt-parsing/" class="prev" rel="prev" title="Pratt Parsing - 自顶向下的算符优先级"><i class="fas fa-angle-left fa-fw"></i>Pratt Parsing - 自顶向下的算符优先级</a>
+            <a href="/tinyrenderer-note-0/" class="next" rel="next" title="TinyRenderer笔记0：画线和三角以及面剔除">TinyRenderer笔记0：画线和三角以及面剔除<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="twikoo"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://twikoo.js.org/">Twikoo</a>.
+            </noscript></div></article></div>
+        </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">      <a href="https://www.travellings.cn/go.html" target="_blank" rel="noopener" title="开往-友链接力"><img src="https://www.travellings.cn/assets/logo.gif" alt="开往-友链接力" width="120"></a><a href="https://www.foreverblog.cn/go.html" target="_blank" > <img src="https://img.foreverblog.cn/wormhole_3.gif" alt="" style="width:auto;height:32px;" title="穿梭虫洞-随机访问十年之约友链博客"> </a>
+      </br><small>1KiritobkMPpaWBjTDHSoiP5icv8PEFNdR</small>
+      </br><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+      </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2020 - 2024</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank" rel="noopener noreferrer">kirito</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+            <div class="footer-line"></div>
+            <div class="footer-line">
+            </div>
+        </div></footer></div>
+
+    <div id="fixed-buttons"><a href="#back-to-top" id="back-to-top-button" class="fixed-button" title="回到顶部">
+            <i class="fas fa-arrow-up fa-fw"></i>
+        </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+            <i class="fas fa-comment fa-fw"></i>
+        </a>
+    </div><div id="cookieconsent-container"></div><div class="assets"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/katex/copy-tex.min.css">
+        <noscript><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"></noscript><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":30},"comment":{"twikoo":{"commentCount":true,"el":"#twikoo","envId":"https://comment-liard.vercel.app/","lang":"zh-cn"}},"cookieconsent":{"content":{"dismiss":"同意","link":"了解更多","message":"本网站使用 Cookies 来改善您的浏览体验."},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"distance":null,"findAllMatches":null,"fuseIndexURL":"/index.json","highlightTag":"em","ignoreFieldNorm":null,"ignoreLocation":null,"isCaseSensitive":null,"location":null,"maxResultLength":10,"minMatchCharLength":null,"noResultsFound":"没有找到结果","snippetLength":50,"threshold":null,"type":"fuse","useExtendedSearch":null}};</script><script type="text/javascript" src="/lib/twikoo/twikoo.all.min.js" defer></script><script type="text/javascript" src="/js/twikoo.min.js" defer></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js" defer></script><script type="text/javascript" src="/lib/katex/auto-render.min.js" defer></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js" defer></script><script type="text/javascript" src="/lib/katex/mhchem.min.js" defer></script><script type="text/javascript" src="/js/katex.min.js" defer></script><script type="text/javascript" src="/lib/cookieconsent/cookieconsent.min.js" defer></script><script type="text/javascript" src="/js/cookieconsent.min.js" defer></script><script type="text/javascript" src="/js/theme.min.js" defer></script><script type="text/javascript">
+            window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());
+            gtag('config', 'G-ZKPP127E4F');
+        </script><script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id=G-ZKPP127E4F" async></script><script>
+			var _hmt = _hmt || [];
+			(function() {
+			  var hm = document.createElement("script");
+			  hm.src = "https://hm.baidu.com/hm.js?2004ef75aa13d757f75bf6f1f3add242";
+			  var s = document.getElementsByTagName("script")[0]; 
+			  s.parentNode.insertBefore(hm, s);
+			})();
+		</script><script>
+         
+         
+        var $cdnPrefix = "https://blog-1256556944.file.myqcloud.com";
+    </script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@2.1.3/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-backstretch@2.1.18/jquery.backstretch.min.js"></script>
+    <script type="text/javascript" src="/js/custom.js"></script>
+</div>
+</body>
+
+</html>

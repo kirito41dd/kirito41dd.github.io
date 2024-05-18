@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noodp" />
+    <title>Nostr账号Nip05验证方法 - kirito&#39;s blog</title><meta name="Description" content="kirito&#39;s blog"><meta property="og:title" content="Nostr账号Nip05验证方法" />
+<meta property="og:description" content="最近Damus App很火，写一篇教程教大家如何在App中获得紫v图标认证。 NIP05简介NIP是[Nostr改进提议]^(Nostr Improvement Pro" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.kirito.info/nostr-nip05-verification/" /><meta property="og:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-02-04T11:57:58+08:00" />
+<meta property="article:modified_time" content="2023-02-04T11:57:58+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/>
+
+<meta name="twitter:title" content="Nostr账号Nip05验证方法"/>
+<meta name="twitter:description" content="最近Damus App很火，写一篇教程教大家如何在App中获得紫v图标认证。 NIP05简介NIP是[Nostr改进提议]^(Nostr Improvement Pro"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt">
+
+<meta name="theme-color" content="#f8f8f8"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="canonical" href="https://www.kirito.info/nostr-nip05-verification/" /><link rel="prev" href="https://www.kirito.info/water-water/" /><link rel="next" href="https://www.kirito.info/tinyrenderer-note-2/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/color.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/fontawesome-free/all.min.css">
+        <noscript><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"></noscript><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/animate/animate.min.css">
+        <noscript><link rel="stylesheet" href="/lib/animate/animate.min.css"></noscript><meta name="google-site-verification" content="5J8bsg9tKySrpONjEV2nAOqQ08TCVjsooCRIuDsxhD4" /><meta name="baidu-site-verification" content="code-NY7bFlUK92" /><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Nostr账号Nip05验证方法",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/www.kirito.info\/nostr-nip05-verification\/"
+        },"image": ["https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"],"genre": "posts","keywords": "nostr, damus, vercel","wordcount":  1354 ,
+        "url": "https:\/\/www.kirito.info\/nostr-nip05-verification\/","datePublished": "2023-02-04T11:57:58+08:00","dateModified": "2023-02-04T11:57:58+08:00","publisher": {
+            "@type": "Organization",
+            "name": "kirito","logo": "https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"},"author": {
+                "@type": "Person",
+                "name": "kirito"
+            },"description": ""
+    }
+    </script><script src="//instant.page/5.1.1" defer type="module" integrity="sha384-MWfCL6g1OTGsbSwfuMHc8+8J2u71/LA8dzlIN3ycajckxuZZmF+DNjdm7O6H3PSq"></script>
+</head>
+
+<body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">
+        function setTheme(theme) {document.body.setAttribute('theme', theme); document.documentElement.style.setProperty('color-scheme', theme === 'light' ? 'light' : 'dark'); window.theme = theme; }
+        function saveTheme(theme) {window.localStorage && localStorage.setItem('theme', theme);}
+        function getMeta(metaName) {const metas = document.getElementsByTagName('meta'); for (let i = 0; i < metas.length; i++) if (metas[i].getAttribute('name') === metaName) return metas[i]; return '';}
+        if (window.localStorage && localStorage.getItem('theme')) {let theme = localStorage.getItem('theme');theme === 'light' || theme === 'dark' || theme === 'black' ? setTheme(theme) : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light')); } else { if ('auto' === 'light' || 'auto' === 'dark' || 'auto' === 'black') setTheme('auto'), saveTheme('auto'); else saveTheme('auto'), window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light');}
+        let metaColors = {'light': '#f8f8f8','dark': '#252627','black': '#000000'}
+        getMeta('theme-color').content = metaColors[document.body.getAttribute('theme')];
+    </script>
+    <div id="back-to-top"></div>
+    <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="kirito&#39;s blog">kirito</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="#" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="kirito&#39;s blog">kirito</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a href="#" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+            <div class="container"><div class="toc" id="toc-auto">
+        <h2 class="toc-title">目录</h2>
+        <div class="toc-content always-active" id="toc-content-auto"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#nip05简介">NIP05简介</a></li>
+    <li><a href="#验证方法">验证方法</a>
+      <ul>
+        <li><a href="#静态文件">静态文件</a></li>
+        <li><a href="#云函数">云函数</a></li>
+        <li><a href="#客户端设置">客户端设置</a></li>
+      </ul>
+    </li>
+    <li><a href="#一些提示">一些提示</a></li>
+  </ul>
+</nav></div>
+    </div><script>document.getElementsByTagName("main")[0].setAttribute("pageStyle", "normal")</script><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "true")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Nostr账号Nip05验证方法</h1><div class="post-meta">
+            <div class="post-meta-line">
+                <span class="post-author"><i class="author fas fa-user-circle fa-fw"></i><a href="/" title="Author" rel=" author" class="author">kirito</a>
+                </span>&nbsp;<span class="post-category">收录于 </span>&nbsp;<span class="post-category">类别 <a href="/categories/default/"><i class="far fa-folder fa-fw"></i>default</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-02-04">2023-02-04</time>&nbsp;<i class="far fa-edit fa-fw"></i>&nbsp;<time datetime="2023-02-04">2023-02-04</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1354 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 3 分钟&nbsp;<span id="/nostr-nip05-verification/" class="leancloud_visitors" data-flag-title="Nostr账号Nip05验证方法">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class="leancloud-visitors-count" id=twikoo_visitors></span>&nbsp;次阅读
+                    </span>&nbsp;<span id="/nostr-nip05-verification/" class="comment_count" data-flag-title="Nostr账号Nip05验证方法">
+                        <i class="far fa-comments fa-fw"></i>&nbsp;<span class="twikoo-comment-count" id="twikoo-comment-count"></span>&nbsp;条评论
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#nip05简介">NIP05简介</a></li>
+    <li><a href="#验证方法">验证方法</a>
+      <ul>
+        <li><a href="#静态文件">静态文件</a></li>
+        <li><a href="#云函数">云函数</a></li>
+        <li><a href="#客户端设置">客户端设置</a></li>
+      </ul>
+    </li>
+    <li><a href="#一些提示">一些提示</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>最近<a href="https://apps.apple.com/ca/app/damus/id1628663131" target="_blank" rel="noopener noreferrer">Damus App</a>很火，写一篇教程教大家如何在App中获得紫v图标认证。</p>
+<h2 id="nip05简介" class="headerLink">
+    <a href="#nip05%e7%ae%80%e4%bb%8b" class="header-mark"></a>NIP05简介</h2><p>NIP是<strong><ruby>Nostr改进提议<rt>Nostr Improvement Proposal</rt></ruby></strong>，<a href="https://github.com/nostr-protocol/nips/blob/master/05.md" target="_blank" rel="noopener noreferrer">NIP05</a>描述了一种账号验证方法。可以想象成telegram或者twitter上的蓝色V标记，在Damus里是一个紫V图标，客户端展示这个图标，就说明该用户通过了NIP05验证。</p>
+<p>该验证由客户端发起，当发现用户设置了用户名和NIP05验证地址，会发送一个https请求。</p>
+<p>比如用户名<code>kirito</code>和验证地址<code>kirito@dogdogback.com</code>，客户端会发送如下请求：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">https://dogdogback.com/.well-known/nostr.json?name=kirito
+</code></pre></td></tr></table>
+</div>
+</div><p>如果验证成功，<code>dogdogback.com</code>应该返回如下结果：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
+  <span class="nt">&#34;names&#34;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">&#34;kirito&#34;</span><span class="p">:</span> <span class="s2">&#34;2f7caa968b0ec9bacd55a07cfaf6206aab5a62387c76303c311db949dec8bc57&#34;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>你也可以调用这个请求观察下返回: <a href="https://dogdogback.com/.well-known/nostr.json?name=kirito" target="_blank" rel="noopener noreferrer">https://dogdogback.com/.well-known/nostr.json?name=kirito</a></p>
+<p>客户端对比返回结果里的公钥和用户的公钥，如果一致则验证完成，Damus会在你头像后展示紫V图标。
+<figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/public/nostr/%E7%B4%ABv.jpg" title="https://blog-1256556944.file.myqcloud.com/public/nostr/%E7%B4%ABv.jpg" data-thumbnail="https://blog-1256556944.file.myqcloud.com/public/nostr/%E7%B4%ABv.jpg">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/public/nostr/%E7%B4%ABv.jpg"
+            srcset="https://blog-1256556944.file.myqcloud.com/public/nostr/%E7%B4%ABv.jpg, https://blog-1256556944.file.myqcloud.com/public/nostr/%E7%B4%ABv.jpg 1.5x, https://blog-1256556944.file.myqcloud.com/public/nostr/%E7%B4%ABv.jpg 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/public/nostr/%E7%B4%ABv.jpg">
+    </a></figure></p>
+<h2 id="验证方法" class="headerLink">
+    <a href="#%e9%aa%8c%e8%af%81%e6%96%b9%e6%b3%95" class="header-mark"></a>验证方法</h2><p>有两种路线：</p>
+<ol>
+<li>找提供验证服务的社区项目，直接用他们的服务，这个自己找吧，缺点是可能不稳定，也不受自己控制</li>
+<li>用自己的域名进行验证，前提是你<strong>拥有一个域名的控制权</strong>，本文主要讲解这种方式</li>
+</ol>
+<h3 id="静态文件" class="headerLink">
+    <a href="#%e9%9d%99%e6%80%81%e6%96%87%e4%bb%b6" class="header-mark"></a>静态文件</h3><p>如果你已经有自己的网站了，并且支持https，那么直接在你的网站根目录放置一个静态文件即可。
+文件名为<code>.well-known/nostr.json</code>，内容写上你的用户名和公钥：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">{
+  &#34;names&#34;: {
+    &#34;kirito&#34;: &#34;2f7caa968b0ec9bacd55a07cfaf6206aab5a62387c76303c311db949dec8bc57&#34;
+  }
+}
+</code></pre></td></tr></table>
+</div>
+</div><p>可以写多行，为你的小伙伴也提供验证。</p>
+<h3 id="云函数" class="headerLink">
+    <a href="#%e4%ba%91%e5%87%bd%e6%95%b0" class="header-mark"></a>云函数</h3><p>当然有更好的方式，而且不需要服务器和证书，下面介绍下我使用的方式：<a href="https://vercel.com/dashboard" target="_blank" rel="noopener noreferrer">vercel</a>云函数（你自己会搭服务或者有其他云函数也行，原理一样）</p>
+<p>我之前写过一篇怎么用vercel云函数的文章，可以<a href="/use-vercel-as-free-faas/" rel="">参考</a>，当你弄好后，<strong>绑定自己的域名</strong>，就可以通过自己的域名访问云函数了，这是一个例子: <a href="https://dogdogback.com/api/list" target="_blank" rel="noopener noreferrer">https://dogdogback.com/api/list</a></p>
+<p>代码如果不会写直接克隆我的仓库即可<a href="https://github.com/kirito41dd/vercel-faas" target="_blank" rel="noopener noreferrer">vercel-faas</a>。</p>
+<p>具体操作：</p>
+<ol>
+<li>修改代码仓库中的文件<code>vercel.json</code>，添加NIP05接口的重定向，这样访问路径<code>/.well-known/nostr.json?name=xxx</code>的请求会被交给<code>/api/entrypoint.go</code>文件处理：
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
+<span class="nt">&#34;trailingSlash&#34;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+<span class="nt">&#34;rewrites&#34;</span><span class="p">:</span>
+<span class="p">[</span>
+    <span class="p">{</span>
+    <span class="nt">&#34;source&#34;</span><span class="p">:</span> <span class="s2">&#34;/api/(.*)&#34;</span><span class="p">,</span>
+    <span class="nt">&#34;destination&#34;</span><span class="p">:</span> <span class="s2">&#34;/api/entrypoint.go&#34;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+    <span class="nt">&#34;source&#34;</span><span class="p">:</span> <span class="s2">&#34;/.well-known/nostr.json&#34;</span><span class="p">,</span>
+    <span class="nt">&#34;destination&#34;</span><span class="p">:</span> <span class="s2">&#34;/api/entrypoint.go&#34;</span>
+    <span class="p">}</span>
+<span class="p">]</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>添加处理认证请求的路由，修改<code>/api/entrypoint.go</code>：
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">registerRouter</span><span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">gin</span><span class="p">.</span><span class="nx">RouterGroup</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// ...
+</span><span class="c1"></span>    <span class="nx">r</span><span class="p">.</span><span class="nf">GET</span><span class="p">(</span><span class="s">&#34;/.well-known/nostr.json&#34;</span><span class="p">,</span> <span class="nx">handler</span><span class="p">.</span><span class="nx">Cors</span><span class="p">,</span> <span class="nx">handler</span><span class="p">.</span><span class="nx">NIP05</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>添加认证逻辑，修改<code>/handler/handler.go</code>:
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">NIP05</span><span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">gin</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">name2pubkey</span> <span class="o">:=</span> <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span>
+        <span class="s">&#34;kirito&#34;</span><span class="p">:</span> <span class="s">&#34;2f7caa968b0ec9bacd55a07cfaf6206aab5a62387c76303c311db949dec8bc57&#34;</span><span class="p">,</span>
+        <span class="c1">// 可以在这里添加更多的账号，为你的朋友提供验证
+</span><span class="c1"></span>        <span class="c1">// &#34;&lt;name1&gt;&#34;:&#34;pubkey1&#34;,
+</span><span class="c1"></span>        <span class="c1">// &#34;&lt;name2&gt;&#34;:&#34;pubkey2&#34;,
+</span><span class="c1"></span>    <span class="p">}</span>
+    <span class="nx">user</span> <span class="o">:=</span> <span class="nx">c</span><span class="p">.</span><span class="nf">Query</span><span class="p">(</span><span class="s">&#34;name&#34;</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;nip05 verify request&#34;</span><span class="p">,</span> <span class="nx">user</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nx">v</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">name2pubkey</span><span class="p">[</span><span class="nx">user</span><span class="p">];</span> <span class="nx">ok</span> <span class="p">{</span>
+        <span class="nx">resp</span> <span class="o">:=</span> <span class="nx">NIP05Resp</span><span class="p">{}</span>
+        <span class="nx">resp</span><span class="p">.</span><span class="nx">Names</span><span class="p">[</span><span class="nx">user</span><span class="p">]</span> <span class="p">=</span> <span class="nx">v</span>
+        <span class="nx">c</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">resp</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="nx">c</span><span class="p">.</span><span class="nf">Status</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusNotFound</span><span class="p">)</span>
+    <span class="k">return</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+</ol>
+<p>把代码push到你的仓库，vercel会自动重新部署，然后用你的域名访问看看效果，这是我的：</p>
+<ol>
+<li><a href="https://dogdogback.com/.well-known/nostr.json?name=kirito" target="_blank" rel="noopener noreferrer">https://dogdogback.com/.well-known/nostr.json?name=kirito</a></li>
+<li><a href="https://dogdogback.com/.well-known/nostr.json?name=shishi" target="_blank" rel="noopener noreferrer">https://dogdogback.com/.well-known/nostr.json?name=shishi</a></li>
+</ol>
+<h3 id="客户端设置" class="headerLink">
+    <a href="#%e5%ae%a2%e6%88%b7%e7%ab%af%e8%ae%be%e7%bd%ae" class="header-mark"></a>客户端设置</h3><p>以Damus举例，编辑资料，配置你的用户名和NIP05地址，就可以看到紫V图标了
+<figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/public/nostr/set-name.jpg" title="https://blog-1256556944.file.myqcloud.com/public/nostr/set-name.jpg" data-thumbnail="https://blog-1256556944.file.myqcloud.com/public/nostr/set-name.jpg">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/public/nostr/set-name.jpg"
+            srcset="https://blog-1256556944.file.myqcloud.com/public/nostr/set-name.jpg, https://blog-1256556944.file.myqcloud.com/public/nostr/set-name.jpg 1.5x, https://blog-1256556944.file.myqcloud.com/public/nostr/set-name.jpg 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/public/nostr/set-name.jpg">
+    </a></figure>
+<figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/public/nostr/set-nip05.jpg" title="https://blog-1256556944.file.myqcloud.com/public/nostr/set-nip05.jpg" data-thumbnail="https://blog-1256556944.file.myqcloud.com/public/nostr/set-nip05.jpg">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/public/nostr/set-nip05.jpg"
+            srcset="https://blog-1256556944.file.myqcloud.com/public/nostr/set-nip05.jpg, https://blog-1256556944.file.myqcloud.com/public/nostr/set-nip05.jpg 1.5x, https://blog-1256556944.file.myqcloud.com/public/nostr/set-nip05.jpg 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/public/nostr/set-nip05.jpg">
+    </a></figure></p>
+<p>到这里就成功了，有疑问可以评论区提。</p>
+<h2 id="一些提示" class="headerLink">
+    <a href="#%e4%b8%80%e4%ba%9b%e6%8f%90%e7%a4%ba" class="header-mark"></a>一些提示</h2><ol>
+<li>有些webapp请求是会受到浏览器跨域策略限制，在http返回header中设置<code>Access-Control-Allow-Origin: *</code>，我的代码中已经处理了，如果用静态文件的方式无法处理跨域。</li>
+<li>如何获取hex格式的公钥？在Damus中长按<strong>你自己</strong>发送的信息，选择<code>Copy Note JSON</code>然后粘贴到一个地方，就能看到了。</li>
+<li>vercel也是可以托管静态文件的，仓库里只留一个json文件就行。</li>
+<li><del>富哥V我50</del></li>
+</ol>
+</div>
+
+        <div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2023-02-04</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/nostr/">nostr</a>,&nbsp;<a href="/tags/damus/">damus</a>,&nbsp;<a href="/tags/vercel/">vercel</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/water-water/" class="prev" rel="prev" title="水群学习法"><i class="fas fa-angle-left fa-fw"></i>水群学习法</a>
+            <a href="/tinyrenderer-note-2/" class="next" rel="next" title="TinyRenderer笔记2：透视投影">TinyRenderer笔记2：透视投影<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="twikoo"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://twikoo.js.org/">Twikoo</a>.
+            </noscript></div></article></div>
+        </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">      <a href="https://www.travellings.cn/go.html" target="_blank" rel="noopener" title="开往-友链接力"><img src="https://www.travellings.cn/assets/logo.gif" alt="开往-友链接力" width="120"></a><a href="https://www.foreverblog.cn/go.html" target="_blank" > <img src="https://img.foreverblog.cn/wormhole_3.gif" alt="" style="width:auto;height:32px;" title="穿梭虫洞-随机访问十年之约友链博客"> </a>
+      </br><small>1KiritobkMPpaWBjTDHSoiP5icv8PEFNdR</small>
+      </br><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+      </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2020 - 2024</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank" rel="noopener noreferrer">kirito</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+            <div class="footer-line"></div>
+            <div class="footer-line">
+            </div>
+        </div></footer></div>
+
+    <div id="fixed-buttons"><a href="#back-to-top" id="back-to-top-button" class="fixed-button" title="回到顶部">
+            <i class="fas fa-arrow-up fa-fw"></i>
+        </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+            <i class="fas fa-comment fa-fw"></i>
+        </a>
+    </div><div id="cookieconsent-container"></div><div class="assets"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/katex/copy-tex.min.css">
+        <noscript><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"></noscript><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":30},"comment":{"twikoo":{"commentCount":true,"el":"#twikoo","envId":"https://comment-liard.vercel.app/","lang":"zh-cn"}},"cookieconsent":{"content":{"dismiss":"同意","link":"了解更多","message":"本网站使用 Cookies 来改善您的浏览体验."},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"distance":null,"findAllMatches":null,"fuseIndexURL":"/index.json","highlightTag":"em","ignoreFieldNorm":null,"ignoreLocation":null,"isCaseSensitive":null,"location":null,"maxResultLength":10,"minMatchCharLength":null,"noResultsFound":"没有找到结果","snippetLength":50,"threshold":null,"type":"fuse","useExtendedSearch":null}};</script><script type="text/javascript" src="/lib/twikoo/twikoo.all.min.js" defer></script><script type="text/javascript" src="/js/twikoo.min.js" defer></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js" defer></script><script type="text/javascript" src="/lib/katex/auto-render.min.js" defer></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js" defer></script><script type="text/javascript" src="/lib/katex/mhchem.min.js" defer></script><script type="text/javascript" src="/js/katex.min.js" defer></script><script type="text/javascript" src="/lib/cookieconsent/cookieconsent.min.js" defer></script><script type="text/javascript" src="/js/cookieconsent.min.js" defer></script><script type="text/javascript" src="/js/theme.min.js" defer></script><script type="text/javascript">
+            window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());
+            gtag('config', 'G-ZKPP127E4F');
+        </script><script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id=G-ZKPP127E4F" async></script><script>
+			var _hmt = _hmt || [];
+			(function() {
+			  var hm = document.createElement("script");
+			  hm.src = "https://hm.baidu.com/hm.js?2004ef75aa13d757f75bf6f1f3add242";
+			  var s = document.getElementsByTagName("script")[0]; 
+			  s.parentNode.insertBefore(hm, s);
+			})();
+		</script><script>
+         
+         
+        var $cdnPrefix = "https://blog-1256556944.file.myqcloud.com";
+    </script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@2.1.3/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-backstretch@2.1.18/jquery.backstretch.min.js"></script>
+    <script type="text/javascript" src="/js/custom.js"></script>
+</div>
+</body>
+
+</html>

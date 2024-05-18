@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noodp" />
+    <title>TinyRenderer笔记2：透视投影 - kirito&#39;s blog</title><meta name="Description" content="kirito&#39;s blog"><meta property="og:title" content="TinyRenderer笔记2：透视投影" />
+<meta property="og:description" content="前面渲染模型时候，没有考虑每个点的z坐标，这种方式叫做[正交投影]^(Orthographic projection)，模型看起来偏胖，因为我" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.kirito.info/tinyrenderer-note-2/" /><meta property="og:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-04-08T12:36:44+08:00" />
+<meta property="article:modified_time" content="2023-04-08T12:36:44+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/>
+
+<meta name="twitter:title" content="TinyRenderer笔记2：透视投影"/>
+<meta name="twitter:description" content="前面渲染模型时候，没有考虑每个点的z坐标，这种方式叫做[正交投影]^(Orthographic projection)，模型看起来偏胖，因为我"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt">
+
+<meta name="theme-color" content="#f8f8f8"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="canonical" href="https://www.kirito.info/tinyrenderer-note-2/" /><link rel="prev" href="https://www.kirito.info/nostr-nip05-verification/" /><link rel="next" href="https://www.kirito.info/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/color.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/fontawesome-free/all.min.css">
+        <noscript><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"></noscript><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/animate/animate.min.css">
+        <noscript><link rel="stylesheet" href="/lib/animate/animate.min.css"></noscript><meta name="google-site-verification" content="5J8bsg9tKySrpONjEV2nAOqQ08TCVjsooCRIuDsxhD4" /><meta name="baidu-site-verification" content="code-NY7bFlUK92" /><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "TinyRenderer笔记2：透视投影",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/www.kirito.info\/tinyrenderer-note-2\/"
+        },"image": ["https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"],"genre": "posts","keywords": "graphics, tinyrenderer","wordcount":  1497 ,
+        "url": "https:\/\/www.kirito.info\/tinyrenderer-note-2\/","datePublished": "2023-04-08T12:36:44+08:00","dateModified": "2023-04-08T12:36:44+08:00","publisher": {
+            "@type": "Organization",
+            "name": "kirito","logo": "https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"},"author": {
+                "@type": "Person",
+                "name": "kirito"
+            },"description": ""
+    }
+    </script><script src="//instant.page/5.1.1" defer type="module" integrity="sha384-MWfCL6g1OTGsbSwfuMHc8+8J2u71/LA8dzlIN3ycajckxuZZmF+DNjdm7O6H3PSq"></script>
+</head>
+
+<body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">
+        function setTheme(theme) {document.body.setAttribute('theme', theme); document.documentElement.style.setProperty('color-scheme', theme === 'light' ? 'light' : 'dark'); window.theme = theme; }
+        function saveTheme(theme) {window.localStorage && localStorage.setItem('theme', theme);}
+        function getMeta(metaName) {const metas = document.getElementsByTagName('meta'); for (let i = 0; i < metas.length; i++) if (metas[i].getAttribute('name') === metaName) return metas[i]; return '';}
+        if (window.localStorage && localStorage.getItem('theme')) {let theme = localStorage.getItem('theme');theme === 'light' || theme === 'dark' || theme === 'black' ? setTheme(theme) : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light')); } else { if ('auto' === 'light' || 'auto' === 'dark' || 'auto' === 'black') setTheme('auto'), saveTheme('auto'); else saveTheme('auto'), window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light');}
+        let metaColors = {'light': '#f8f8f8','dark': '#252627','black': '#000000'}
+        getMeta('theme-color').content = metaColors[document.body.getAttribute('theme')];
+    </script>
+    <div id="back-to-top"></div>
+    <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="kirito&#39;s blog">kirito</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="#" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="kirito&#39;s blog">kirito</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a href="#" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+            <div class="container"><div class="toc" id="toc-auto">
+        <h2 class="toc-title">目录</h2>
+        <div class="toc-content always-active" id="toc-content-auto"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#2维几何">2维几何</a>
+      <ul>
+        <li><a href="#线性变换linear-transformations"><strong><ruby>线性变换<rt>Linear transformations</rt></ruby></strong></a></li>
+        <li><a href="#仿射变换affine-transformations"><strong><ruby>仿射变换<rt>affine transformations</rt></ruby></strong></a></li>
+      </ul>
+    </li>
+    <li><a href="#齐次坐标homogeneous-coordinates"><strong><ruby>齐次坐标<rt>Homogeneous coordinates</rt></ruby></strong></a></li>
+    <li><a href="#3d仿射变换">3d仿射变换</a></li>
+    <li><a href="#总结">总结</a></li>
+  </ul>
+</nav></div>
+    </div><script>document.getElementsByTagName("main")[0].setAttribute("pageStyle", "normal")</script><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "true")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">TinyRenderer笔记2：透视投影</h1><div class="post-meta">
+            <div class="post-meta-line">
+                <span class="post-author"><i class="author fas fa-user-circle fa-fw"></i><a href="/" title="Author" rel=" author" class="author">kirito</a>
+                </span>&nbsp;<span class="post-category">收录于 </span>&nbsp;<span class="post-category">类别 <a href="/categories/program/"><i class="far fa-folder fa-fw"></i>program</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-04-08">2023-04-08</time>&nbsp;<i class="far fa-edit fa-fw"></i>&nbsp;<time datetime="2023-04-08">2023-04-08</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1497 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 3 分钟&nbsp;<span id="/tinyrenderer-note-2/" class="leancloud_visitors" data-flag-title="TinyRenderer笔记2：透视投影">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class="leancloud-visitors-count" id=twikoo_visitors></span>&nbsp;次阅读
+                    </span>&nbsp;<span id="/tinyrenderer-note-2/" class="comment_count" data-flag-title="TinyRenderer笔记2：透视投影">
+                        <i class="far fa-comments fa-fw"></i>&nbsp;<span class="twikoo-comment-count" id="twikoo-comment-count"></span>&nbsp;条评论
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#2维几何">2维几何</a>
+      <ul>
+        <li><a href="#线性变换linear-transformations"><strong><ruby>线性变换<rt>Linear transformations</rt></ruby></strong></a></li>
+        <li><a href="#仿射变换affine-transformations"><strong><ruby>仿射变换<rt>affine transformations</rt></ruby></strong></a></li>
+      </ul>
+    </li>
+    <li><a href="#齐次坐标homogeneous-coordinates"><strong><ruby>齐次坐标<rt>Homogeneous coordinates</rt></ruby></strong></a></li>
+    <li><a href="#3d仿射变换">3d仿射变换</a></li>
+    <li><a href="#总结">总结</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>前面渲染模型时候，没有考虑每个点的z坐标，这种方式叫做<strong><ruby>正交投影<rt>Orthographic projection</rt></ruby></strong>，模型看起来偏胖，因为我们平时在3d世界看到的物体都是近大远小的。<strong><ruby>透视投影<rt>Perspective projection</rt></ruby></strong>就是用近大远小的方式投影。</p>
+<p>两种投影对比：</p>
+<table>
+<thead>
+<tr>
+<th>正交</th>
+<th>透视</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><image src="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/1-5.png" wdith=400px height=400px /></td>
+<td><image src="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/2-2.png" wdith=400px height=400px /></td>
+</tr>
+</tbody>
+</table>
+<h2 id="2维几何" class="headerLink">
+    <a href="#2%e7%bb%b4%e5%87%a0%e4%bd%95" class="header-mark"></a>2维几何</h2><h3 id="线性变换linear-transformations" class="headerLink">
+    <a href="#%e7%ba%bf%e6%80%a7%e5%8f%98%e6%8d%a2linear-transformations" class="header-mark"></a><strong><ruby>线性变换<rt>Linear transformations</rt></ruby></strong></h3><p>线性变换从几何直观有三个要点：</p>
+<ul>
+<li>变换前是直线的，变换后依然是直线</li>
+<li>直线比例保持不变</li>
+<li>变换前是原点的，变换后依然是原点</li>
+</ul>
+<p>说白了就是缩放、裁切和旋转， 不包括平移：<a href="https://www.aiuai.cn/aifarm1946.html" target="_blank" rel="noopener noreferrer">可以看这个文章</a></p>
+<p>平面上的线性变换都可以用一个二维矩阵计算：</p>
+<div>
+$$
+\begin{bmatrix}
+a & b \\ 
+c & d 
+\end{bmatrix} 
+\begin{bmatrix}
+x \\ y 
+\end{bmatrix}
+=
+\begin{bmatrix}
+ax + by \\ 
+cx + dy 
+\end{bmatrix} 
+$$
+<div/>
+<h3 id="仿射变换affine-transformations" class="headerLink">
+    <a href="#%e4%bb%bf%e5%b0%84%e5%8f%98%e6%8d%a2affine-transformations" class="header-mark"></a><strong><ruby>仿射变换<rt>affine transformations</rt></ruby></strong></h3><p>说简单点就是线性变换加上平移，用矩阵计算：</p>
+<div>
+$$
+\begin{bmatrix}
+a & b \\ 
+c & d 
+\end{bmatrix} 
+\begin{bmatrix}
+x \\ y 
+\end{bmatrix}
++
+\begin{bmatrix}
+e \\ f
+\end{bmatrix}
+=
+\begin{bmatrix}
+ax + by + e\\ 
+cx + dy + f
+\end{bmatrix} 
+$$
+<div/>
+<h2 id="齐次坐标homogeneous-coordinates" class="headerLink">
+    <a href="#%e9%bd%90%e6%ac%a1%e5%9d%90%e6%a0%87homogeneous-coordinates" class="header-mark"></a><strong><ruby>齐次坐标<rt>Homogeneous coordinates</rt></ruby></strong></h2><p>把2x2的变换矩阵加上一行一列，变成3x3，并且把等待变换的向量加上一个总是1的坐标：</p>
+<div>
+$$
+\begin{bmatrix}
+a & b & e \\ 
+c & d & f \\
+0 & 0 & 1 
+\end{bmatrix} 
+\begin{bmatrix}
+x \\ y \\ 1
+\end{bmatrix}
+=
+\begin{bmatrix}
+ax + by + e\\ 
+cx + dy + f \\
+1
+\end{bmatrix} 
+$$
+<div/>
+<p>这样就实现了和仿射变换一样的效果！这个想法非常简单。平移在二维空间中不是线性的。所以我们将2D嵌入到3D空间中(通过简单地为第三个分量加1)。这意味着二维空间是三维空间中z=1的平面。然后我们执行一个3D线性变换，并将结果投影到我们的2D物理平面上。</p>
+<p>将3d投射到2d只需要除以3d分量：</p>
+<div>
+$$
+\begin{bmatrix}
+x \\ 
+y \\
+z
+\end{bmatrix} 
+\rightarrow 
+\begin{bmatrix}
+x/z \\ 
+y/z
+\end{bmatrix} 
+$$
+<div/>
+<p>如果z无限逼近0代表被投影后的点在无穷远处：</p>
+<ul>
+<li>被投影的点 -&gt; 投影到平面z=?的2d坐标</li>
+<li>(x,y,1) -&gt; (x,y)</li>
+<li>(x,y,1/2) -&gt; (2x,2y)</li>
+<li>(x,y,1/4) -&gt; (4x,4y)</li>
+</ul>
+<p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/2-0.png" title="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/2-0.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/2-0.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/2-0.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/2-0.png, https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/2-0.png 1.5x, https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/2-0.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/2-0.png">
+    </a></figure></p>
+<p>可以看到，随着平面的下降，投影后的点越来越远，所以当z=0时，表示的是一个向量而不是3d空间中的一个点。</p>
+<h2 id="3d仿射变换" class="headerLink">
+    <a href="#3d%e4%bb%bf%e5%b0%84%e5%8f%98%e6%8d%a2" class="header-mark"></a>3d仿射变换</h2><p>2d的仿射变换可以通过吧2d嵌入3d，转换成3d中的线性变换，再投影回2d。同样的道理：3d的仿射变换，可以通过吧3d嵌入4d，转换成4d中的线性变换，在投影回3d！</p>
+<p>使用齐次坐标: 点(x,y,z) -&gt; (x,y,z,1)，用下面的矩阵试着把它在4d空间中进行变换:</p>
+<div>
+$$
+\begin{bmatrix}
+1 & 0 & 0 & 0 \\ 
+0 & 1 & 0 & 0 \\ 
+0 & 0 & 1 & 0 \\ 
+0 & 0 & r & 1 
+\end{bmatrix} 
+\begin{bmatrix}
+x \\ y \\ z \\ 1
+\end{bmatrix} 
+=
+\begin{bmatrix}
+x \\ y \\ z \\ rz+1
+\end{bmatrix} 
+$$
+<div/>
+<p>再投影回3d：</p>
+<div>
+$$
+\begin{bmatrix}
+x \\ y \\ z \\ rz+1
+\end{bmatrix} 
+\rightarrow
+\begin{bmatrix}
+\frac{x}{rz+1} \\ \frac{y}{rz+1} \\ \frac{z}{rz+1}
+\end{bmatrix} 
+$$
+<div/>
+<p>先把这个结果放一边。来看一个模拟现实中人眼将3d中一个点投影到平面上的例子:</p>
+<p>有一个点P=(x,y,z),我们要把它投影到z=0的平面上,摄像机(也就是人的眼睛)在z轴上(0,0,c)的位置</p>
+<p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/2-1.png" title="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/2-1.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/2-1.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/2-1.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/2-1.png, https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/2-1.png 1.5x, https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/2-1.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/2-1.png">
+    </a></figure></p>
+<p>根据初中还是高中的知识，三角形ABC和ODC是相似三角形，所以$\frac{AB}{AC}=\frac{OD}{OC}$，进而得出$\frac{x}{c-z}=\frac{x^{'}}{c}$</p>
+<p>所以：</p>
+<div>
+$$
+x^{'}= \frac{x}{1-z/c}
+$$
+<div/>
+同理：
+<div>
+$$
+y^{'}= \frac{y}{1-z/c}
+$$
+<div/>
+<p>回到矩阵，让r=-1/c:</p>
+<div>
+$$
+\begin{bmatrix}
+x \\ y \\ z \\ rz+1
+\end{bmatrix} 
+\rightarrow
+\begin{bmatrix}
+\frac{x}{rz+1} \\ \frac{y}{rz+1} \\ \frac{z}{rz+1}
+\end{bmatrix} 
+\rightarrow
+\begin{bmatrix}
+\frac{x}{1-z/c} \\ \frac{y}{1-z/c} \\ \frac{z}{1-z/c}
+\end{bmatrix} 
+$$
+<div/>
+<h2 id="总结" class="headerLink">
+    <a href="#%e6%80%bb%e7%bb%93" class="header-mark"></a>总结</h2><p>如果我们想用位于z轴上距离原点为c的摄像机计算一个中心投影，分三步：</p>
+<ol>
+<li>将3d嵌入到4d中</li>
+<li>在4d中进行线性变换</li>
+<li>投影回3d</li>
+</ol>
+<div>
+$$
+\begin{aligned}
+\begin{bmatrix}
+x \\ y \\ z
+\end{bmatrix}
+\rightarrow
+\begin{bmatrix}
+x \\ y \\ z \\ 1
+\end{bmatrix} 
+&\qquad(1)\\
+\begin{bmatrix}
+1 & 0 & 0 & 0 \\ 
+0 & 1 & 0 & 0 \\ 
+0 & 0 & 1 & 0 \\ 
+0 & 0 & -1/c & 1 
+\end{bmatrix} 
+\begin{bmatrix}
+x \\ y \\ z \\ 1
+\end{bmatrix} 
+=
+\begin{bmatrix}
+x \\ y \\ z \\ 1-z/c
+\end{bmatrix}
+&\qquad(2)\\
+\begin{bmatrix}
+x \\ y \\ z \\ 1-z/c
+\end{bmatrix} 
+\rightarrow
+\begin{bmatrix}
+\frac{x}{1-z/c} \\ \frac{y}{1-z/c} \\ \frac{z}{1-z/c}
+\end{bmatrix} 
+&\qquad(3)
+\end{aligned}
+$$
+<div/>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="c1">// 4d投影到3d
+</span><span class="c1"></span><span class="k">fn</span> <span class="nf">v4p2v3</span><span class="p">(</span><span class="n">v</span>: <span class="nc">glm</span>::<span class="n">Vec4</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">glm</span>::<span class="n">Vec3</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="n">v</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">v</span><span class="p">.</span><span class="n">w</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">v</span><span class="p">.</span><span class="n">w</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">.</span><span class="n">z</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">v</span><span class="p">.</span><span class="n">w</span><span class="p">)</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="c1">// ...
+</span><span class="c1"></span><span class="kd">let</span><span class="w"> </span><span class="n">camera</span>: <span class="nc">glm</span>::<span class="n">Vec3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">3.</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="c1">// 投影变换矩阵，注意gml初始化一行是矩阵中的一列
+</span><span class="c1"></span><span class="kd">let</span><span class="w"> </span><span class="n">projection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">mat4</span><span class="p">(</span><span class="w">
+</span><span class="w">        </span><span class="mf">1.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> 
+</span><span class="w">        </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">1.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> 
+</span><span class="w">        </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">1.</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">1.</span><span class="o">/</span><span class="n">camera</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w"> 
+</span><span class="w">        </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">1.</span><span class="p">);</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="c1">// ...
+</span><span class="c1">// 透视投影
+</span><span class="c1"></span><span class="kd">let</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v4p2v3</span><span class="p">(</span><span class="n">projection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">extend</span><span class="p">(</span><span class="mf">1.</span><span class="p">));</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v4p2v3</span><span class="p">(</span><span class="n">projection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">extend</span><span class="p">(</span><span class="mf">1.</span><span class="p">));</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v4p2v3</span><span class="p">(</span><span class="n">projection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">c</span><span class="p">.</span><span class="n">extend</span><span class="p">(</span><span class="mf">1.</span><span class="p">));</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p><image src="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/2-2.png" wdith=400px height=400px /></p>
+<p>详细代码见这里<a href="https://github.com/kirito41dd/tinyrenderer/tree/076b31fc4ea69f00e2cee530e5e3e25445189b67" target="_blank" rel="noopener noreferrer">076b31fc4ea69f00e2cee530e5e3e25445189b67</a></p>
+</div>
+
+        <div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2023-04-08</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/graphics/">graphics</a>,&nbsp;<a href="/tags/tinyrenderer/">tinyrenderer</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/nostr-nip05-verification/" class="prev" rel="prev" title="Nostr账号Nip05验证方法"><i class="fas fa-angle-left fa-fw"></i>Nostr账号Nip05验证方法</a>
+            <a href="/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84/" class="next" rel="next" title="神经网络的结构">神经网络的结构<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="twikoo"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://twikoo.js.org/">Twikoo</a>.
+            </noscript></div></article></div>
+        </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">      <a href="https://www.travellings.cn/go.html" target="_blank" rel="noopener" title="开往-友链接力"><img src="https://www.travellings.cn/assets/logo.gif" alt="开往-友链接力" width="120"></a><a href="https://www.foreverblog.cn/go.html" target="_blank" > <img src="https://img.foreverblog.cn/wormhole_3.gif" alt="" style="width:auto;height:32px;" title="穿梭虫洞-随机访问十年之约友链博客"> </a>
+      </br><small>1KiritobkMPpaWBjTDHSoiP5icv8PEFNdR</small>
+      </br><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+      </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2020 - 2024</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank" rel="noopener noreferrer">kirito</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+            <div class="footer-line"></div>
+            <div class="footer-line">
+            </div>
+        </div></footer></div>
+
+    <div id="fixed-buttons"><a href="#back-to-top" id="back-to-top-button" class="fixed-button" title="回到顶部">
+            <i class="fas fa-arrow-up fa-fw"></i>
+        </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+            <i class="fas fa-comment fa-fw"></i>
+        </a>
+    </div><div id="cookieconsent-container"></div><div class="assets"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/katex/copy-tex.min.css">
+        <noscript><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"></noscript><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":30},"comment":{"twikoo":{"commentCount":true,"el":"#twikoo","envId":"https://comment-liard.vercel.app/","lang":"zh-cn"}},"cookieconsent":{"content":{"dismiss":"同意","link":"了解更多","message":"本网站使用 Cookies 来改善您的浏览体验."},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"distance":null,"findAllMatches":null,"fuseIndexURL":"/index.json","highlightTag":"em","ignoreFieldNorm":null,"ignoreLocation":null,"isCaseSensitive":null,"location":null,"maxResultLength":10,"minMatchCharLength":null,"noResultsFound":"没有找到结果","snippetLength":50,"threshold":null,"type":"fuse","useExtendedSearch":null}};</script><script type="text/javascript" src="/lib/twikoo/twikoo.all.min.js" defer></script><script type="text/javascript" src="/js/twikoo.min.js" defer></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js" defer></script><script type="text/javascript" src="/lib/katex/auto-render.min.js" defer></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js" defer></script><script type="text/javascript" src="/lib/katex/mhchem.min.js" defer></script><script type="text/javascript" src="/js/katex.min.js" defer></script><script type="text/javascript" src="/lib/cookieconsent/cookieconsent.min.js" defer></script><script type="text/javascript" src="/js/cookieconsent.min.js" defer></script><script type="text/javascript" src="/js/theme.min.js" defer></script><script type="text/javascript">
+            window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());
+            gtag('config', 'G-ZKPP127E4F');
+        </script><script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id=G-ZKPP127E4F" async></script><script>
+			var _hmt = _hmt || [];
+			(function() {
+			  var hm = document.createElement("script");
+			  hm.src = "https://hm.baidu.com/hm.js?2004ef75aa13d757f75bf6f1f3add242";
+			  var s = document.getElementsByTagName("script")[0]; 
+			  s.parentNode.insertBefore(hm, s);
+			})();
+		</script><script>
+         
+         
+        var $cdnPrefix = "https://blog-1256556944.file.myqcloud.com";
+    </script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@2.1.3/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-backstretch@2.1.18/jquery.backstretch.min.js"></script>
+    <script type="text/javascript" src="/js/custom.js"></script>
+</div>
+</body>
+
+</html>

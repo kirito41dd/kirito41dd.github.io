@@ -1,0 +1,204 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>pattern-matching - 标签 - kirito&#39;s blog</title>
+        <link>https://www.kirito.info/tags/pattern-matching/</link>
+        <description>pattern-matching - 标签 - kirito&#39;s blog</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Thu, 17 Jan 2019 18:21:49 &#43;0800</lastBuildDate><atom:link href="https://www.kirito.info/tags/pattern-matching/" rel="self" type="application/rss+xml" /><item>
+    <title>kmp</title>
+    <link>https://www.kirito.info/kmp/</link>
+    <pubDate>Thu, 17 Jan 2019 18:21:49 &#43;0800</pubDate><author>
+        <name>kirito</name>
+    </author><guid>https://www.kirito.info/kmp/</guid>
+    <description><![CDATA[<h2 id="求模式串在目标串中出现的次数和位置" class="headerLink">
+    <a href="#%e6%b1%82%e6%a8%a1%e5%bc%8f%e4%b8%b2%e5%9c%a8%e7%9b%ae%e6%a0%87%e4%b8%b2%e4%b8%ad%e5%87%ba%e7%8e%b0%e7%9a%84%e6%ac%a1%e6%95%b0%e5%92%8c%e4%bd%8d%e7%bd%ae" class="header-mark"></a>求模式串在目标串中出现的次数和位置</h2><h3 id="next数组的一些性质" class="headerLink">
+    <a href="#next%e6%95%b0%e7%bb%84%e7%9a%84%e4%b8%80%e4%ba%9b%e6%80%a7%e8%b4%a8" class="header-mark"></a>next数组的一些性质</h3><p>KMP最小循环节、循环周期：</p>
+<p>定理：假设S的长度为<code>len</code>则S存在最小循环节，对S构造next数组，循环节的长度<code>L</code>为<code>len-next[len]</code>，子串为S[0…<code>len-next[len]-1</code>]。</p>
+<p>（1）如果<code>len</code>可以被<code>len - next[len]</code>整除，则表明字符串S可以完全由循环节循环组成，循环周期<code>T = len/L</code>。</p>
+<p>（2）如果不能，说明还需要再添加几个字母才能补全。需要补的个数是循环个数<code>L-len%L = L-(len-L)%L = L-next[len]%L</code>，<code>L = len-next[len]</code>。</p>
+<h2 id="代码" class="headerLink">
+    <a href="#%e4%bb%a3%e7%a0%81" class="header-mark"></a>代码</h2><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">namespace</span> <span class="n">KMP</span><span class="p">{</span>
+	<span class="kt">int</span> <span class="n">next</span><span class="p">[</span><span class="mi">10010</span><span class="p">];</span>
+	<span class="c1">// 处理模式串的next数组,x[i-next[i]...i-1] == x[0....next[i]-1]
+</span><span class="c1"></span>	<span class="kt">void</span> <span class="nf">kmp_pre</span><span class="p">(</span><span class="kt">char</span> <span class="n">x</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">m</span><span class="p">,</span> <span class="kt">int</span> <span class="n">_next</span><span class="p">[]){</span>
+		<span class="kt">int</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">;</span>
+		<span class="n">j</span> <span class="o">=</span> <span class="n">_next</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+		<span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+		<span class="k">while</span><span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">m</span><span class="p">){</span>
+			<span class="k">while</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">!=</span> <span class="n">j</span> <span class="o">&amp;&amp;</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="n">j</span> <span class="o">=</span> <span class="n">_next</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+			<span class="n">_next</span><span class="p">[</span><span class="o">++</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">++</span><span class="n">j</span><span class="p">;</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+	<span class="c1">// 改进next数组,减少回溯次数，但不能使用next的性质
+</span><span class="c1"></span>	<span class="kt">void</span> <span class="nf">kmp_pre_2</span><span class="p">(</span><span class="kt">char</span> <span class="n">x</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">m</span><span class="p">,</span> <span class="kt">int</span> <span class="n">fast_next</span><span class="p">[]){</span>
+		<span class="kt">int</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">;</span>
+		<span class="n">j</span> <span class="o">=</span> <span class="n">fast_next</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+		<span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+		<span class="k">while</span><span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">m</span><span class="p">){</span>
+			<span class="k">while</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">!=</span> <span class="n">j</span> <span class="o">&amp;&amp;</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="n">j</span> <span class="o">=</span> <span class="n">fast_next</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="o">++</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">x</span><span class="p">[</span><span class="o">++</span><span class="n">j</span><span class="p">])</span> <span class="n">fast_next</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">fast_next</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+			<span class="k">else</span> <span class="n">fast_next</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">j</span><span class="p">;</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+	<span class="c1">//模式匹配,返回出现次数，x模式串，y主串
+</span><span class="c1"></span>	<span class="kt">int</span> <span class="nf">kmp</span><span class="p">(</span><span class="kt">char</span> <span class="n">x</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">m</span><span class="p">,</span> <span class="kt">char</span> <span class="n">y</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">n</span><span class="p">){</span>
+		<span class="kt">int</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">;</span>
+		<span class="kt">int</span> <span class="n">ans</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+		<span class="n">kmp_pre</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">next</span><span class="p">);</span>
+		<span class="c1">//kmp_pre_2(x, m, next);
+</span><span class="c1"></span>		<span class="n">i</span> <span class="o">=</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+		<span class="k">while</span><span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">){</span>
+			<span class="k">while</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">!=</span><span class="n">j</span> <span class="o">&amp;&amp;</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="n">j</span> <span class="o">=</span> <span class="n">next</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+			<span class="n">i</span><span class="o">++</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">;</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">j</span> <span class="o">&gt;=</span> <span class="n">m</span><span class="p">){</span>
+				<span class="n">ans</span><span class="o">++</span><span class="p">;</span>
+				<span class="c1">//i-m即为模式串在主串中的开始位置
+</span><span class="c1"></span>				<span class="n">j</span> <span class="o">=</span> <span class="n">next</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+			<span class="p">}</span>
+		<span class="p">}</span>
+		<span class="k">return</span> <span class="n">ans</span><span class="p">;</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="例题" class="headerLink">
+    <a href="#%e4%be%8b%e9%a2%98" class="header-mark"></a>例题</h2><p><a href="http://acm.hdu.edu.cn/showproblem.php?pid=3336" target="_blank" rel="noopener noreferrer">hdu3336</a> next数组+dp</p>
+<p>大意：给你个字符串如<code>abab</code>，它的子串<code>a</code>，<code>ab</code>，<code>aba</code>，<code>abab</code>出现次数</p>
+<p>即2+2+1+1=6</p>
+<p>dp[i]表示以第<code>i</code>个字符结尾的子串出现次数</p>
+<p>dp[i] = dp[next[i]] + 1</p>
+<p>对于<code>abab</code>，next[]={-1,0,0,1,2}</p>
+<p>当i=1时，表示子串<code>a</code>，dp[1] = dp[next[1]] + 1 = dp[0] + 1 = 1，‘a’</p>
+<p>当i=2时，表示子串<code>ab</code>，dp[2] = dp[next[2]] + 1 = dp[0] + 1 = 1，&lsquo;ab&rsquo;</p>
+<p>当i=3时，表示子串<code>aba</code>，dp[3] = dp[next[3]] + 1 = dp[1] + 1 = 2，&lsquo;a&rsquo;,&lsquo;aba&rsquo;</p>
+<p>当i=4时，表示子串<code>abab</code>，dp[4] = dp[next[4]] + 1 = dp[2] + 1 = 2，&lsquo;ab&rsquo;,&lsquo;abab&rsquo;</p>
+<p>以a结尾的有&rsquo;a',&lsquo;a&rsquo;,&lsquo;aba&rsquo;;</p>
+<p>以b结尾的有&rsquo;ab',&lsquo;ab&rsquo;,&lsquo;abab&rsquo;;</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span><span class="cp">#define mem(x,y) memset(x,y,sizeof(x))
+</span><span class="cp"></span><span class="k">const</span> <span class="kt">int</span> <span class="n">mod</span> <span class="o">=</span> <span class="mi">10007</span><span class="p">;</span>
+<span class="k">namespace</span> <span class="n">KMP</span><span class="p">{</span>
+	<span class="kt">int</span> <span class="n">next</span><span class="p">[</span><span class="mi">200001</span><span class="p">];</span>
+	<span class="c1">// 处理模式串的next数组,x[i-next[i]...i-1] == x[0....next[i]-1]
+</span><span class="c1"></span>	<span class="kt">void</span> <span class="nf">kmp_pre</span><span class="p">(</span><span class="kt">char</span> <span class="n">x</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">m</span><span class="p">,</span> <span class="kt">int</span> <span class="n">_next</span><span class="p">[]){</span>
+		<span class="kt">int</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">;</span>
+		<span class="n">j</span> <span class="o">=</span> <span class="n">_next</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+		<span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+		<span class="k">while</span><span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">m</span><span class="p">){</span>
+			<span class="k">while</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">!=</span> <span class="n">j</span> <span class="o">&amp;&amp;</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="n">j</span> <span class="o">=</span> <span class="n">_next</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+			<span class="n">_next</span><span class="p">[</span><span class="o">++</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">++</span><span class="n">j</span><span class="p">;</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+<span class="kt">int</span> <span class="n">t</span><span class="p">,</span><span class="n">n</span><span class="p">;</span><span class="c1">//200000
+</span><span class="c1"></span><span class="kt">char</span> <span class="n">str</span><span class="p">[</span><span class="mi">200001</span><span class="p">];</span>
+<span class="kt">int</span> <span class="n">dp</span><span class="p">[</span><span class="mi">200001</span><span class="p">];</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(){</span>
+ 	<span class="n">scanf</span><span class="p">(</span><span class="s">&#34;%d&#34;</span><span class="p">,</span><span class="o">&amp;</span><span class="n">t</span><span class="p">);</span>
+ 	<span class="k">while</span><span class="p">(</span><span class="n">t</span><span class="o">--</span><span class="p">){</span>
+ 		<span class="n">mem</span><span class="p">(</span><span class="n">KMP</span><span class="o">::</span><span class="n">next</span><span class="p">,</span><span class="mi">0</span><span class="p">);</span>
+ 		<span class="n">scanf</span><span class="p">(</span><span class="s">&#34;%d&#34;</span><span class="p">,</span><span class="o">&amp;</span><span class="n">n</span><span class="p">);</span>
+ 		<span class="n">scanf</span><span class="p">(</span><span class="s">&#34;%s&#34;</span><span class="p">,</span><span class="n">str</span><span class="p">);</span>
+ 		<span class="n">KMP</span><span class="o">::</span><span class="n">kmp_pre</span><span class="p">(</span><span class="n">str</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">KMP</span><span class="o">::</span><span class="n">next</span><span class="p">);</span>
+ 		<span class="kt">int</span> <span class="n">ans</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+ 		<span class="n">mem</span><span class="p">(</span><span class="n">dp</span><span class="p">,</span><span class="mi">0</span><span class="p">);</span>
+ 		<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span><span class="n">i</span><span class="o">&lt;=</span><span class="n">n</span><span class="p">;</span><span class="n">i</span><span class="o">++</span><span class="p">){</span>
+ 			<span class="n">dp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">dp</span><span class="p">[</span><span class="n">KMP</span><span class="o">::</span><span class="n">next</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">mod</span><span class="p">;</span>
+ 			<span class="n">ans</span> <span class="o">=</span> <span class="p">(</span><span class="n">ans</span> <span class="o">+</span> <span class="n">dp</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">%</span><span class="n">mod</span><span class="p">;</span>
+ 		<span class="p">}</span>
+ 		<span class="n">printf</span><span class="p">(</span><span class="s">&#34;%d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span><span class="n">ans</span> <span class="p">);</span>
+ 	<span class="p">}</span>
+  	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div>]]></description>
+</item></channel>
+</rss>
