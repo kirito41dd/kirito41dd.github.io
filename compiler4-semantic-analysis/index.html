@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noodp" />
+    <title>Compiler4_语义分析or类型检查 - kirito&#39;s blog</title><meta name="Description" content="kirito&#39;s blog"><meta property="og:title" content="Compiler4_语义分析or类型检查" />
+<meta property="og:description" content="语义分析(Semantic Analysis)的任务编译器前端： 语义分析的任务就是输出图中的中间表示。早期编译器语义分析往往直接生成目标代码，" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.kirito.info/compiler4-semantic-analysis/" /><meta property="og:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2020-06-13T15:23:05+08:00" />
+<meta property="article:modified_time" content="2020-06-13T15:23:05+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/>
+
+<meta name="twitter:title" content="Compiler4_语义分析or类型检查"/>
+<meta name="twitter:description" content="语义分析(Semantic Analysis)的任务编译器前端： 语义分析的任务就是输出图中的中间表示。早期编译器语义分析往往直接生成目标代码，"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt">
+
+<meta name="theme-color" content="#f8f8f8"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="canonical" href="https://www.kirito.info/compiler4-semantic-analysis/" /><link rel="prev" href="https://www.kirito.info/compiler3-syntax-directed-translation-and-ast/" /><link rel="next" href="https://www.kirito.info/compiler5-code-generation/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/color.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/fontawesome-free/all.min.css">
+        <noscript><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"></noscript><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/animate/animate.min.css">
+        <noscript><link rel="stylesheet" href="/lib/animate/animate.min.css"></noscript><meta name="google-site-verification" content="5J8bsg9tKySrpONjEV2nAOqQ08TCVjsooCRIuDsxhD4" /><meta name="baidu-site-verification" content="code-NY7bFlUK92" /><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Compiler4_语义分析or类型检查",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/www.kirito.info\/compiler4-semantic-analysis\/"
+        },"image": ["https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"],"genre": "posts","keywords": "compiler","wordcount":  919 ,
+        "url": "https:\/\/www.kirito.info\/compiler4-semantic-analysis\/","datePublished": "2020-06-13T15:23:05+08:00","dateModified": "2020-06-13T15:23:05+08:00","publisher": {
+            "@type": "Organization",
+            "name": "kirito","logo": "https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"},"author": {
+                "@type": "Person",
+                "name": "kirito"
+            },"description": ""
+    }
+    </script><script src="//instant.page/5.1.1" defer type="module" integrity="sha384-MWfCL6g1OTGsbSwfuMHc8+8J2u71/LA8dzlIN3ycajckxuZZmF+DNjdm7O6H3PSq"></script>
+</head>
+
+<body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">
+        function setTheme(theme) {document.body.setAttribute('theme', theme); document.documentElement.style.setProperty('color-scheme', theme === 'light' ? 'light' : 'dark'); window.theme = theme; }
+        function saveTheme(theme) {window.localStorage && localStorage.setItem('theme', theme);}
+        function getMeta(metaName) {const metas = document.getElementsByTagName('meta'); for (let i = 0; i < metas.length; i++) if (metas[i].getAttribute('name') === metaName) return metas[i]; return '';}
+        if (window.localStorage && localStorage.getItem('theme')) {let theme = localStorage.getItem('theme');theme === 'light' || theme === 'dark' || theme === 'black' ? setTheme(theme) : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light')); } else { if ('auto' === 'light' || 'auto' === 'dark' || 'auto' === 'black') setTheme('auto'), saveTheme('auto'); else saveTheme('auto'), window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light');}
+        let metaColors = {'light': '#f8f8f8','dark': '#252627','black': '#000000'}
+        getMeta('theme-color').content = metaColors[document.body.getAttribute('theme')];
+    </script>
+    <div id="back-to-top"></div>
+    <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="kirito&#39;s blog">kirito</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="#" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="kirito&#39;s blog">kirito</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a href="#" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+            <div class="container"><div class="toc" id="toc-auto">
+        <h2 class="toc-title">目录</h2>
+        <div class="toc-content always-active" id="toc-content-auto"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#语义分析semantic-analysis的任务">语义分析(Semantic Analysis)的任务</a></li>
+    <li><a href="#语义规则及实现">语义规则及实现</a>
+      <ul>
+        <li><a href="#类型检查">类型检查</a></li>
+        <li><a href="#变量声明的处理">变量声明的处理</a></li>
+        <li><a href="#语句的处理">语句的处理</a></li>
+        <li><a href="#符号表">符号表</a></li>
+      </ul>
+    </li>
+    <li><a href="#其他问题">其他问题</a></li>
+  </ul>
+</nav></div>
+    </div><script>document.getElementsByTagName("main")[0].setAttribute("pageStyle", "normal")</script><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "true")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Compiler4_语义分析or类型检查</h1><div class="post-meta">
+            <div class="post-meta-line">
+                <span class="post-author"><i class="author fas fa-user-circle fa-fw"></i><a href="/" title="Author" rel=" author" class="author">kirito</a>
+                </span>&nbsp;<span class="post-category">收录于 </span>&nbsp;<span class="post-category">类别 <a href="/categories/compiler/"><i class="far fa-folder fa-fw"></i>compiler</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2020-06-13">2020-06-13</time>&nbsp;<i class="far fa-edit fa-fw"></i>&nbsp;<time datetime="2020-06-13">2020-06-13</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 919 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 2 分钟&nbsp;<span id="/compiler4-semantic-analysis/" class="leancloud_visitors" data-flag-title="Compiler4_语义分析or类型检查">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class="leancloud-visitors-count" id=twikoo_visitors></span>&nbsp;次阅读
+                    </span>&nbsp;<span id="/compiler4-semantic-analysis/" class="comment_count" data-flag-title="Compiler4_语义分析or类型检查">
+                        <i class="far fa-comments fa-fw"></i>&nbsp;<span class="twikoo-comment-count" id="twikoo-comment-count"></span>&nbsp;条评论
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#语义分析semantic-analysis的任务">语义分析(Semantic Analysis)的任务</a></li>
+    <li><a href="#语义规则及实现">语义规则及实现</a>
+      <ul>
+        <li><a href="#类型检查">类型检查</a></li>
+        <li><a href="#变量声明的处理">变量声明的处理</a></li>
+        <li><a href="#语句的处理">语句的处理</a></li>
+        <li><a href="#符号表">符号表</a></li>
+      </ul>
+    </li>
+    <li><a href="#其他问题">其他问题</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h2 id="语义分析semantic-analysis的任务" class="headerLink">
+    <a href="#%e8%af%ad%e4%b9%89%e5%88%86%e6%9e%90semantic-analysis%e7%9a%84%e4%bb%bb%e5%8a%a1" class="header-mark"></a>语义分析(Semantic Analysis)的任务</h2><p>编译器前端：</p>
+<p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/compiler/front.png" title="https://blog-1256556944.file.myqcloud.com/compiler/front.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/compiler/front.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/compiler/front.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/compiler/front.png, https://blog-1256556944.file.myqcloud.com/compiler/front.png 1.5x, https://blog-1256556944.file.myqcloud.com/compiler/front.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/compiler/front.png">
+    </a></figure></p>
+<p>语义分析的任务就是输出图中的中间表示。早期编译器语义分析往往直接生成目标代码，现代编译器需要对代码做优化或其他分析，所以生成中间表示（中间代码）。</p>
+<p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/compiler/typechecking.png" title="https://blog-1256556944.file.myqcloud.com/compiler/typechecking.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/compiler/typechecking.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/compiler/typechecking.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/compiler/typechecking.png, https://blog-1256556944.file.myqcloud.com/compiler/typechecking.png 1.5x, https://blog-1256556944.file.myqcloud.com/compiler/typechecking.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/compiler/typechecking.png">
+    </a></figure></p>
+<ul>
+<li><strong>语义分析</strong>也称为<strong>类型检查(Type Checking)</strong>、<strong>上下文相关分析</strong></li>
+<li>负责<strong>检查</strong>程序（抽象语法树）的上下文相关的属性，这是具体语言相关的，如：
+<ul>
+<li>变量在使用前先进行声明</li>
+<li>每个表达式都有合适的类型</li>
+<li>函数调用和函数的定义一致</li>
+<li>&hellip;</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">f</span><span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="n">p</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">x</span> <span class="o">+=</span> <span class="mi">4</span><span class="p">;</span> <span class="c1">// ?
+</span><span class="c1"></span>    <span class="n">p</span><span class="p">(</span><span class="mi">123</span><span class="p">);</span> <span class="c1">// ?
+</span><span class="c1"></span>    <span class="s">&#34;hello&#34;</span> <span class="o">+</span> <span class="s">&#34;world&#34;</span><span class="p">;</span> <span class="c1">// ?
+</span><span class="c1"></span><span class="p">}</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="n">f</span><span class="p">()</span> <span class="o">+</span> <span class="mi">5</span><span class="p">;</span> <span class="c1">// ?
+</span><span class="c1"></span>    <span class="k">break</span><span class="p">;</span> <span class="c1">// ?
+</span><span class="c1"></span>    <span class="k">return</span><span class="p">;</span> <span class="c1">// ?
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>上面的C程序，对语法分析器来说是合法的，但是它明显有许多错误，找出这些错误是语义分析的任务。</p>
+<p><strong>程序的语义：</strong></p>
+<ul>
+<li>传统上，大部分程序设计语言的语义都采用自然语言来表达程序语言的语义</li>
+<li>编译器的实现者必须对语言中的语义规定有全面的理解</li>
+</ul>
+<h2 id="语义规则及实现" class="headerLink">
+    <a href="#%e8%af%ad%e4%b9%89%e8%a7%84%e5%88%99%e5%8f%8a%e5%ae%9e%e7%8e%b0" class="header-mark"></a>语义规则及实现</h2><h3 id="类型检查" class="headerLink">
+    <a href="#%e7%b1%bb%e5%9e%8b%e6%a3%80%e6%9f%a5" class="header-mark"></a>类型检查</h3><p>定义一个c&ndash;语言：</p>
+<div>
+$$
+E\to n\\
+\ |\ true\\
+\ |\ false\\
+\ |\ E+E\\
+\ |\ E\ \&\&\ E
+$$
+</div>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="c1">// 类型合法的程序：
+</span><span class="c1"></span><span class="mi">3</span><span class="o">+</span><span class="mi">4</span>
+<span class="nb">false</span> <span class="o">&amp;&amp;</span> <span class="nb">true</span>
+<span class="c1">// 类型不合法的程序
+</span><span class="c1"></span><span class="mi">3</span> <span class="o">+</span> <span class="nb">true</span>
+<span class="nb">true</span> <span class="o">+</span> <span class="nb">false</span>
+<span class="c1">// 注意在文法上,他们都是合法的
+</span><span class="c1">// 语义分析的任务是，对于一个给定的表达式e而言，写一个函数
+</span><span class="c1"></span><span class="n">type</span> <span class="n">check</span><span class="p">(</span><span class="n">e</span><span class="p">);</span>
+<span class="c1">// 返回表达式e的类型，不合法则报错
+</span></code></pre></td></tr></table>
+</div>
+</div><p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/compiler/check.png" title="https://blog-1256556944.file.myqcloud.com/compiler/check.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/compiler/check.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/compiler/check.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/compiler/check.png, https://blog-1256556944.file.myqcloud.com/compiler/check.png 1.5x, https://blog-1256556944.file.myqcloud.com/compiler/check.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/compiler/check.png">
+    </a></figure></p>
+<h3 id="变量声明的处理" class="headerLink">
+    <a href="#%e5%8f%98%e9%87%8f%e5%a3%b0%e6%98%8e%e7%9a%84%e5%a4%84%e7%90%86" class="header-mark"></a>变量声明的处理</h3><p>扩充语言，必须有声明和表达式。</p>
+<div>
+$$
+P\to D\ E\\
+\ \\
+D\to T\ id;\ D\ |\ \varepsilon\\
+\ \\
+T\to int\\
+\ |\ bool\\
+\ \\
+E\to n\\
+\ |\ true\\
+\ |\ false\\
+\ |\ E+E\\
+\ |\ E\ \&\&\ E
+$$
+</div>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="c1">// 合法
+</span><span class="c1"></span><span class="kt">int</span> <span class="n">x</span><span class="p">;</span>
+<span class="n">x</span><span class="o">+</span><span class="mi">4</span>
+<span class="c1">// 不合法
+</span><span class="c1"></span><span class="kt">bool</span> <span class="n">y</span><span class="p">;</span>
+<span class="nb">false</span> <span class="o">&amp;&amp;</span> <span class="n">y</span>
+<span class="c1">// 不合法
+</span><span class="c1"></span><span class="n">x</span> <span class="o">+</span> <span class="mi">3</span>
+<span class="c1">// 不合法
+</span><span class="c1"></span><span class="kt">int</span> <span class="n">x</span><span class="p">;</span>
+<span class="n">x</span> <span class="o">+</span> <span class="nb">false</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>检查算法： table是符号表</p>
+<p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/compiler/typecheck1.png" title="https://blog-1256556944.file.myqcloud.com/compiler/typecheck1.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/compiler/typecheck1.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/compiler/typecheck1.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/compiler/typecheck1.png, https://blog-1256556944.file.myqcloud.com/compiler/typecheck1.png 1.5x, https://blog-1256556944.file.myqcloud.com/compiler/typecheck1.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/compiler/typecheck1.png">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/compiler/typecheck2.png" title="https://blog-1256556944.file.myqcloud.com/compiler/typecheck2.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/compiler/typecheck2.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/compiler/typecheck2.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/compiler/typecheck2.png, https://blog-1256556944.file.myqcloud.com/compiler/typecheck2.png 1.5x, https://blog-1256556944.file.myqcloud.com/compiler/typecheck2.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/compiler/typecheck2.png">
+    </a></figure></p>
+<h3 id="语句的处理" class="headerLink">
+    <a href="#%e8%af%ad%e5%8f%a5%e7%9a%84%e5%a4%84%e7%90%86" class="header-mark"></a>语句的处理</h3><p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/compiler/stm.png" title="https://blog-1256556944.file.myqcloud.com/compiler/stm.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/compiler/stm.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/compiler/stm.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/compiler/stm.png, https://blog-1256556944.file.myqcloud.com/compiler/stm.png 1.5x, https://blog-1256556944.file.myqcloud.com/compiler/stm.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/compiler/stm.png">
+    </a></figure></p>
+<h3 id="符号表" class="headerLink">
+    <a href="#%e7%ac%a6%e5%8f%b7%e8%a1%a8" class="header-mark"></a>符号表</h3><ul>
+<li>用来存储程序中的变量相关信息
+<ul>
+<li>类型</li>
+<li>作用域</li>
+<li>访问控制信息</li>
+</ul>
+</li>
+<li>必须非常高效，因为程序中变量规模会很大</li>
+</ul>
+<p>符号表是典型的字典结构：<code>symbolTable: key -&gt; value</code></p>
+<table>
+<thead>
+<tr>
+<th>变量/映射</th>
+<th>type</th>
+<th>scope</th>
+<th>&hellip;</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>x</td>
+<td>INT</td>
+<td>0</td>
+<td>&hellip;</td>
+</tr>
+<tr>
+<td>y</td>
+<td>BOOL</td>
+<td>1</td>
+<td>&hellip;</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>
+<p>为了高效，可以使用hash表(O(1))，或者红黑树(O(logN)更小)</p>
+</li>
+<li>
+<p>处理作用域的方法</p>
+<ul>
+<li>一张表
+<ul>
+<li>进入作用域时，插入元素</li>
+<li>离开作用域时，删除元素</li>
+</ul>
+</li>
+<li>采用符号表构成的栈</li>
+<li>进入作用域时，插入新的符号表</li>
+<li>离开作用域时，删除栈顶符号表</li>
+</ul>
+</li>
+<li>
+<p>名称空间</p>
+<ul>
+<li>每个名字空间用一个表来表示</li>
+</ul>
+</li>
+</ul>
+<h2 id="其他问题" class="headerLink">
+    <a href="#%e5%85%b6%e4%bb%96%e9%97%ae%e9%a2%98" class="header-mark"></a>其他问题</h2><ul>
+<li>类型相容性</li>
+<li>错误诊断</li>
+<li>代码翻译
+<ul>
+<li>现代编译器的语义分析模块，除了做语义分析外，还要负责生成中间代码或目标代码</li>
+<li>因此语义分析模块往往是编译器中最庞大复杂的模块</li>
+</ul>
+</li>
+</ul>
+</div>
+
+        <div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2020-06-13</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/compiler/">compiler</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/compiler3-syntax-directed-translation-and-ast/" class="prev" rel="prev" title="Compiler3_语法制导翻译&amp;AST"><i class="fas fa-angle-left fa-fw"></i>Compiler3_语法制导翻译&amp;AST</a>
+            <a href="/compiler5-code-generation/" class="next" rel="next" title="Compiler5_代码生成">Compiler5_代码生成<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="twikoo"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://twikoo.js.org/">Twikoo</a>.
+            </noscript></div></article></div>
+        </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">      <a href="https://www.travellings.cn/go.html" target="_blank" rel="noopener" title="开往-友链接力"><img src="https://www.travellings.cn/assets/logo.gif" alt="开往-友链接力" width="120"></a><a href="https://www.foreverblog.cn/go.html" target="_blank" > <img src="https://img.foreverblog.cn/wormhole_3.gif" alt="" style="width:auto;height:32px;" title="穿梭虫洞-随机访问十年之约友链博客"> </a>
+      </br><small>1KiritobkMPpaWBjTDHSoiP5icv8PEFNdR</small>
+      </br><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+      </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2020 - 2024</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank" rel="noopener noreferrer">kirito</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+            <div class="footer-line"></div>
+            <div class="footer-line">
+            </div>
+        </div></footer></div>
+
+    <div id="fixed-buttons"><a href="#back-to-top" id="back-to-top-button" class="fixed-button" title="回到顶部">
+            <i class="fas fa-arrow-up fa-fw"></i>
+        </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+            <i class="fas fa-comment fa-fw"></i>
+        </a>
+    </div><div class="assets"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/katex/copy-tex.min.css">
+        <noscript><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"></noscript><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":30},"comment":{"twikoo":{"commentCount":true,"el":"#twikoo","envId":"https://comment-liard.vercel.app/","lang":"zh-cn"}},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"distance":null,"findAllMatches":null,"fuseIndexURL":"/index.json","highlightTag":"em","ignoreFieldNorm":null,"ignoreLocation":null,"isCaseSensitive":null,"location":null,"maxResultLength":10,"minMatchCharLength":null,"noResultsFound":"没有找到结果","snippetLength":50,"threshold":null,"type":"fuse","useExtendedSearch":null}};</script><script type="text/javascript" src="/lib/twikoo/twikoo.all.min.js" defer></script><script type="text/javascript" src="/js/twikoo.min.js" defer></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js" defer></script><script type="text/javascript" src="/lib/katex/auto-render.min.js" defer></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js" defer></script><script type="text/javascript" src="/lib/katex/mhchem.min.js" defer></script><script type="text/javascript" src="/js/katex.min.js" defer></script><script type="text/javascript" src="/js/theme.min.js" defer></script><script type="text/javascript">
+            window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());
+            gtag('config', 'G-ZKPP127E4F');
+        </script><script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id=G-ZKPP127E4F" async></script><script>
+			var _hmt = _hmt || [];
+			(function() {
+			  var hm = document.createElement("script");
+			  hm.src = "https://hm.baidu.com/hm.js?2004ef75aa13d757f75bf6f1f3add242";
+			  var s = document.getElementsByTagName("script")[0]; 
+			  s.parentNode.insertBefore(hm, s);
+			})();
+		</script><script>
+         
+         
+        var $cdnPrefix = "https://blog-1256556944.file.myqcloud.com";
+    </script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@2.1.3/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-backstretch@2.1.18/jquery.backstretch.min.js"></script>
+    <script type="text/javascript" src="/js/custom.js"></script>
+</div>
+</body>
+
+</html>

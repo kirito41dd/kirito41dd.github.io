@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noodp" />
+    <title>Compiler5_代码生成 - kirito&#39;s blog</title><meta name="Description" content="kirito&#39;s blog"><meta property="og:title" content="Compiler5_代码生成" />
+<meta property="og:description" content="代码生成(Code Generation)的任务中端和后端： 最简单的结构： 简单的结构在早期非常流行，现代编译器很少用，而是分成多个阶段向目标代" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.kirito.info/compiler5-code-generation/" /><meta property="og:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2020-06-14T10:58:06+08:00" />
+<meta property="article:modified_time" content="2020-06-14T10:58:06+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/>
+
+<meta name="twitter:title" content="Compiler5_代码生成"/>
+<meta name="twitter:description" content="代码生成(Code Generation)的任务中端和后端： 最简单的结构： 简单的结构在早期非常流行，现代编译器很少用，而是分成多个阶段向目标代"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt">
+
+<meta name="theme-color" content="#f8f8f8"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="canonical" href="https://www.kirito.info/compiler5-code-generation/" /><link rel="prev" href="https://www.kirito.info/compiler4-semantic-analysis/" /><link rel="next" href="https://www.kirito.info/template/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/color.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/fontawesome-free/all.min.css">
+        <noscript><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"></noscript><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/animate/animate.min.css">
+        <noscript><link rel="stylesheet" href="/lib/animate/animate.min.css"></noscript><meta name="google-site-verification" content="5J8bsg9tKySrpONjEV2nAOqQ08TCVjsooCRIuDsxhD4" /><meta name="baidu-site-verification" content="code-NY7bFlUK92" /><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Compiler5_代码生成",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/www.kirito.info\/compiler5-code-generation\/"
+        },"image": ["https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"],"genre": "posts","keywords": "compiler","wordcount":  1867 ,
+        "url": "https:\/\/www.kirito.info\/compiler5-code-generation\/","datePublished": "2020-06-14T10:58:06+08:00","dateModified": "2020-06-14T10:58:06+08:00","publisher": {
+            "@type": "Organization",
+            "name": "kirito","logo": "https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"},"author": {
+                "@type": "Person",
+                "name": "kirito"
+            },"description": ""
+    }
+    </script><script src="//instant.page/5.1.1" defer type="module" integrity="sha384-MWfCL6g1OTGsbSwfuMHc8+8J2u71/LA8dzlIN3ycajckxuZZmF+DNjdm7O6H3PSq"></script>
+</head>
+
+<body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">
+        function setTheme(theme) {document.body.setAttribute('theme', theme); document.documentElement.style.setProperty('color-scheme', theme === 'light' ? 'light' : 'dark'); window.theme = theme; }
+        function saveTheme(theme) {window.localStorage && localStorage.setItem('theme', theme);}
+        function getMeta(metaName) {const metas = document.getElementsByTagName('meta'); for (let i = 0; i < metas.length; i++) if (metas[i].getAttribute('name') === metaName) return metas[i]; return '';}
+        if (window.localStorage && localStorage.getItem('theme')) {let theme = localStorage.getItem('theme');theme === 'light' || theme === 'dark' || theme === 'black' ? setTheme(theme) : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light')); } else { if ('auto' === 'light' || 'auto' === 'dark' || 'auto' === 'black') setTheme('auto'), saveTheme('auto'); else saveTheme('auto'), window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light');}
+        let metaColors = {'light': '#f8f8f8','dark': '#252627','black': '#000000'}
+        getMeta('theme-color').content = metaColors[document.body.getAttribute('theme')];
+    </script>
+    <div id="back-to-top"></div>
+    <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="kirito&#39;s blog">kirito</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="#" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="kirito&#39;s blog">kirito</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a href="#" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+            <div class="container"><div class="toc" id="toc-auto">
+        <h2 class="toc-title">目录</h2>
+        <div class="toc-content always-active" id="toc-content-auto"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#代码生成code-generation的任务">代码生成(Code Generation)的任务</a></li>
+    <li><a href="#栈式计算机">栈式计算机</a>
+      <ul>
+        <li><a href="#递归下降代码生成算法">递归下降代码生成算法</a></li>
+      </ul>
+    </li>
+    <li><a href="#寄存器计算机">寄存器计算机</a>
+      <ul>
+        <li><a href="#递归下降代码生成算法-1">递归下降代码生成算法</a></li>
+      </ul>
+    </li>
+    <li><a href="#中间代码intermediate-code-generation的地位和作用">中间代码(Intermediate Code Generation)的地位和作用</a></li>
+    <li><a href="#三地址码">三地址码</a></li>
+    <li><a href="#控制流图">控制流图</a></li>
+    <li><a href="#数据流分析">数据流分析</a></li>
+  </ul>
+</nav></div>
+    </div><script>document.getElementsByTagName("main")[0].setAttribute("pageStyle", "normal")</script><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "true")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Compiler5_代码生成</h1><div class="post-meta">
+            <div class="post-meta-line">
+                <span class="post-author"><i class="author fas fa-user-circle fa-fw"></i><a href="/" title="Author" rel=" author" class="author">kirito</a>
+                </span>&nbsp;<span class="post-category">收录于 </span>&nbsp;<span class="post-category">类别 <a href="/categories/compiler/"><i class="far fa-folder fa-fw"></i>compiler</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2020-06-14">2020-06-14</time>&nbsp;<i class="far fa-edit fa-fw"></i>&nbsp;<time datetime="2020-06-14">2020-06-14</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1867 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 4 分钟&nbsp;<span id="/compiler5-code-generation/" class="leancloud_visitors" data-flag-title="Compiler5_代码生成">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class="leancloud-visitors-count" id=twikoo_visitors></span>&nbsp;次阅读
+                    </span>&nbsp;<span id="/compiler5-code-generation/" class="comment_count" data-flag-title="Compiler5_代码生成">
+                        <i class="far fa-comments fa-fw"></i>&nbsp;<span class="twikoo-comment-count" id="twikoo-comment-count"></span>&nbsp;条评论
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#代码生成code-generation的任务">代码生成(Code Generation)的任务</a></li>
+    <li><a href="#栈式计算机">栈式计算机</a>
+      <ul>
+        <li><a href="#递归下降代码生成算法">递归下降代码生成算法</a></li>
+      </ul>
+    </li>
+    <li><a href="#寄存器计算机">寄存器计算机</a>
+      <ul>
+        <li><a href="#递归下降代码生成算法-1">递归下降代码生成算法</a></li>
+      </ul>
+    </li>
+    <li><a href="#中间代码intermediate-code-generation的地位和作用">中间代码(Intermediate Code Generation)的地位和作用</a></li>
+    <li><a href="#三地址码">三地址码</a></li>
+    <li><a href="#控制流图">控制流图</a></li>
+    <li><a href="#数据流分析">数据流分析</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h2 id="代码生成code-generation的任务" class="headerLink">
+    <a href="#%e4%bb%a3%e7%a0%81%e7%94%9f%e6%88%90code-generation%e7%9a%84%e4%bb%bb%e5%8a%a1" class="header-mark"></a>代码生成(Code Generation)的任务</h2><p>中端和后端：</p>
+<p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/compiler/back.png" title="https://blog-1256556944.file.myqcloud.com/compiler/back.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/compiler/back.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/compiler/back.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/compiler/back.png, https://blog-1256556944.file.myqcloud.com/compiler/back.png 1.5x, https://blog-1256556944.file.myqcloud.com/compiler/back.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/compiler/back.png">
+    </a></figure></p>
+<p>最简单的结构：</p>
+<p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/compiler/back2.png" title="https://blog-1256556944.file.myqcloud.com/compiler/back2.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/compiler/back2.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/compiler/back2.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/compiler/back2.png, https://blog-1256556944.file.myqcloud.com/compiler/back2.png 1.5x, https://blog-1256556944.file.myqcloud.com/compiler/back2.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/compiler/back2.png">
+    </a></figure></p>
+<p>简单的结构在早期非常流行，现代编译器很少用，而是分成多个阶段向目标代码靠近。</p>
+<p>代码生成的任务：</p>
+<ul>
+<li>负责把源程序翻译成“目标机器”上的代码
+<ul>
+<li>目标机器可以是真是物理机</li>
+<li>可以实虚拟机，jvm&hellip;</li>
+</ul>
+</li>
+<li>两个重要的子任务
+<ul>
+<li>给源程序的数据分配计算资源
+<ul>
+<li>数据
+<ul>
+<li>全局变量、局部变量、动态分配</li>
+<li>还要考虑变量放在内存还是寄存器之类的问题</li>
+</ul>
+</li>
+<li>计算机资源
+<ul>
+<li>寄存器、数据区、代码区、栈区、堆区</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>给源程序的代码选择指令
+<ul>
+<li>源程序的代码
+<ul>
+<li>表达式运算、语句、函数等</li>
+</ul>
+</li>
+<li>机器指令
+<ul>
+<li>算数运算、比较、跳转、函数调用返回</li>
+<li>需要熟悉指令集体系结构(ISA)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>下面研究两种不同的ISA上的代码生成技术</p>
+<ul>
+<li>栈计算机Stack</li>
+<li>寄存器计算机Reg</li>
+</ul>
+<h2 id="栈式计算机" class="headerLink">
+    <a href="#%e6%a0%88%e5%bc%8f%e8%ae%a1%e7%ae%97%e6%9c%ba" class="header-mark"></a>栈式计算机</h2><ul>
+<li>效率低，基本已经退出历史舞台，现在没有物理机用这个结构</li>
+<li>栈式计算机生成代码是<strong>最容易</strong>的</li>
+<li>仍然有许多栈式虚拟机
+<ul>
+<li>Pascal P code</li>
+<li>java virtual machine (JVM)</li>
+<li>Postscript</li>
+<li>&hellip;</li>
+</ul>
+</li>
+</ul>
+<p>一个简单的栈式计算机：</p>
+<p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/compiler/stack.png" title="https://blog-1256556944.file.myqcloud.com/compiler/stack.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/compiler/stack.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/compiler/stack.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/compiler/stack.png, https://blog-1256556944.file.myqcloud.com/compiler/stack.png 1.5x, https://blog-1256556944.file.myqcloud.com/compiler/stack.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/compiler/stack.png">
+    </a></figure></p>
+<p>指令集：</p>
+<div>
+$$
+s\to\ push\ NUM\\
+|\ load\ x\\
+|\ store\ x\\
+|\ add\\
+|\ sub\\
+|\ times\\
+|\ div
+$$
+</div>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">push NUM	压入立即数	stack[++top]=NUM;
+
+load x		从内存读入到栈顶	stack[++top]=x;
+store x		弹出栈顶变量，并赋值给内存	x=stack[top--];
+
+add			+ 	temp=stack[top-1]+stack[top]; top-=2; push temp;
+sub			-
+times		*
+div			/
+
+变量内存分配的伪指令(只支持整形)
+.int x		为变量x分配内存单元
+
+
+示例
+int x;
+int y;
+int z;
+
+x = 10;
+y = 5;
+z = x + y;
+y = z * x;
+指令
+.int x
+.int y
+.int z
+
+push	10
+store	x
+push	5
+store	y
+push	x
+push	y
+add
+store	z
+load	z
+load	x
+times
+store	y
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="递归下降代码生成算法" class="headerLink">
+    <a href="#%e9%80%92%e5%bd%92%e4%b8%8b%e9%99%8d%e4%bb%a3%e7%a0%81%e7%94%9f%e6%88%90%e7%ae%97%e6%b3%95" class="header-mark"></a>递归下降代码生成算法</h3><p>从c&ndash;到stack</p>
+<p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/compiler/c--2stack.png" title="https://blog-1256556944.file.myqcloud.com/compiler/c--2stack.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/compiler/c--2stack.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/compiler/c--2stack.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/compiler/c--2stack.png, https://blog-1256556944.file.myqcloud.com/compiler/c--2stack.png 1.5x, https://blog-1256556944.file.myqcloud.com/compiler/c--2stack.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/compiler/c--2stack.png">
+    </a></figure></p>
+<p>会发现这是对抽象语法树的后序遍历，和语义分析差不多，所以很多编译器把语义分析和代码生成（或中间代码生成）和二为一</p>
+<p>不变式：表达式的值总在栈顶</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">Gen_E(E e)
+	switch (e)
+		calse n: emit(&#34;push n&#34;); break;
+		calse id: emit(&#34;load id&#34;); break;
+		case true: emit(&#34;push 1&#34;); break;
+		case false: emit(&#34;push 0&#34;); break;
+		case e1+e2: Gen_E (e1);
+					Gen_E (e2);
+					emit(&#34;add&#34;); break
+		case ...: ... // ...
+</code></pre></td></tr></table>
+</div>
+</div><p>不变式：执行后，栈的规模不变</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">Gen_S(S s)
+	switch (s)
+		case id=e:  Gen_E(e);
+					emit(&#34;store id&#34;); break;
+		case printi(e): Gen_E(e);
+						emit(&#34;printi&#34;); break;
+		case printb(e): Gen_(e);
+						emit(&#34;printb&#34;); break;
+</code></pre></td></tr></table>
+</div>
+</div><p>不变式：只生产.int类型</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">Gen_T(T t)
+	switch (t)
+		case int: emit(&#34;.int&#34;); break;
+		case bool: emit(&#34;.int&#34;); break;
+		
+Gen_D (T id; D)
+	Gen_T(T);
+	emit(&#34;id&#34;);
+	Gen_D(D);
+	
+Gen_P(D S)
+	Gen_D(D);
+	Gen_S(S);
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="寄存器计算机" class="headerLink">
+    <a href="#%e5%af%84%e5%ad%98%e5%99%a8%e8%ae%a1%e7%ae%97%e6%9c%ba" class="header-mark"></a>寄存器计算机</h2><ul>
+<li>
+<p>寄存器计算机是目前最流行的机器体系结构之一</p>
+<ul>
+<li>效率很高</li>
+<li>机器体系结构很工整</li>
+</ul>
+</li>
+<li>
+<p>机器基于寄存器架构</p>
+<ul>
+<li>典型的有16、32或更多寄存器，所有操作都在寄存器中进行</li>
+<li>访存都通过 load/store 进行，内存不能直接运算</li>
+</ul>
+</li>
+</ul>
+<p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/compiler/reg.png" title="https://blog-1256556944.file.myqcloud.com/compiler/reg.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/compiler/reg.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/compiler/reg.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/compiler/reg.png, https://blog-1256556944.file.myqcloud.com/compiler/reg.png 1.5x, https://blog-1256556944.file.myqcloud.com/compiler/reg.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/compiler/reg.png">
+    </a></figure></p>
+<p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/compiler/reg2.png" title="https://blog-1256556944.file.myqcloud.com/compiler/reg2.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/compiler/reg2.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/compiler/reg2.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/compiler/reg2.png, https://blog-1256556944.file.myqcloud.com/compiler/reg2.png 1.5x, https://blog-1256556944.file.myqcloud.com/compiler/reg2.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/compiler/reg2.png">
+    </a></figure></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">movn n, r		把n放入寄存器r
+mov  r1, r2 	把r1赋值r2
+load [x], r 	把内存的值读入寄存器r
+store r, [x]	把r的值存入内存
+add r1, r2, r3 	r3=r1+r2
+sub r1, r2, r3
+times r1, r2, r3
+dive r1, r2, r3
+
+为变量分配寄存器的伪指令
+.int x
+</code></pre></td></tr></table>
+</div>
+</div><p>因为假设有无限多个寄存器(真实机器不可能)</p>
+<ul>
+<li>因此每个声明变量和临时变量都会占用一个（虚拟）寄存器</li>
+<li>把虚拟寄存器分配到物理寄存器的过程称为<strong>寄存器分配</strong></li>
+</ul>
+<h3 id="递归下降代码生成算法-1" class="headerLink">
+    <a href="#%e9%80%92%e5%bd%92%e4%b8%8b%e9%99%8d%e4%bb%a3%e7%a0%81%e7%94%9f%e6%88%90%e7%ae%97%e6%b3%95-1" class="header-mark"></a>递归下降代码生成算法</h3><p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/compiler/reg3.png" title="https://blog-1256556944.file.myqcloud.com/compiler/reg3.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/compiler/reg3.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/compiler/reg3.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/compiler/reg3.png, https://blog-1256556944.file.myqcloud.com/compiler/reg3.png 1.5x, https://blog-1256556944.file.myqcloud.com/compiler/reg3.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/compiler/reg3.png">
+    </a></figure></p>
+<p>略</p>
+<h2 id="中间代码intermediate-code-generation的地位和作用" class="headerLink">
+    <a href="#%e4%b8%ad%e9%97%b4%e4%bb%a3%e7%a0%81intermediate-code-generation%e7%9a%84%e5%9c%b0%e4%bd%8d%e5%92%8c%e4%bd%9c%e7%94%a8" class="header-mark"></a>中间代码(Intermediate Code Generation)的地位和作用</h2><p>中间代码/中间表示:</p>
+<ul>
+<li>树和有向无环图（DAG）
+<ul>
+<li>高层表示，适用于程序源代码。抽象语法树就是个树</li>
+</ul>
+</li>
+<li>三地址码（3-address code）
+<ul>
+<li>低层表示，靠近目标机器</li>
+</ul>
+</li>
+<li>控制流图（CFG）
+<ul>
+<li>更精细的三地址码，程序的图状表示</li>
+<li>适合做程序分析、程序优化等</li>
+</ul>
+</li>
+<li>静态单赋值形式（SSA）
+<ul>
+<li>更精细的控制流图</li>
+<li>同时编码控制流信息和数据流信息</li>
+<li>gcc4.0之后用了这个</li>
+</ul>
+</li>
+<li>连续传递风格（CPS）
+<ul>
+<li>更一般的SSA</li>
+<li>SSA一般是函数内，CPS可以表示跨函数或跨模块</li>
+</ul>
+</li>
+<li>&hellip; 等等</li>
+</ul>
+<p>为什么要划分成这么多中间表示？</p>
+<ul>
+<li>
+<p>编译器工程上的考虑</p>
+<ul>
+<li>阶段划分：把整个编译过程划分成不同的阶段</li>
+<li>任务分解</li>
+<li>代码工程：代码更容易实现、维护、演进</li>
+</ul>
+</li>
+<li>
+<p><strong>程序分析</strong>和<strong>代码优化</strong>的需要</p>
+<ul>
+<li>许多优化在特定的中间表示上才可以或才容易进行</li>
+</ul>
+</li>
+<li>
+<p>更通用</p>
+<p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/compiler/ir.png" title="https://blog-1256556944.file.myqcloud.com/compiler/ir.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/compiler/ir.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/compiler/ir.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/compiler/ir.png, https://blog-1256556944.file.myqcloud.com/compiler/ir.png 1.5x, https://blog-1256556944.file.myqcloud.com/compiler/ir.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/compiler/ir.png">
+    </a></figure></p>
+</li>
+</ul>
+<h2 id="三地址码" class="headerLink">
+    <a href="#%e4%b8%89%e5%9c%b0%e5%9d%80%e7%a0%81" class="header-mark"></a>三地址码</h2><p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/compiler/3code.png" title="https://blog-1256556944.file.myqcloud.com/compiler/3code.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/compiler/3code.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/compiler/3code.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/compiler/3code.png, https://blog-1256556944.file.myqcloud.com/compiler/3code.png 1.5x, https://blog-1256556944.file.myqcloud.com/compiler/3code.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/compiler/3code.png">
+    </a></figure></p>
+<p>三地址码基本思想</p>
+<ul>
+<li>给每个中间变量和计算结果命名
+<ul>
+<li>没有复合表达式</li>
+</ul>
+</li>
+<li>只有最基本的控制流
+<ul>
+<li>没有各种控制结构</li>
+<li>只有goto, call等</li>
+</ul>
+</li>
+<li>所以三地址码可以看成是抽象的指令集
+<ul>
+<li>通用的RISC</li>
+</ul>
+</li>
+</ul>
+<p>示例</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">a = 3 + 4 * 5;
+if(x &lt; y)
+	z = 6;
+else
+	z = 7;
+	
+/*****************************/
+
+x_1 = 4;
+x_2 = 5;
+x_3 = x_1 * x_2;
+x_4 = 3;
+x_5 = x_4 + x_3;
+a = x_5;
+Cjmp (x&lt;y, L_1, L_2);
+L_1:
+	z = 6;
+	jmp L_3;
+L_2:
+	z = 7;
+	jmp L_3;
+L_3:
+	...
+</code></pre></td></tr></table>
+</div>
+</div><p>一个简单的三地址码定义</p>
+<p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/compiler/3code2.png" title="https://blog-1256556944.file.myqcloud.com/compiler/3code2.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/compiler/3code2.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/compiler/3code2.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/compiler/3code2.png, https://blog-1256556944.file.myqcloud.com/compiler/3code2.png 1.5x, https://blog-1256556944.file.myqcloud.com/compiler/3code2.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/compiler/3code2.png">
+    </a></figure></p>
+<h2 id="控制流图" class="headerLink">
+    <a href="#%e6%8e%a7%e5%88%b6%e6%b5%81%e5%9b%be" class="header-mark"></a>控制流图</h2><p>好处：</p>
+<ul>
+<li>控制流分析
+<ul>
+<li>典型问题，”程序中是否存在循环？“</li>
+</ul>
+</li>
+<li>数据流分析
+<ul>
+<li>“某个变量的值可能是什么”</li>
+</ul>
+</li>
+</ul>
+<p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/compiler/ctrl.png" title="https://blog-1256556944.file.myqcloud.com/compiler/ctrl.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/compiler/ctrl.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/compiler/ctrl.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/compiler/ctrl.png, https://blog-1256556944.file.myqcloud.com/compiler/ctrl.png 1.5x, https://blog-1256556944.file.myqcloud.com/compiler/ctrl.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/compiler/ctrl.png">
+    </a></figure></p>
+<ul>
+<li>基本块：是语句的一个序列，从第一条执行到最后一条
+<ul>
+<li>不能从中间进入</li>
+<li>不能从中间退出
+<ul>
+<li>即跳转指令只能出现在最后</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>控制流图：有向图$G=(V,E)$
+<ul>
+<li>节点：基本块</li>
+<li>边：基本块之间的跳转关系</li>
+</ul>
+</li>
+</ul>
+<p>如何生成控制流图：</p>
+<ul>
+<li>直接从抽象语法树生成
+<ul>
+<li>如果高层语言的控制流结构比较工整的话，比较容易</li>
+</ul>
+</li>
+<li>先生成三地址码，然后继续生成控制流图
+<ul>
+<li>像包含<code>goto</code>语句的语言，更合适</li>
+<li>更通用，阶段划分</li>
+</ul>
+</li>
+</ul>
+<p>控制流图应用之一：死基本块删除</p>
+<p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/compiler/die.png" title="https://blog-1256556944.file.myqcloud.com/compiler/die.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/compiler/die.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/compiler/die.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/compiler/die.png, https://blog-1256556944.file.myqcloud.com/compiler/die.png 1.5x, https://blog-1256556944.file.myqcloud.com/compiler/die.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/compiler/die.png">
+    </a></figure></p>
+<h2 id="数据流分析" class="headerLink">
+    <a href="#%e6%95%b0%e6%8d%ae%e6%b5%81%e5%88%86%e6%9e%90" class="header-mark"></a>数据流分析</h2><p>优化的一般模式：</p>
+<p><figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/compiler/youhua.png" title="https://blog-1256556944.file.myqcloud.com/compiler/youhua.png" data-thumbnail="https://blog-1256556944.file.myqcloud.com/compiler/youhua.png">
+        <img
+            
+            loading="lazy"
+            src="https://blog-1256556944.file.myqcloud.com/compiler/youhua.png"
+            srcset="https://blog-1256556944.file.myqcloud.com/compiler/youhua.png, https://blog-1256556944.file.myqcloud.com/compiler/youhua.png 1.5x, https://blog-1256556944.file.myqcloud.com/compiler/youhua.png 2x"
+            sizes="auto"
+            alt="https://blog-1256556944.file.myqcloud.com/compiler/youhua.png">
+    </a></figure></p>
+<p>两种具体的数据流分析：</p>
+<ul>
+<li>到达定义分析</li>
+<li>活性分析</li>
+</ul>
+</div>
+
+        <div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2020-06-14</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/compiler/">compiler</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/compiler4-semantic-analysis/" class="prev" rel="prev" title="Compiler4_语义分析or类型检查"><i class="fas fa-angle-left fa-fw"></i>Compiler4_语义分析or类型检查</a>
+            <a href="/template/" class="next" rel="next" title="板子">板子<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="twikoo"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://twikoo.js.org/">Twikoo</a>.
+            </noscript></div></article></div>
+        </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">      <a href="https://www.travellings.cn/go.html" target="_blank" rel="noopener" title="开往-友链接力"><img src="https://www.travellings.cn/assets/logo.gif" alt="开往-友链接力" width="120"></a><a href="https://www.foreverblog.cn/go.html" target="_blank" > <img src="https://img.foreverblog.cn/wormhole_3.gif" alt="" style="width:auto;height:32px;" title="穿梭虫洞-随机访问十年之约友链博客"> </a>
+      </br><small>1KiritobkMPpaWBjTDHSoiP5icv8PEFNdR</small>
+      </br><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+      </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2020 - 2024</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank" rel="noopener noreferrer">kirito</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+            <div class="footer-line"></div>
+            <div class="footer-line">
+            </div>
+        </div></footer></div>
+
+    <div id="fixed-buttons"><a href="#back-to-top" id="back-to-top-button" class="fixed-button" title="回到顶部">
+            <i class="fas fa-arrow-up fa-fw"></i>
+        </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+            <i class="fas fa-comment fa-fw"></i>
+        </a>
+    </div><div class="assets"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/katex/copy-tex.min.css">
+        <noscript><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"></noscript><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":30},"comment":{"twikoo":{"commentCount":true,"el":"#twikoo","envId":"https://comment-liard.vercel.app/","lang":"zh-cn"}},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"distance":null,"findAllMatches":null,"fuseIndexURL":"/index.json","highlightTag":"em","ignoreFieldNorm":null,"ignoreLocation":null,"isCaseSensitive":null,"location":null,"maxResultLength":10,"minMatchCharLength":null,"noResultsFound":"没有找到结果","snippetLength":50,"threshold":null,"type":"fuse","useExtendedSearch":null}};</script><script type="text/javascript" src="/lib/twikoo/twikoo.all.min.js" defer></script><script type="text/javascript" src="/js/twikoo.min.js" defer></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js" defer></script><script type="text/javascript" src="/lib/katex/auto-render.min.js" defer></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js" defer></script><script type="text/javascript" src="/lib/katex/mhchem.min.js" defer></script><script type="text/javascript" src="/js/katex.min.js" defer></script><script type="text/javascript" src="/js/theme.min.js" defer></script><script type="text/javascript">
+            window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());
+            gtag('config', 'G-ZKPP127E4F');
+        </script><script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id=G-ZKPP127E4F" async></script><script>
+			var _hmt = _hmt || [];
+			(function() {
+			  var hm = document.createElement("script");
+			  hm.src = "https://hm.baidu.com/hm.js?2004ef75aa13d757f75bf6f1f3add242";
+			  var s = document.getElementsByTagName("script")[0]; 
+			  s.parentNode.insertBefore(hm, s);
+			})();
+		</script><script>
+         
+         
+        var $cdnPrefix = "https://blog-1256556944.file.myqcloud.com";
+    </script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@2.1.3/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-backstretch@2.1.18/jquery.backstretch.min.js"></script>
+    <script type="text/javascript" src="/js/custom.js"></script>
+</div>
+</body>
+
+</html>
