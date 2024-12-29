@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noodp" />
+    <title>TinyRenderer笔记3：移动摄像机 - kirito&#39;s blog</title><meta name="Description" content="kirito&#39;s blog"><meta property="og:title" content="TinyRenderer笔记3：移动摄像机" />
+<meta property="og:description" content="3D空间中的基底变化在欧几里得空间中，一个坐标可以由一个原点和基底给出，考虑点$P$在坐标系$(O,i,j,k)$中拥有坐标$(x,y,z)" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.kirito.info/tinyrenderer%E7%AC%94%E8%AE%B03%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA/" /><meta property="og:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-12-28T09:14:40+00:00" />
+<meta property="article:modified_time" content="2024-12-29T11:30:50+00:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/>
+
+<meta name="twitter:title" content="TinyRenderer笔记3：移动摄像机"/>
+<meta name="twitter:description" content="3D空间中的基底变化在欧几里得空间中，一个坐标可以由一个原点和基底给出，考虑点$P$在坐标系$(O,i,j,k)$中拥有坐标$(x,y,z)"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt">
+
+<meta name="theme-color" content="#f8f8f8"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="canonical" href="https://www.kirito.info/tinyrenderer%E7%AC%94%E8%AE%B03%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA/" /><link rel="prev" href="https://www.kirito.info/%E5%B8%B8%E7%94%A8%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E5%92%8C%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/color.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/fontawesome-free/all.min.css">
+        <noscript><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"></noscript><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/animate/animate.min.css">
+        <noscript><link rel="stylesheet" href="/lib/animate/animate.min.css"></noscript><meta name="google-site-verification" content="5J8bsg9tKySrpONjEV2nAOqQ08TCVjsooCRIuDsxhD4" /><meta name="baidu-site-verification" content="code-NY7bFlUK92" /><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "TinyRenderer笔记3：移动摄像机",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/www.kirito.info\/tinyrenderer%E7%AC%94%E8%AE%B03%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA\/"
+        },"image": ["https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"],"genre": "posts","keywords": "blog, tinyrenderer, graphics","wordcount":  2387 ,
+        "url": "https:\/\/www.kirito.info\/tinyrenderer%E7%AC%94%E8%AE%B03%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA\/","datePublished": "2024-12-28T09:14:40+00:00","dateModified": "2024-12-29T11:30:50+00:00","publisher": {
+            "@type": "Organization",
+            "name": "kirito","logo": "https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"},"author": {
+                "@type": "Person",
+                "name": "kirito"
+            },"description": ""
+    }
+    </script><script src="//instant.page/5.1.1" defer type="module" integrity="sha384-MWfCL6g1OTGsbSwfuMHc8+8J2u71/LA8dzlIN3ycajckxuZZmF+DNjdm7O6H3PSq"></script>
+</head>
+
+<body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">
+        function setTheme(theme) {document.body.setAttribute('theme', theme); document.documentElement.style.setProperty('color-scheme', theme === 'light' ? 'light' : 'dark'); window.theme = theme; }
+        function saveTheme(theme) {window.localStorage && localStorage.setItem('theme', theme);}
+        function getMeta(metaName) {const metas = document.getElementsByTagName('meta'); for (let i = 0; i < metas.length; i++) if (metas[i].getAttribute('name') === metaName) return metas[i]; return '';}
+        if (window.localStorage && localStorage.getItem('theme')) {let theme = localStorage.getItem('theme');theme === 'light' || theme === 'dark' || theme === 'black' ? setTheme(theme) : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light')); } else { if ('auto' === 'light' || 'auto' === 'dark' || 'auto' === 'black') setTheme('auto'), saveTheme('auto'); else saveTheme('auto'), window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light');}
+        let metaColors = {'light': '#f8f8f8','dark': '#252627','black': '#000000'}
+        getMeta('theme-color').content = metaColors[document.body.getAttribute('theme')];
+    </script>
+    <div id="back-to-top"></div>
+    <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="kirito&#39;s blog">kirito</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="#" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="kirito&#39;s blog">kirito</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a href="#" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+            <div class="container"><div class="toc" id="toc-auto">
+        <h2 class="toc-title">目录</h2>
+        <div class="toc-content always-active" id="toc-content-auto"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#3d空间中的基底变化">3D空间中的基底变化</a></li>
+    <li><a href="#look_at">look_at</a></li>
+    <li><a href="#viewport">viewport</a></li>
+    <li><a href="#坐标变换链">坐标变换链</a></li>
+    <li><a href="#法向量的变换">法向量的变换</a></li>
+  </ul>
+</nav></div>
+    </div><script>document.getElementsByTagName("main")[0].setAttribute("pageStyle", "normal")</script><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "true")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">TinyRenderer笔记3：移动摄像机</h1><div class="post-meta">
+            <div class="post-meta-line">
+                <span class="post-author"><i class="author fas fa-user-circle fa-fw"></i><a href="/" title="Author" rel=" author" class="author">kirito</a>
+                </span>&nbsp;<span class="post-category">收录于 </span>&nbsp;<span class="post-category">类别 <a href="/categories/program/"><i class="far fa-folder fa-fw"></i>program</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-12-28">2024-12-28</time>&nbsp;<i class="far fa-edit fa-fw"></i>&nbsp;<time datetime="2024-12-29">2024-12-29</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 2387 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 5 分钟&nbsp;<span id="/tinyrenderer%E7%AC%94%E8%AE%B03%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA/" class="leancloud_visitors" data-flag-title="TinyRenderer笔记3：移动摄像机">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class="leancloud-visitors-count" id=twikoo_visitors></span>&nbsp;次阅读
+                    </span>&nbsp;<span id="/tinyrenderer%E7%AC%94%E8%AE%B03%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA/" class="comment_count" data-flag-title="TinyRenderer笔记3：移动摄像机">
+                        <i class="far fa-comments fa-fw"></i>&nbsp;<span class="twikoo-comment-count" id="twikoo-comment-count"></span>&nbsp;条评论
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#3d空间中的基底变化">3D空间中的基底变化</a></li>
+    <li><a href="#look_at">look_at</a></li>
+    <li><a href="#viewport">viewport</a></li>
+    <li><a href="#坐标变换链">坐标变换链</a></li>
+    <li><a href="#法向量的变换">法向量的变换</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h2 id="3d空间中的基底变化" class="headerLink">
+    <a href="#3d%e7%a9%ba%e9%97%b4%e4%b8%ad%e7%9a%84%e5%9f%ba%e5%ba%95%e5%8f%98%e5%8c%96" class="header-mark"></a>3D空间中的基底变化</h2><p>在欧几里得空间中，一个坐标可以由一个原点和基底给出，考虑点$P$在坐标系$(O,i,j,k)$中拥有坐标$(x,y,z)$的含义，它意味着向量$\overrightarrow{OP}$ 可以表示为:</p>
+<div>
+$$
+\overrightarrow{OP}=\vec{i}x+\vec{j}y+\vec{k}z = 
+\begin{aligned}
+	\begin{bmatrix}
+	\vec{i}&  \vec{j}&  \vec{k}
+	\end{bmatrix}
+\end{aligned}
+\begin{bmatrix}
+x \\ y \\ z
+\end{bmatrix}
+$$
+</div>
+<p>现在我们有另外一个坐标系$(O,i',j',k')$，如何将坐标从一个坐标系转换到另一个坐标系，首先$(i,j,k)$和$(i',j',k')$是三维的基底，存在一个(非简并)矩阵$M$使得：</p>
+<div>
+$$
+\begin{aligned}
+	\begin{bmatrix}
+	\vec{i'}&  \vec{j'}&  \vec{k'}
+	\end{bmatrix}
+\end{aligned}
+=
+\begin{aligned}
+	\begin{bmatrix}
+	\vec{i}&  \vec{j}&  \vec{k}
+	\end{bmatrix}
+\end{aligned}
+\times M
+$$
+</div>
+<p>参考下面的例子<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B03%EF%BC%9A%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA-1.png" title="TinyRenderer笔记3：移动摄像机-1.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B03%EF%BC%9A%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA-1.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B03%EF%BC%9A%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA-1.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B03%EF%BC%9A%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA-1.png, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B03%EF%BC%9A%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA-1.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B03%EF%BC%9A%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA-1.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B03%EF%BC%9A%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA-1.png">
+    </a></figure><br>
+让我们重新表示$\overrightarrow{OP}$：</p>
+<div>
+$$
+\overrightarrow{OP} = \overrightarrow{OO'} + \overrightarrow{O'P}
+=
+\begin{aligned}
+	\begin{bmatrix}
+	\vec{i}&  \vec{j}&  \vec{k}
+	\end{bmatrix}
+\end{aligned}
+\begin{bmatrix}
+O'_{x} \\ O'_{y} \\ O'_{z}
+\end{bmatrix}
++
+\begin{aligned}
+	\begin{bmatrix}
+	\vec{i'}&  \vec{j'}&  \vec{k'}
+	\end{bmatrix}
+\end{aligned}
+\begin{bmatrix}
+x' \\ y' \\ z'
+\end{bmatrix}
+$$
+</div>
+<p>现在把右边的$(i',j',k')$替换成矩阵</p>
+<div>
+$$
+\overrightarrow{OP}
+=
+\begin{aligned}
+	\begin{bmatrix}
+	\vec{i}&  \vec{j}&  \vec{k}
+	\end{bmatrix}
+\end{aligned}
+\left(
+\begin{bmatrix}
+O'_{x} \\ O'_{y} \\ O'_{z}
+\end{bmatrix}
++
+M
+\begin{bmatrix}
+x' \\ y' \\ z'
+\end{bmatrix}
+\right)
+$$
+</div>
+<p>它给出了坐标从一个坐标系到另一个坐标系的变换公式</p>
+<div>
+$$
+\begin{bmatrix}
+x \\ y \\ z
+\end{bmatrix}
+=
+\begin{bmatrix}
+O'_{x} \\ O'_{y} \\ O'_{z}
+\end{bmatrix}
++
+M
+\begin{bmatrix}
+x' \\ y' \\ z'
+\end{bmatrix}
+\ 
+\Rightarrow
+\ 
+\begin{bmatrix}
+x' \\ y' \\ z'
+\end{bmatrix}
+=
+M^{-1}
+\left(
+\begin{bmatrix}
+x \\ y \\ z
+\end{bmatrix}
+-
+\begin{bmatrix}
+O'_{x} \\ O'_{y} \\ O'_{z}
+\end{bmatrix}
+\right)
+$$
+</div>
+<h2 id="look_at" class="headerLink">
+    <a href="#look_at" class="header-mark"></a>look_at</h2><p>目前我们实现的渲染器相当于使用位于Z轴上的摄像机来绘制场景。如果我们想要移动摄像机得到不同视角的画面，没问题，我们可以移动所有的场景，而不移动摄像机。</p>
+<p>让我们这样来看待这个问题：我们想画一个场景，相机位于点$e$(眼睛)。相机应对准点$c$(中心)，向量$u$(up)指向画面的上方：</p>
+<p><figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B03%EF%BC%9A%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA.png" title="TinyRenderer笔记3：移动摄像机.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B03%EF%BC%9A%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B03%EF%BC%9A%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B03%EF%BC%9A%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA.png, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B03%EF%BC%9A%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B03%EF%BC%9A%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B03%EF%BC%9A%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA.png">
+    </a></figure></p>
+<p>这意味着我们要在坐标系$(c,x',y',z')$中渲染，但是我们的模型是在$(O,x,y,z)$中给出的，这没有问题，我们只需要计算坐标的变换。这是rust代码计算必要的4x4矩阵<strong>ModelView</strong>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="c1">// eye 摄像机位置 center 焦点 up视角上方
+</span><span class="c1"></span><span class="k">fn</span> <span class="nf">lookat</span><span class="p">(</span><span class="n">eye</span>: <span class="nc">glm</span>::<span class="n">Vec3</span><span class="p">,</span><span class="w"> </span><span class="n">center</span>: <span class="nc">glm</span>::<span class="n">Vec3</span><span class="p">,</span><span class="w"> </span><span class="n">up</span>: <span class="nc">Vec3</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">glm</span>::<span class="n">Matrix4</span><span class="o">&lt;</span><span class="kt">f32</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">normalize</span><span class="p">(</span><span class="n">eye</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">center</span><span class="p">);</span><span class="w"> </span><span class="c1">// 向量ce
+</span><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">normalize</span><span class="p">(</span><span class="n">glm</span>::<span class="n">cross</span><span class="p">(</span><span class="n">up</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">));</span><span class="w"> </span><span class="c1">// 同时垂直于 up和z的向量
+</span><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">normalize</span><span class="p">(</span><span class="n">glm</span>::<span class="n">cross</span><span class="p">(</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">));</span><span class="w">
+</span><span class="w">    </span><span class="c1">// 注意glm中是按列存的
+</span><span class="c1"></span><span class="w">    </span><span class="cp">#[rustfmt::skip]</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">minv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">mat4</span><span class="p">(</span><span class="w">
+</span><span class="w">        </span><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> 
+</span><span class="w">        </span><span class="n">x</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> 
+</span><span class="w">        </span><span class="n">x</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> 
+</span><span class="w">        </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">1.</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="cp">#[rustfmt::skip]</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">tr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">mat4</span><span class="p">(</span><span class="w">
+</span><span class="w">        </span><span class="mf">1.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> 
+</span><span class="w">        </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">1.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> 
+</span><span class="w">        </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">1.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> 
+</span><span class="w">        </span><span class="o">-</span><span class="n">eye</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">eye</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">eye</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="mf">1.</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="n">minv</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">tr</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>想象原点$O$平移到$c$ ,然后通过旋转$O$的坐标轴，使得坐标轴$xyz$于$x&rsquo;y&rsquo;z'$重合。&ldquo;我们可以移动所有的场景，而不移动摄像机。&quot;<br>
+正常理解是摄像机旋转，然后平移：(旋转、平移可以操作可以叠加成一个矩阵，写成乘法是从后往前写)</p>
+<div>
+$$
+M_{camera}=M_{translation}\ *\ M_{rotation}
+$$
+</div>
+<p>我们用它来看物体，可以摄像机不动，对物体做上面变换的逆变换：</p>
+<div>
+$$
+M^{-1}_{camera}=M^{-1}_{rotation}\ *\ M^{-1}_{translation}
+$$
+</div>
+<p>旋转矩阵的逆是它的转置，平移矩阵的逆也就是再吧它移回去。</p>
+<p>rust代码中写的矩阵是这么来的：</p>
+<div>
+$$
+lookat = 
+\begin{aligned}
+	\begin{bmatrix}
+		R_{x}&  R_{y}&  R_{z}& 0\\
+		U_{x}&  U_{y}&  U_{z}& 0\\
+		D_{x}&  D_{y}&  D_{z}& 0\\
+		0&  0&  0& 1
+	\end{bmatrix}
+\end{aligned}
+\begin{aligned}
+	\begin{bmatrix}
+		1&  0&  0& -P_x\\
+		0&  1&  0& -P_y\\
+		0&  0&  1& -P_z\\
+		0&  0&  0& 1
+	\end{bmatrix}
+\end{aligned}
+$$
+</div>
+<ul>
+<li>R - 右向量，对应相机坐标系x轴在世界坐标中的表示</li>
+<li>U - 上向量，对应相机坐标系y轴在世界坐标中的表示</li>
+<li>D - 方向向量，对应相机坐标系z轴在世界坐标中的表示</li>
+<li>P - 相机在世界坐标系中的位置</li>
+</ul>
+<h2 id="viewport" class="headerLink">
+    <a href="#viewport" class="header-mark"></a>viewport</h2><p>我们在代码中写过这样的转换</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">screen_coords_a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="w">
+</span><span class="w">		</span><span class="p">((</span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1.</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">width</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">),</span><span class="w">
+</span><span class="w">		</span><span class="p">((</span><span class="n">a</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1.</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">height</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">),</span><span class="w">
+</span><span class="w">		</span><span class="n">a</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w">
+</span><span class="w">	</span><span class="p">);</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>我们有一个点$a$，它属于正方形$[-1,1]*[-1,1]$，我们想要把它画成$(width,height)$尺寸的图像。<br>
+$a.x + 1$的范围在0到2，$(a.x+1)/2$的范围在0到1，$(a.x+1)*width/2$刚好适配图像尺寸。</p>
+<p>接下来要替换掉这种丑陋的方式，把所有的计算写成矩阵形式。</p>
+<p><strong>Viewport</strong>矩阵：</p>
+<div>
+$$
+\begin{aligned}
+	\begin{bmatrix}
+		\frac{w}{2}&  0&  0& x+\frac{w}{2}\\
+		0&  \frac{h}{2}&  0& y+\frac{h}{2}\\
+		0&  0&  \frac{d}{2}& \frac{d}{2}\\
+		0&  0&  0& 1
+	\end{bmatrix}
+\end{aligned}
+$$
+</div>
+<p>它意味着立方体$[-1,1]<em>[-1,1]</em>[-1,1]$映射到屏幕立方体$[x,x+w]<em>[y,y+h]</em>[0,d]$其中d是深度对应z轴。作者说：是的，立方体，而不是矩形，这是因为Z-Buffer的深度计算。这是Z-Buffer的分辨率。我喜欢将其等于255，因为简单地将Z-Buffer的黑白图像进行调试。，暂时还不知道这句话含义。<br>
+上面的矩阵也很好推倒，他可以拆分为：</p>
+<ul>
+<li>平移：把$[-1,1]<em>[-1,1]</em>[-1,1]$平移到$[0,2]<em>[0,2]</em>[0,2]$</li>
+<li>缩放：$[0,2]<em>[0,2]</em>[0,2]$缩放到$[0,1]<em>[0,1]</em>[0,1]$</li>
+<li>缩放：$[0,1]<em>[0,1]</em>[0,1]$缩放到$[0,w]<em>[0,h]</em>[0,d]$</li>
+<li>平移：$[0,w]<em>[0,h]</em>[0,d]$平移到$[x,x+w]<em>[y,y+h]</em>[0,d]$</li>
+</ul>
+<div>
+$$
+\begin{aligned}
+	\begin{bmatrix}
+		1&  0&  0& x\\
+		0&  1&  0& y\\
+		0&  0&  1& 0\\
+		0&  0&  0& 1
+	\end{bmatrix}
+\end{aligned}
+\begin{aligned}
+	\begin{bmatrix}
+		w&  0&  0& 0\\
+		0&  h&  0& 0\\
+		0&  0&  d& 0\\
+		0&  0&  0& 1
+	\end{bmatrix}
+\end{aligned}
+\begin{aligned}
+	\begin{bmatrix}
+		\frac{1}{2}&  0&  0& 0\\
+		0&  \frac{1}{2}&  0& 0\\
+		0&  0&  \frac{1}{2}& 0\\
+		0&  0&  0& 1
+	\end{bmatrix}
+\end{aligned}
+\begin{aligned}
+	\begin{bmatrix}
+		1&  0&  0& 1\\
+		0&  1&  0& 1\\
+		0&  0&  1& 1\\
+		0&  0&  0& 1
+	\end{bmatrix}
+\end{aligned}
+$$
+</div>
+<p>最终结果就是viewport矩阵</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">viewport</span><span class="p">(</span><span class="n">x</span>: <span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="n">y</span>: <span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="n">w</span>: <span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="n">h</span>: <span class="kt">i32</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">glm</span>::<span class="n">Matrix4</span><span class="o">&lt;</span><span class="kt">f32</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">w</span><span class="p">,</span><span class="w"> </span><span class="n">h</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">,</span><span class="w"> </span><span class="n">w</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">,</span><span class="w"> </span><span class="n">h</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">255.</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="cp">#[rustfmt::skip]</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">mat4</span><span class="p">(</span><span class="w">
+</span><span class="w">        </span><span class="n">w</span><span class="o">/</span><span class="mf">2.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> 
+</span><span class="w">        </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="n">h</span><span class="o">/</span><span class="mf">2.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> 
+</span><span class="w">        </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="o">/</span><span class="mf">2.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> 
+</span><span class="w">        </span><span class="n">x</span><span class="o">+</span><span class="n">w</span><span class="o">/</span><span class="mf">2.</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="o">+</span><span class="n">h</span><span class="o">/</span><span class="mf">2.</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="o">/</span><span class="mf">2.</span><span class="p">,</span><span class="w"> </span><span class="mf">1.</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="n">m</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><h2 id="坐标变换链" class="headerLink">
+    <a href="#%e5%9d%90%e6%a0%87%e5%8f%98%e6%8d%a2%e9%93%be" class="header-mark"></a>坐标变换链</h2><p>模型一般在他们的本地坐标系中被创建(<strong>object coordinates</strong>)，他们被插入世界坐标(<strong>world coordinates</strong>)表达的场景，从一个位置转换到另一个是用矩阵<strong>Model</strong>进行的。然后，我们想在相机坐标系(<strong>eye coordinates</strong>)中表达它，这个转换叫做<strong>View</strong>。然后使用投影矩阵(<strong>Projection</strong>)对场景进行透视变形，这个矩阵将场景转换为所谓的裁剪坐标(<strong>clip coordinates</strong>)。最后，我们绘制场景，将裁剪坐标转换为屏幕坐标的矩阵称为<strong>Viewport</strong>。</p>
+<p>如果我们从.obj文件中读取点v，那么为了在屏幕上绘制它，它将经历以下转换链：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">Viewport * Projection * View * Model * v.
+</code></pre></td></tr></table>
+</div>
+</div><p>当我们只画一个对象时，Model不做用任何事情(我们不需要更改对象在世界中的位置)，可以忽略。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">fin</span><span class="w"> </span><span class="o">=</span><span class="n">view_port</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">projection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">model_view</span><span class="p">;</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v4p2v3</span><span class="p">(</span><span class="n">fin</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">extend</span><span class="p">(</span><span class="mf">1.</span><span class="p">));</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v4p2v3</span><span class="p">(</span><span class="n">fin</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">extend</span><span class="p">(</span><span class="mf">1.</span><span class="p">));</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v4p2v3</span><span class="p">(</span><span class="n">fin</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">c</span><span class="p">.</span><span class="n">extend</span><span class="p">(</span><span class="mf">1.</span><span class="p">));</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>暂时画出来长这样：<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B03%EF%BC%9A%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA-2.png" title="TinyRenderer笔记3：移动摄像机-2.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B03%EF%BC%9A%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA-2.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B03%EF%BC%9A%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA-2.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B03%EF%BC%9A%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA-2.png, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B03%EF%BC%9A%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA-2.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B03%EF%BC%9A%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA-2.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B03%EF%BC%9A%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA-2.png">
+    </a></figure></p>
+<p>代码见这里<a href="https://github.com/kirito41dd/tinyrenderer/tree/44bf1901d7d4cea9e3c8a7b01a88e6fcddaa7206" target="_blank" rel="noopener noreferrer">44bf1901d7d4cea9e3c8a7b01a88e6fcddaa7206</a></p>
+<h2 id="法向量的变换" class="headerLink">
+    <a href="#%e6%b3%95%e5%90%91%e9%87%8f%e7%9a%84%e5%8f%98%e6%8d%a2" class="header-mark"></a>法向量的变换</h2><p>如果我们有一个模型，并且其法向量由艺术家给出，如果我们使用该模型进行了仿射变换，那么不能简单的对其原有法向量进行相同的变换。</p>
+<p>简单的例子就是如$p(1,0)$是模型的某个法向量，我们把模型沿y轴平移1个单位，如果也对法向量进行平移操作得到$p'(1,1)$，显然$p'$和$p$不是平行的.</p>
+<p>具体可以看这里：<a href="https://zhuanlan.zhihu.com/p/479809019" target="_blank" rel="noopener noreferrer">知乎</a></p>
+<p>结论：法向量的变换矩阵为模型变换矩阵的逆转置矩阵</p>
+<div>
+$$
+M'=(M^{-1})^T
+$$
+</div>
+</div>
+
+        <div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2024-12-29</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/blog/">blog</a>,&nbsp;<a href="/tags/tinyrenderer/">tinyrenderer</a>,&nbsp;<a href="/tags/graphics/">graphics</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/%E5%B8%B8%E7%94%A8%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E5%92%8C%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/" class="prev" rel="prev" title="常用激活函数和损失函数"><i class="fas fa-angle-left fa-fw"></i>常用激活函数和损失函数</a></div>
+</div>
+<div id="comments"><div id="twikoo"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://twikoo.js.org/">Twikoo</a>.
+            </noscript></div></article></div>
+        </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">      <a href="https://www.travellings.cn/go.html" target="_blank" rel="noopener" title="开往-友链接力"><img src="https://www.travellings.cn/assets/logo.gif" alt="开往-友链接力" width="120"></a><a href="https://www.foreverblog.cn/go.html" target="_blank" > <img src="https://img.foreverblog.cn/wormhole_3.gif" alt="" style="width:auto;height:32px;" title="穿梭虫洞-随机访问十年之约友链博客"> </a>
+      </br><small>1KiritobkMPpaWBjTDHSoiP5icv8PEFNdR</small>
+      </br><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+      </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2020 - 2024</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank" rel="noopener noreferrer">kirito</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+            <div class="footer-line"></div>
+            <div class="footer-line">
+            </div>
+        </div></footer></div>
+
+    <div id="fixed-buttons"><a href="#back-to-top" id="back-to-top-button" class="fixed-button" title="回到顶部">
+            <i class="fas fa-arrow-up fa-fw"></i>
+        </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+            <i class="fas fa-comment fa-fw"></i>
+        </a>
+    </div><div class="assets"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/katex/copy-tex.min.css">
+        <noscript><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"></noscript><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":30},"comment":{"twikoo":{"commentCount":true,"el":"#twikoo","envId":"https://comment-liard.vercel.app/","lang":"zh-cn"}},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"distance":null,"findAllMatches":null,"fuseIndexURL":"/index.json","highlightTag":"em","ignoreFieldNorm":null,"ignoreLocation":null,"isCaseSensitive":null,"location":null,"maxResultLength":10,"minMatchCharLength":null,"noResultsFound":"没有找到结果","snippetLength":50,"threshold":null,"type":"fuse","useExtendedSearch":null}};</script><script type="text/javascript" src="/lib/twikoo/twikoo.all.min.js" defer></script><script type="text/javascript" src="/js/twikoo.min.js" defer></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js" defer></script><script type="text/javascript" src="/lib/katex/auto-render.min.js" defer></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js" defer></script><script type="text/javascript" src="/lib/katex/mhchem.min.js" defer></script><script type="text/javascript" src="/js/katex.min.js" defer></script><script type="text/javascript" src="/js/theme.min.js" defer></script><script type="text/javascript">
+            window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());
+            gtag('config', 'G-ZKPP127E4F');
+        </script><script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id=G-ZKPP127E4F" async></script><script>
+			var _hmt = _hmt || [];
+			(function() {
+			  var hm = document.createElement("script");
+			  hm.src = "https://hm.baidu.com/hm.js?2004ef75aa13d757f75bf6f1f3add242";
+			  var s = document.getElementsByTagName("script")[0]; 
+			  s.parentNode.insertBefore(hm, s);
+			})();
+		</script><script>
+         
+         
+        var $cdnPrefix = "https://blog-1256556944.file.myqcloud.com";
+    </script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@2.1.3/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-backstretch@2.1.18/jquery.backstretch.min.js"></script>
+    <script type="text/javascript" src="/js/custom.js"></script>
+</div>
+</body>
+
+</html>

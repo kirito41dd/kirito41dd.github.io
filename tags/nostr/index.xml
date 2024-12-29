@@ -1,0 +1,197 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>nostr - 标签 - kirito&#39;s blog</title>
+        <link>https://www.kirito.info/tags/nostr/</link>
+        <description>nostr - 标签 - kirito&#39;s blog</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sat, 04 Feb 2023 11:57:58 &#43;0800</lastBuildDate><atom:link href="https://www.kirito.info/tags/nostr/" rel="self" type="application/rss+xml" /><item>
+    <title>Nostr账号Nip05验证方法</title>
+    <link>https://www.kirito.info/nostr-nip05-verification/</link>
+    <pubDate>Sat, 04 Feb 2023 11:57:58 &#43;0800</pubDate><author>
+        <name>kirito</name>
+    </author><guid>https://www.kirito.info/nostr-nip05-verification/</guid>
+    <description><![CDATA[<p>最近<a href="https://apps.apple.com/ca/app/damus/id1628663131" target="_blank" rel="noopener noreferrer">Damus App</a>很火，写一篇教程教大家如何在App中获得紫v图标认证。</p>
+<h2 id="nip05简介" class="headerLink">
+    <a href="#nip05%e7%ae%80%e4%bb%8b" class="header-mark"></a>NIP05简介</h2><p>NIP是<strong><ruby>Nostr改进提议<rt>Nostr Improvement Proposal</rt></ruby></strong>，<a href="https://github.com/nostr-protocol/nips/blob/master/05.md" target="_blank" rel="noopener noreferrer">NIP05</a>描述了一种账号验证方法。可以想象成telegram或者twitter上的蓝色V标记，在Damus里是一个紫V图标，客户端展示这个图标，就说明该用户通过了NIP05验证。</p>
+<p>该验证由客户端发起，当发现用户设置了用户名和NIP05验证地址，会发送一个https请求。</p>
+<p>比如用户名<code>kirito</code>和验证地址<code>kirito@dogdogback.com</code>，客户端会发送如下请求：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">https://dogdogback.com/.well-known/nostr.json?name=kirito
+</code></pre></td></tr></table>
+</div>
+</div><p>如果验证成功，<code>dogdogback.com</code>应该返回如下结果：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
+  <span class="nt">&#34;names&#34;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">&#34;kirito&#34;</span><span class="p">:</span> <span class="s2">&#34;2f7caa968b0ec9bacd55a07cfaf6206aab5a62387c76303c311db949dec8bc57&#34;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>你也可以调用这个请求观察下返回: <a href="https://dogdogback.com/.well-known/nostr.json?name=kirito" target="_blank" rel="noopener noreferrer">https://dogdogback.com/.well-known/nostr.json?name=kirito</a></p>
+<p>客户端对比返回结果里的公钥和用户的公钥，如果一致则验证完成，Damus会在你头像后展示紫V图标。
+<figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/public/nostr/%E7%B4%ABv.jpg" title="https://blog-1256556944.file.myqcloud.com/public/nostr/%E7%B4%ABv.jpg" data-thumbnail="https://blog-1256556944.file.myqcloud.com/public/nostr/%E7%B4%ABv.jpg">
+        
+    </a></figure></p>
+<h2 id="验证方法" class="headerLink">
+    <a href="#%e9%aa%8c%e8%af%81%e6%96%b9%e6%b3%95" class="header-mark"></a>验证方法</h2><p>有两种路线：</p>
+<ol>
+<li>找提供验证服务的社区项目，直接用他们的服务，这个自己找吧，缺点是可能不稳定，也不受自己控制</li>
+<li>用自己的域名进行验证，前提是你<strong>拥有一个域名的控制权</strong>，本文主要讲解这种方式</li>
+</ol>
+<h3 id="静态文件" class="headerLink">
+    <a href="#%e9%9d%99%e6%80%81%e6%96%87%e4%bb%b6" class="header-mark"></a>静态文件</h3><p>如果你已经有自己的网站了，并且支持https，那么直接在你的网站根目录放置一个静态文件即可。
+文件名为<code>.well-known/nostr.json</code>，内容写上你的用户名和公钥：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">{
+  &#34;names&#34;: {
+    &#34;kirito&#34;: &#34;2f7caa968b0ec9bacd55a07cfaf6206aab5a62387c76303c311db949dec8bc57&#34;
+  }
+}
+</code></pre></td></tr></table>
+</div>
+</div><p>可以写多行，为你的小伙伴也提供验证。</p>
+<h3 id="云函数" class="headerLink">
+    <a href="#%e4%ba%91%e5%87%bd%e6%95%b0" class="header-mark"></a>云函数</h3><p>当然有更好的方式，而且不需要服务器和证书，下面介绍下我使用的方式：<a href="https://vercel.com/dashboard" target="_blank" rel="noopener noreferrer">vercel</a>云函数（你自己会搭服务或者有其他云函数也行，原理一样）</p>
+<p>我之前写过一篇怎么用vercel云函数的文章，可以<a href="/use-vercel-as-free-faas/" rel="">参考</a>，当你弄好后，<strong>绑定自己的域名</strong>，就可以通过自己的域名访问云函数了，这是一个例子: <a href="https://dogdogback.com/api/list" target="_blank" rel="noopener noreferrer">https://dogdogback.com/api/list</a></p>
+<p>代码如果不会写直接克隆我的仓库即可<a href="https://github.com/kirito41dd/vercel-faas" target="_blank" rel="noopener noreferrer">vercel-faas</a>。</p>
+<p>具体操作：</p>
+<ol>
+<li>修改代码仓库中的文件<code>vercel.json</code>，添加NIP05接口的重定向，这样访问路径<code>/.well-known/nostr.json?name=xxx</code>的请求会被交给<code>/api/entrypoint.go</code>文件处理：
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
+<span class="nt">&#34;trailingSlash&#34;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+<span class="nt">&#34;rewrites&#34;</span><span class="p">:</span>
+<span class="p">[</span>
+    <span class="p">{</span>
+    <span class="nt">&#34;source&#34;</span><span class="p">:</span> <span class="s2">&#34;/api/(.*)&#34;</span><span class="p">,</span>
+    <span class="nt">&#34;destination&#34;</span><span class="p">:</span> <span class="s2">&#34;/api/entrypoint.go&#34;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+    <span class="nt">&#34;source&#34;</span><span class="p">:</span> <span class="s2">&#34;/.well-known/nostr.json&#34;</span><span class="p">,</span>
+    <span class="nt">&#34;destination&#34;</span><span class="p">:</span> <span class="s2">&#34;/api/entrypoint.go&#34;</span>
+    <span class="p">}</span>
+<span class="p">]</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>添加处理认证请求的路由，修改<code>/api/entrypoint.go</code>：
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">registerRouter</span><span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">gin</span><span class="p">.</span><span class="nx">RouterGroup</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// ...
+</span><span class="c1"></span>    <span class="nx">r</span><span class="p">.</span><span class="nf">GET</span><span class="p">(</span><span class="s">&#34;/.well-known/nostr.json&#34;</span><span class="p">,</span> <span class="nx">handler</span><span class="p">.</span><span class="nx">Cors</span><span class="p">,</span> <span class="nx">handler</span><span class="p">.</span><span class="nx">NIP05</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>添加认证逻辑，修改<code>/handler/handler.go</code>:
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">NIP05</span><span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">gin</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">name2pubkey</span> <span class="o">:=</span> <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span>
+        <span class="s">&#34;kirito&#34;</span><span class="p">:</span> <span class="s">&#34;2f7caa968b0ec9bacd55a07cfaf6206aab5a62387c76303c311db949dec8bc57&#34;</span><span class="p">,</span>
+        <span class="c1">// 可以在这里添加更多的账号，为你的朋友提供验证
+</span><span class="c1"></span>        <span class="c1">// &#34;&lt;name1&gt;&#34;:&#34;pubkey1&#34;,
+</span><span class="c1"></span>        <span class="c1">// &#34;&lt;name2&gt;&#34;:&#34;pubkey2&#34;,
+</span><span class="c1"></span>    <span class="p">}</span>
+    <span class="nx">user</span> <span class="o">:=</span> <span class="nx">c</span><span class="p">.</span><span class="nf">Query</span><span class="p">(</span><span class="s">&#34;name&#34;</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;nip05 verify request&#34;</span><span class="p">,</span> <span class="nx">user</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nx">v</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">name2pubkey</span><span class="p">[</span><span class="nx">user</span><span class="p">];</span> <span class="nx">ok</span> <span class="p">{</span>
+        <span class="nx">resp</span> <span class="o">:=</span> <span class="nx">NIP05Resp</span><span class="p">{}</span>
+        <span class="nx">resp</span><span class="p">.</span><span class="nx">Names</span><span class="p">[</span><span class="nx">user</span><span class="p">]</span> <span class="p">=</span> <span class="nx">v</span>
+        <span class="nx">c</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">resp</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="nx">c</span><span class="p">.</span><span class="nf">Status</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusNotFound</span><span class="p">)</span>
+    <span class="k">return</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+</ol>
+<p>把代码push到你的仓库，vercel会自动重新部署，然后用你的域名访问看看效果，这是我的：</p>
+<ol>
+<li><a href="https://dogdogback.com/.well-known/nostr.json?name=kirito" target="_blank" rel="noopener noreferrer">https://dogdogback.com/.well-known/nostr.json?name=kirito</a></li>
+<li><a href="https://dogdogback.com/.well-known/nostr.json?name=shishi" target="_blank" rel="noopener noreferrer">https://dogdogback.com/.well-known/nostr.json?name=shishi</a></li>
+</ol>
+<h3 id="客户端设置" class="headerLink">
+    <a href="#%e5%ae%a2%e6%88%b7%e7%ab%af%e8%ae%be%e7%bd%ae" class="header-mark"></a>客户端设置</h3><p>以Damus举例，编辑资料，配置你的用户名和NIP05地址，就可以看到紫V图标了
+<figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/public/nostr/set-name.jpg" title="https://blog-1256556944.file.myqcloud.com/public/nostr/set-name.jpg" data-thumbnail="https://blog-1256556944.file.myqcloud.com/public/nostr/set-name.jpg">
+        
+    </a></figure>
+<figure><a class="lightgallery" href="https://blog-1256556944.file.myqcloud.com/public/nostr/set-nip05.jpg" title="https://blog-1256556944.file.myqcloud.com/public/nostr/set-nip05.jpg" data-thumbnail="https://blog-1256556944.file.myqcloud.com/public/nostr/set-nip05.jpg">
+        
+    </a></figure></p>
+<p>到这里就成功了，有疑问可以评论区提。</p>
+<h2 id="一些提示" class="headerLink">
+    <a href="#%e4%b8%80%e4%ba%9b%e6%8f%90%e7%a4%ba" class="header-mark"></a>一些提示</h2><ol>
+<li>有些webapp请求是会受到浏览器跨域策略限制，在http返回header中设置<code>Access-Control-Allow-Origin: *</code>，我的代码中已经处理了，如果用静态文件的方式无法处理跨域。</li>
+<li>如何获取hex格式的公钥？在Damus中长按<strong>你自己</strong>发送的信息，选择<code>Copy Note JSON</code>然后粘贴到一个地方，就能看到了。</li>
+<li>vercel也是可以托管静态文件的，仓库里只留一个json文件就行。</li>
+<li><del>富哥V我50</del></li>
+</ol>
+]]></description>
+</item></channel>
+</rss>

@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noodp" />
+    <title>TinyRenderer笔记0：画线和三角以及面剔除 - kirito&#39;s blog</title><meta name="Description" content="kirito&#39;s blog"><meta property="og:title" content="TinyRenderer笔记0：画线和三角以及面剔除" />
+<meta property="og:description" content="这篇是自己学习tinyrenderer的笔记，不务正业系列。 tinyrenderer教程地址：https://github.com/sslo" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.kirito.info/tinyrenderer-note-0/" /><meta property="og:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-01-01T20:06:21+08:00" />
+<meta property="article:modified_time" content="2022-07-03T00:00:00+00:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/>
+
+<meta name="twitter:title" content="TinyRenderer笔记0：画线和三角以及面剔除"/>
+<meta name="twitter:description" content="这篇是自己学习tinyrenderer的笔记，不务正业系列。 tinyrenderer教程地址：https://github.com/sslo"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt">
+
+<meta name="theme-color" content="#f8f8f8"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="canonical" href="https://www.kirito.info/tinyrenderer-note-0/" /><link rel="prev" href="https://www.kirito.info/learn-opengl-env/" /><link rel="next" href="https://www.kirito.info/tinyrenderer-note-1/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/color.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/fontawesome-free/all.min.css">
+        <noscript><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"></noscript><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/animate/animate.min.css">
+        <noscript><link rel="stylesheet" href="/lib/animate/animate.min.css"></noscript><meta name="google-site-verification" content="5J8bsg9tKySrpONjEV2nAOqQ08TCVjsooCRIuDsxhD4" /><meta name="baidu-site-verification" content="code-NY7bFlUK92" /><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "TinyRenderer笔记0：画线和三角以及面剔除",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/www.kirito.info\/tinyrenderer-note-0\/"
+        },"image": ["https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"],"genre": "posts","keywords": "graphics, tinyrenderer","wordcount":  2660 ,
+        "url": "https:\/\/www.kirito.info\/tinyrenderer-note-0\/","datePublished": "2022-01-01T20:06:21+08:00","dateModified": "2022-07-03T00:00:00+00:00","publisher": {
+            "@type": "Organization",
+            "name": "kirito","logo": "https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"},"author": {
+                "@type": "Person",
+                "name": "kirito"
+            },"description": ""
+    }
+    </script><script src="//instant.page/5.1.1" defer type="module" integrity="sha384-MWfCL6g1OTGsbSwfuMHc8+8J2u71/LA8dzlIN3ycajckxuZZmF+DNjdm7O6H3PSq"></script>
+</head>
+
+<body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">
+        function setTheme(theme) {document.body.setAttribute('theme', theme); document.documentElement.style.setProperty('color-scheme', theme === 'light' ? 'light' : 'dark'); window.theme = theme; }
+        function saveTheme(theme) {window.localStorage && localStorage.setItem('theme', theme);}
+        function getMeta(metaName) {const metas = document.getElementsByTagName('meta'); for (let i = 0; i < metas.length; i++) if (metas[i].getAttribute('name') === metaName) return metas[i]; return '';}
+        if (window.localStorage && localStorage.getItem('theme')) {let theme = localStorage.getItem('theme');theme === 'light' || theme === 'dark' || theme === 'black' ? setTheme(theme) : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light')); } else { if ('auto' === 'light' || 'auto' === 'dark' || 'auto' === 'black') setTheme('auto'), saveTheme('auto'); else saveTheme('auto'), window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light');}
+        let metaColors = {'light': '#f8f8f8','dark': '#252627','black': '#000000'}
+        getMeta('theme-color').content = metaColors[document.body.getAttribute('theme')];
+    </script>
+    <div id="back-to-top"></div>
+    <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="kirito&#39;s blog">kirito</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="#" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="kirito&#39;s blog">kirito</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a href="#" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+            <div class="container"><div class="toc" id="toc-auto">
+        <h2 class="toc-title">目录</h2>
+        <div class="toc-content always-active" id="toc-content-auto"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#准备画布">准备画布</a></li>
+    <li><a href="#画线">画线</a></li>
+    <li><a href="#填充三角形">填充三角形</a>
+      <ul>
+        <li><a href="#扫描线">扫描线</a></li>
+        <li><a href="#重心坐标">重心坐标</a></li>
+      </ul>
+    </li>
+    <li><a href="#渲染阴影以及面剔除">渲染阴影以及面剔除</a></li>
+  </ul>
+</nav></div>
+    </div><script>document.getElementsByTagName("main")[0].setAttribute("pageStyle", "normal")</script><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "true")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">TinyRenderer笔记0：画线和三角以及面剔除</h1><div class="post-meta">
+            <div class="post-meta-line">
+                <span class="post-author"><i class="author fas fa-user-circle fa-fw"></i><a href="/" title="Author" rel=" author" class="author">kirito</a>
+                </span>&nbsp;<span class="post-category">收录于 </span>&nbsp;<span class="post-category">类别 <a href="/categories/program/"><i class="far fa-folder fa-fw"></i>program</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-01-01">2022-01-01</time>&nbsp;<i class="far fa-edit fa-fw"></i>&nbsp;<time datetime="2022-07-03">2022-07-03</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 2660 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 6 分钟&nbsp;<span id="/tinyrenderer-note-0/" class="leancloud_visitors" data-flag-title="TinyRenderer笔记0：画线和三角以及面剔除">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class="leancloud-visitors-count" id=twikoo_visitors></span>&nbsp;次阅读
+                    </span>&nbsp;<span id="/tinyrenderer-note-0/" class="comment_count" data-flag-title="TinyRenderer笔记0：画线和三角以及面剔除">
+                        <i class="far fa-comments fa-fw"></i>&nbsp;<span class="twikoo-comment-count" id="twikoo-comment-count"></span>&nbsp;条评论
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#准备画布">准备画布</a></li>
+    <li><a href="#画线">画线</a></li>
+    <li><a href="#填充三角形">填充三角形</a>
+      <ul>
+        <li><a href="#扫描线">扫描线</a></li>
+        <li><a href="#重心坐标">重心坐标</a></li>
+      </ul>
+    </li>
+    <li><a href="#渲染阴影以及面剔除">渲染阴影以及面剔除</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>这篇是自己学习tinyrenderer的笔记，不务正业系列。</p>
+<p>tinyrenderer教程地址：<a href="https://github.com/ssloy/tinyrenderer/wiki" target="_blank" rel="noopener noreferrer">https://github.com/ssloy/tinyrenderer/wiki</a></p>
+<p>作者教程是用cpp实现的，我用rust来学，列一下用到的库：</p>
+<ul>
+<li><a href="https://crates.io/crates/image" target="_blank" rel="noopener noreferrer">image</a> - 这是个图片库，充当画布，控制每个像素的颜色，生成图片</li>
+<li><a href="https://crates.io/crates/obj-rs" target="_blank" rel="noopener noreferrer">obj-rs</a> - 解析obj文件的库，关于obj文件可以看<a href="https://www.pengfeixc.com/blogs/computer-graphics/obj-graphic-file-parse" target="_blank" rel="noopener noreferrer">Wavefront OBJ文件格式</a>，里面存的是一些模型顶点</li>
+<li><a href="https://crates.io/crates/glm" target="_blank" rel="noopener noreferrer">glm</a> - 数学库，比如坐标表示，计算向量点乘、叉乘，矩阵运算</li>
+</ul>
+<h2 id="准备画布" class="headerLink">
+    <a href="#%e5%87%86%e5%a4%87%e7%94%bb%e5%b8%83" class="header-mark"></a>准备画布</h2><p>用image库操作图片的每个像素，生成图片：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="k">use</span><span class="w"> </span><span class="n">image</span>::<span class="p">{</span><span class="n">imageops</span>::<span class="n">flip_vertical_in_place</span><span class="p">,</span><span class="w"> </span><span class="n">ImageBuffer</span><span class="p">,</span><span class="w"> </span><span class="n">Rgba</span><span class="p">};</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">const</span><span class="w"> </span><span class="n">WHITE</span>: <span class="nc">Rgba</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Rgba</span><span class="p">([</span><span class="mi">255</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="p">]);</span><span class="w">
+</span><span class="w"></span><span class="k">const</span><span class="w"> </span><span class="n">RED</span>: <span class="nc">Rgba</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Rgba</span><span class="p">([</span><span class="mi">255</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="p">]);</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="mi">400</span><span class="p">,</span><span class="w"> </span><span class="mi">400</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">image</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ImageBuffer</span>::<span class="o">&lt;</span><span class="n">Rgba</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="o">&gt;</span>::<span class="n">from_pixel</span><span class="p">(</span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">,</span><span class="w"> </span><span class="n">BLACK</span><span class="p">);</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="p">..</span><span class="mi">200</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="p">..</span><span class="mi">200</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">image</span><span class="p">.</span><span class="n">put_pixel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">RED</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="n">flip_vertical_in_place</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">image</span><span class="p">);</span><span class="w"> </span><span class="c1">// 垂直反转，因为默认坐标原点在左上角，反转后在左下角
+</span><span class="c1"></span><span class="w">    </span><span class="n">image</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&#34;a.png&#34;</span><span class="p">).</span><span class="n">unwrap</span><span class="p">();</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p><image src="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/huabu.png" wdith=200px height=200px /></p>
+<h2 id="画线" class="headerLink">
+    <a href="#%e7%94%bb%e7%ba%bf" class="header-mark"></a>画线</h2><p>画线比较简单，思路是对于线段ab，从a出发到b一路画点，x坐标每次移动一个像素，然后计算y坐标应该移动多少，还有一些细节直接看代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">line</span><span class="o">&lt;</span><span class="n">I</span>: <span class="nc">GenericImage</span><span class="o">&gt;</span><span class="p">(</span><span class="k">mut</span><span class="w"> </span><span class="n">a</span>: <span class="nc">glm</span>::<span class="n">IVec2</span><span class="p">,</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">b</span>: <span class="nc">glm</span>::<span class="n">IVec2</span><span class="p">,</span><span class="w"> </span><span class="n">image</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">I</span><span class="p">,</span><span class="w"> </span><span class="n">color</span>: <span class="nc">I</span>::<span class="n">Pixel</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">steep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="p">).</span><span class="n">abs</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">y</span><span class="p">).</span><span class="n">abs</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="c1">// 如果这条线是陡峭的，就交换x，y让它躺平
+</span><span class="c1"></span><span class="w">        </span><span class="n">swap</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">y</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="n">swap</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">y</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="n">steep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="c1">// make it left−to−right
+</span><span class="c1"></span><span class="w">        </span><span class="n">swap</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">b</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">dx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">dy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">y</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">derror</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">dy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f64</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">dx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f64</span><span class="p">).</span><span class="n">abs</span><span class="p">();</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">error</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">y</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="p">..</span><span class="o">=</span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">steep</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">image</span><span class="p">.</span><span class="n">put_pixel</span><span class="p">(</span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">color</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">image</span><span class="p">.</span><span class="n">put_pixel</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">color</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">        </span><span class="n">error</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">derror</span><span class="p">;</span><span class="w">
+</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">error</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0.5</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">y</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="w"> </span><span class="p">};</span><span class="w">
+</span><span class="w">            </span><span class="n">error</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>如果这条线很陡峭，那么x坐标移动一个像素，对应的y坐标可能要移动好几个像素，画出来不连续，所以让它躺平。</p>
+<p>然后我们从左到右画，dy/dx算出斜率，比如斜率是0.5，那么x移动一个像素，y应该移动0.5个像素。</p>
+<p>因为像素不能分割，所以按照四舍五入的方式，y的变化积攒到一定量再移动一个单位。</p>
+<p>看着已经很完美了，但是里面有浮点数，可以根据简单的代换，消除浮点数：我们让<code>derror = derror' * 2dx = 2dy</code>，那么<code>error &gt; 0.5</code>变成<code>error &gt; dx</code>，<code>error -= 1.0</code>变成<code>error -= 2dx</code>，这样一来就全是整数计算：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">line</span><span class="o">&lt;</span><span class="n">I</span>: <span class="nc">GenericImage</span><span class="o">&gt;</span><span class="p">(</span><span class="k">mut</span><span class="w"> </span><span class="n">a</span>: <span class="nc">glm</span>::<span class="n">IVec2</span><span class="p">,</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">b</span>: <span class="nc">glm</span>::<span class="n">IVec2</span><span class="p">,</span><span class="w"> </span><span class="n">image</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">I</span><span class="p">,</span><span class="w"> </span><span class="n">color</span>: <span class="nc">I</span>::<span class="n">Pixel</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">steep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="p">).</span><span class="n">abs</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">y</span><span class="p">).</span><span class="n">abs</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="c1">// if the line is steep, we transpose the image
+</span><span class="c1"></span><span class="w">        </span><span class="n">swap</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">y</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="n">swap</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">y</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="n">steep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="c1">// make it left−to−right
+</span><span class="c1"></span><span class="w">        </span><span class="n">swap</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">b</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">dx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">dy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">y</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">derror</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dy</span><span class="p">.</span><span class="n">abs</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">error</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">y</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="p">..</span><span class="o">=</span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">steep</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">image</span><span class="p">.</span><span class="n">put_pixel</span><span class="p">(</span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">color</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">image</span><span class="p">.</span><span class="n">put_pixel</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">color</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">        </span><span class="n">error</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">derror</span><span class="p">;</span><span class="w">
+</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">error</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">dx</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">y</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="w"> </span><span class="p">};</span><span class="w">
+</span><span class="w">            </span><span class="n">error</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">dx</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>随便画几条</p>
+<p><image src="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/line_0.png" wdith=200px height=200px /></p>
+<p>能画线，就能画三角形框了，把作者提供的<a href="https://github.com/ssloy/tinyrenderer/blob/f6fecb7ad493264ecd15e230411bfb1cca539a12/obj/african_head.obj" target="_blank" rel="noopener noreferrer">obj文件</a>画出来：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="mi">800</span><span class="p">,</span><span class="w"> </span><span class="mi">800</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">image</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ImageBuffer</span>::<span class="o">&lt;</span><span class="n">Rgba</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="o">&gt;</span>::<span class="n">from_pixel</span><span class="p">(</span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">,</span><span class="w"> </span><span class="n">BLACK</span><span class="p">);</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">input</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BufReader</span>::<span class="n">new</span><span class="p">(</span><span class="n">File</span>::<span class="n">open</span><span class="p">(</span><span class="s">&#34;a.obj&#34;</span><span class="p">).</span><span class="n">unwrap</span><span class="p">());</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">model</span>: <span class="nc">obj</span>::<span class="n">Obj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">obj</span>::<span class="n">load_obj</span><span class="p">(</span><span class="n">input</span><span class="p">).</span><span class="n">unwrap</span><span class="p">();</span><span class="w">
+</span><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">arr</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">model</span><span class="p">.</span><span class="n">indices</span><span class="p">.</span><span class="n">chunks</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="p">..</span><span class="mi">3</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">v0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model</span><span class="p">.</span><span class="n">vertices</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">).</span><span class="n">unwrap</span><span class="p">().</span><span class="n">position</span><span class="p">;</span><span class="w">
+</span><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">v1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model</span><span class="w">
+</span><span class="w">                </span><span class="p">.</span><span class="n">vertices</span><span class="w">
+</span><span class="w">                </span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">arr</span><span class="p">[(</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">)</span><span class="w">
+</span><span class="w">                </span><span class="p">.</span><span class="n">unwrap</span><span class="p">()</span><span class="w">
+</span><span class="w">                </span><span class="p">.</span><span class="n">position</span><span class="p">;</span><span class="w">
+</span><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">x0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">((</span><span class="n">v0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1.0</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">width</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">2.0</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="p">;</span><span class="w">
+</span><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">y0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">((</span><span class="n">v0</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1.0</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">height</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">2.0</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="p">;</span><span class="w">
+</span><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">x1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">((</span><span class="n">v1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1.0</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">width</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">2.0</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="p">;</span><span class="w">
+</span><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">y1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">((</span><span class="n">v1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1.0</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">height</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">2.0</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="p">;</span><span class="w">
+</span><span class="w">            </span><span class="n">draw</span>::<span class="n">line</span><span class="p">(</span><span class="n">glm</span>::<span class="n">ivec2</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span><span class="w"> </span><span class="n">y0</span><span class="p">),</span><span class="w"> </span><span class="n">glm</span>::<span class="n">ivec2</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span><span class="w"> </span><span class="n">y1</span><span class="p">),</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">image</span><span class="p">,</span><span class="w"> </span><span class="n">WHITE</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="n">flip_vertical_in_place</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">image</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="n">image</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&#34;a.png&#34;</span><span class="p">).</span><span class="n">unwrap</span><span class="p">();</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><image src="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/line_obj.png" wdith=400px height=400px/>
+<p>详细代码见这里<a href="https://github.com/kirito41dd/tinyrenderer/tree/9f1f2564d8400ed296a5ee6ce9cb23e44203fd3c" target="_blank" rel="noopener noreferrer">9f1f2564d8400ed296a5ee6ce9cb23e44203fd3c</a></p>
+<h2 id="填充三角形" class="headerLink">
+    <a href="#%e5%a1%ab%e5%85%85%e4%b8%89%e8%a7%92%e5%bd%a2" class="header-mark"></a>填充三角形</h2><h3 id="扫描线" class="headerLink">
+    <a href="#%e6%89%ab%e6%8f%8f%e7%ba%bf" class="header-mark"></a>扫描线</h3><p>扫描线填充三角形的方式和这个方法的名字一样，一行一行的画直线，首先把三角形的三个点按y坐标从低到高排序，最高点和最低点连线是红色，中间点和其他两个点连线是绿色：</p>
+<image src="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/line-sweeping-0.png" wdith=200px height=200px/>
+<p>这样中间点就将三角形分为了上下两部分，分别画出两部分，就得到了一个完整的三角形：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">triangle</span><span class="o">&lt;</span><span class="n">I</span>: <span class="nc">GenericImage</span><span class="o">&gt;</span><span class="p">(</span><span class="w">
+</span><span class="w">    </span><span class="k">mut</span><span class="w"> </span><span class="n">t0</span>: <span class="nc">glm</span>::<span class="n">Vec2</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="k">mut</span><span class="w"> </span><span class="n">t1</span>: <span class="nc">glm</span>::<span class="n">Vec2</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="k">mut</span><span class="w"> </span><span class="n">t2</span>: <span class="nc">glm</span>::<span class="n">Vec2</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">image</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">I</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">color</span>: <span class="nc">I</span>::<span class="n">Pixel</span><span class="p">,</span><span class="w">
+</span><span class="w"></span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">t0</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">t1</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">t0</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">t2</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="k">return</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="c1">// 按y坐标排序，从低到高 t0 t1 t2
+</span><span class="c1"></span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">t0</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">t1</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="n">swap</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">t0</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">t1</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">t0</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">t2</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="n">swap</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">t0</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">t2</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">t1</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">t2</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="n">swap</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">t1</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">t2</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">total_height</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t2</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="p">.</span><span class="n">y</span><span class="p">;</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="c1">// 下半部分
+</span><span class="c1"></span><span class="w">    </span><span class="c1">// y in t0.y -&gt; t1.y
+</span><span class="c1"></span><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">t0</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="p">..</span><span class="o">=</span><span class="n">t1</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">segment_height</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t1</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1.</span><span class="p">;</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">alpha</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="p">.</span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">total_height</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">;</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">beta</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="p">.</span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">segment_height</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">;</span><span class="w"> </span><span class="c1">// be careful with divisions by zero
+</span><span class="c1"></span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t0</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">t2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">alpha</span><span class="p">;</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t0</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">t1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">beta</span><span class="p">;</span><span class="w">
+</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">swap</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">b</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="p">..</span><span class="o">=</span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">image</span><span class="p">.</span><span class="n">put_pixel</span><span class="p">(</span><span class="n">j</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">color</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="c1">// 上半部分
+</span><span class="c1"></span><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">t1</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="p">..</span><span class="o">=</span><span class="n">t2</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">segment_height</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t2</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t1</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1.</span><span class="p">;</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">alpha</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="p">.</span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">total_height</span><span class="p">;</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">beta</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t1</span><span class="p">.</span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">segment_height</span><span class="p">;</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t0</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">t2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">alpha</span><span class="p">;</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">t2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t1</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">beta</span><span class="p">;</span><span class="w">
+</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">swap</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">b</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="p">..</span><span class="o">=</span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">image</span><span class="p">.</span><span class="n">put_pixel</span><span class="p">(</span><span class="n">j</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">color</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><image src="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/line-swepping-1.png" wdith=200px height=200px/>
+<p>将代码整理一下，同时画出两部分：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">triangle</span><span class="o">&lt;</span><span class="n">I</span>: <span class="nc">GenericImage</span><span class="o">&gt;</span><span class="p">(</span><span class="w">
+</span><span class="w">    </span><span class="k">mut</span><span class="w"> </span><span class="n">t0</span>: <span class="nc">glm</span>::<span class="n">Vec2</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="k">mut</span><span class="w"> </span><span class="n">t1</span>: <span class="nc">glm</span>::<span class="n">Vec2</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="k">mut</span><span class="w"> </span><span class="n">t2</span>: <span class="nc">glm</span>::<span class="n">Vec2</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">image</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">I</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">color</span>: <span class="nc">I</span>::<span class="n">Pixel</span><span class="p">,</span><span class="w">
+</span><span class="w"></span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">t0</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">t1</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">t0</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">t2</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="k">return</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="c1">// 按y坐标排序
+</span><span class="c1"></span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">t0</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">t1</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="n">swap</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">t0</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">t1</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">t0</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">t2</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="n">swap</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">t0</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">t2</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">t1</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">t2</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="n">swap</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">t1</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">t2</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">total_height</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t2</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="p">.</span><span class="n">y</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="c1">// 同时画两部分
+</span><span class="c1"></span><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="p">..</span><span class="o">=</span><span class="n">total_height</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">second_half</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="p">(</span><span class="n">t1</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="p">.</span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">t1</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">t0</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="kc">true</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="kc">false</span><span class="w">
+</span><span class="w">        </span><span class="p">};</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">segment_height</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">second_half</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">t2</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t1</span><span class="p">.</span><span class="n">y</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">t1</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="p">.</span><span class="n">y</span><span class="w">
+</span><span class="w">        </span><span class="p">};</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">alpha</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">total_height</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">;</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">beta</span><span class="w"> </span><span class="o">=</span><span class="w">
+</span><span class="w">            </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">second_half</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">t1</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mf">0.</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">segment_height</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">;</span><span class="w"> </span><span class="c1">// be careful with divisions by zero
+</span><span class="c1"></span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t0</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">t2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">alpha</span><span class="p">;</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">second_half</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">t1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">t2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t1</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">beta</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">t0</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">t1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">beta</span><span class="w">
+</span><span class="w">        </span><span class="p">};</span><span class="w">
+</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">swap</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">b</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="p">..</span><span class="o">=</span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">image</span><span class="p">.</span><span class="n">put_pixel</span><span class="p">(</span><span class="n">j</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">t0</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">color</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>详细代码见这里<a href="https://github.com/kirito41dd/tinyrenderer/tree/37bc2e71b0fe47a37da314987c69f43caf9027c1" target="_blank" rel="noopener noreferrer">37bc2e71b0fe47a37da314987c69f43caf9027c1</a></p>
+<h3 id="重心坐标" class="headerLink">
+    <a href="#%e9%87%8d%e5%bf%83%e5%9d%90%e6%a0%87" class="header-mark"></a>重心坐标</h3><p>扫描线是为单线程CPU编程设计的老式方法，显卡有很多核心，这种方式发挥不了显卡的威力。更好的方式是对于每个像素，直接判断其是否属于三角形内部。</p>
+<p>首先需要了解什么是<a href="https://zh.wikipedia.org/wiki/%E9%87%8D%E5%BF%83%E5%9D%90%E6%A0%87" target="_blank" rel="noopener noreferrer">重心坐标</a>，可以看这个<a href="https://zhuanlan.zhihu.com/p/58199366" target="_blank" rel="noopener noreferrer">文章</a>，总结来讲：</p>
+<p><image src="https://blog-1256556944.file.myqcloud.com/public/abcp.png" wdith=250px height=250px /></p>
+<blockquote>
+<p>如果点P再三角形ABC内部，必定唯一存在三个数w1,w2,w3，满足：</p>
+<p>w1+w2+w3=1 且 w1,w2,w3非负数（负数说明不在内部）</p>
+<p>P=w1*A+w2*B+w3*C （即P表示成A,B,C的线性组合）</p>
+<p>则(w1,w2,w3)就称为此三角形上P点的（归一化）重心坐标。</p>
+</blockquote>
+<p>计算的话，教程里的更好理解些，w1,w2,w3表示成(1-u-v,u,v)：</p>
+<div>
+$$
+\begin{aligned}
+P &= (1-u-v)A + uB + vC \\
+  &= A + u(B-A) + v(C-A) \\
+  &= A + u\overrightarrow{AB} + v\overrightarrow{AC}
+\end{aligned}
+$$
+</div>
+然后再把P移过去，就得到：
+<div>
+$$
+u\overrightarrow{AB} + v\overrightarrow{AC} + \overrightarrow{PA} = 0
+$$
+</div>
+再把向量展开成坐标值表示：
+<div>
+$$
+\begin{cases}
+u\overrightarrow{AB}_x + v\overrightarrow{AC}_x + \overrightarrow{PA}_x &= 0\\
+u\overrightarrow{AB}_y + v\overrightarrow{AC}_y + \overrightarrow{PA}_y &= 0\\
+\end{cases}
+$$
+</div>
+然后作者上面的式子写成了矩阵的形式：
+<div>
+$$
+\begin{cases}
+\begin{bmatrix}
+u & v &1
+\end{bmatrix} 
+\begin{bmatrix}
+\overrightarrow{AB}_x \\ \overrightarrow{AC}_x \\ \overrightarrow{PA}_x 
+\end{bmatrix} &= 0 \\
+\\
+\begin{bmatrix}
+u & v &1
+\end{bmatrix} 
+\begin{bmatrix}
+\overrightarrow{AB}_y \\ \overrightarrow{AC}_y \\ \overrightarrow{PA}_y
+\end{bmatrix} &= 0
+\end{cases}
+$$
+</div>
+其实不转换成矩阵也行，这一步无所谓。观察上面的式子，如果把参与计算的数值看作三维坐标，就会变得很简单，高中知识就够了：
+<div>
+$$
+\begin{aligned}
+(u,v,1)\ &*\ (x_1,x_2,x_3) &= 0\\
+(u,v,1)\ &*\ (y_1,y_2,y_3) &= 0
+\end{aligned}
+$$
+</div>
+<p>这不就两个向量的<a href="https://zh.wikipedia.org/wiki/%E7%82%B9%E7%A7%AF" target="_blank" rel="noopener noreferrer">点积</a>么，复习一下：</p>
+<p><image src="https://blog-1256556944.file.myqcloud.com/public/vec-dot-product.gif" wdith=300px height=300px /></p>
+<p>向量$A*B=|A||B|\cos\theta$，什么时候结果为零呢：当两个向量垂直的时候结果为0</p>
+<p>回到式子, (u,v,1)和(x1,x2,x3)、(y1,y2,y3)必须同时垂直。换句话说，给定(x1,x2,x3)、(y1,y2,y3)两向量，找到同时垂直他们的向量即可。</p>
+<p>继续高中知识就足够了，回忆下两个向量的<a href="https://zh.wikipedia.org/wiki/%E5%8F%89%E7%A7%AF" target="_blank" rel="noopener noreferrer">叉积</a>：</p>
+<p><image src="https://blog-1256556944.file.myqcloud.com/public/vec-vector-product.png" wdith=300px height=300px /></p>
+<p>对两个向量做叉积能得到一个新的向量，这个向量同时垂直ab且方向与ab的位置有关。</p>
+<p>所以，求(u,v,1)的值，只需要：</p>
+<div>
+$$
+(\overrightarrow{AB}_x , \overrightarrow{AC}_x , \overrightarrow{PA}_x) 
+\times
+(\overrightarrow{AB}_y , \overrightarrow{AC}_y , \overrightarrow{PA}_y)
+$$
+</div>
+<p>代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="c1">// 求重心坐标
+</span><span class="c1"></span><span class="k">fn</span> <span class="nf">barycentric</span><span class="p">(</span><span class="n">a</span>: <span class="nc">glm</span>::<span class="n">IVec2</span><span class="p">,</span><span class="w"> </span><span class="n">b</span>: <span class="nc">glm</span>::<span class="n">IVec2</span><span class="p">,</span><span class="w"> </span><span class="n">c</span>: <span class="nc">glm</span>::<span class="n">IVec2</span><span class="p">,</span><span class="w"> </span><span class="n">p</span>: <span class="nc">glm</span>::<span class="n">IVec2</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">glm</span>::<span class="n">Vec3</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">ab</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">a</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">ac</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">a</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">pa</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">p</span><span class="p">;</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">cross</span><span class="p">(</span><span class="w">
+</span><span class="w">        </span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="n">ab</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">,</span><span class="w"> </span><span class="n">ac</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">,</span><span class="w"> </span><span class="n">pa</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">),</span><span class="w">
+</span><span class="w">        </span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="n">ab</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">,</span><span class="w"> </span><span class="n">ac</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">,</span><span class="w"> </span><span class="n">pa</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">),</span><span class="w">
+</span><span class="w">    </span><span class="p">);</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="c1">// 因为传入坐标都是整数，所以z小于1就意味着z是0，这种情况是因为三角形三个顶点在一条直线上，不是合法三角形
+</span><span class="c1"></span><span class="w">    </span><span class="c1">// 这种情况返回一个负值
+</span><span class="c1"></span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">z</span><span class="p">.</span><span class="n">abs</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">1.</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span><span class="w"> </span><span class="mf">1.</span><span class="p">,</span><span class="w"> </span><span class="mf">1.</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="c1">// vec(x,y,z)/z -&gt; (u,v,1) -&gt; (1-u-v, u, v)
+</span><span class="c1"></span><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="mf">1.</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">((</span><span class="n">u</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">z</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">z</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>有了求重心坐标的函数后，只需要枚举坐标，用当前坐标与三角形顶点算重心坐标，如果重心坐标中任意一个值为负数，说明当前坐标不在三角形中，反之则说明该坐标在三角形内：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">triangle_with_barycentric</span><span class="o">&lt;</span><span class="n">I</span>: <span class="nc">GenericImage</span><span class="o">&gt;</span><span class="p">(</span><span class="w">
+</span><span class="w">    </span><span class="n">t0</span>: <span class="nc">glm</span>::<span class="n">IVec2</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">t1</span>: <span class="nc">glm</span>::<span class="n">IVec2</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">t2</span>: <span class="nc">glm</span>::<span class="n">IVec2</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">image</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">I</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">color</span>: <span class="nc">I</span>::<span class="n">Pixel</span><span class="p">,</span><span class="w">
+</span><span class="w"></span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">bboxmin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">ivec2</span><span class="p">(</span><span class="n">t0</span><span class="p">.</span><span class="n">x</span><span class="p">.</span><span class="n">min</span><span class="p">(</span><span class="n">t1</span><span class="p">.</span><span class="n">x</span><span class="p">).</span><span class="n">min</span><span class="p">(</span><span class="n">t2</span><span class="p">.</span><span class="n">x</span><span class="p">),</span><span class="w"> </span><span class="n">t0</span><span class="p">.</span><span class="n">y</span><span class="p">.</span><span class="n">min</span><span class="p">(</span><span class="n">t1</span><span class="p">.</span><span class="n">y</span><span class="p">).</span><span class="n">min</span><span class="p">(</span><span class="n">t2</span><span class="p">.</span><span class="n">y</span><span class="p">));</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">bboxmax</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">ivec2</span><span class="p">(</span><span class="n">t0</span><span class="p">.</span><span class="n">x</span><span class="p">.</span><span class="n">max</span><span class="p">(</span><span class="n">t1</span><span class="p">.</span><span class="n">x</span><span class="p">).</span><span class="n">max</span><span class="p">(</span><span class="n">t2</span><span class="p">.</span><span class="n">x</span><span class="p">),</span><span class="w"> </span><span class="n">t0</span><span class="p">.</span><span class="n">y</span><span class="p">.</span><span class="n">max</span><span class="p">(</span><span class="n">t1</span><span class="p">.</span><span class="n">y</span><span class="p">).</span><span class="n">max</span><span class="p">(</span><span class="n">t2</span><span class="p">.</span><span class="n">y</span><span class="p">));</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">t0</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">px</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">bboxmin</span><span class="p">.</span><span class="n">x</span><span class="p">..</span><span class="o">=</span><span class="n">bboxmax</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">py</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">bboxmin</span><span class="p">.</span><span class="n">y</span><span class="p">..</span><span class="o">=</span><span class="n">bboxmax</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">bc_screen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">barycentric</span><span class="p">(</span><span class="n">t0</span><span class="p">,</span><span class="w"> </span><span class="n">t1</span><span class="p">,</span><span class="w"> </span><span class="n">t2</span><span class="p">,</span><span class="w"> </span><span class="n">glm</span>::<span class="n">ivec2</span><span class="p">(</span><span class="n">px</span><span class="p">,</span><span class="w"> </span><span class="n">py</span><span class="p">));</span><span class="w">
+</span><span class="w">
+</span><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">bc_screen</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">bc_screen</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">bc_screen</span><span class="p">.</span><span class="n">z</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">                </span><span class="k">continue</span><span class="p">;</span><span class="w">
+</span><span class="w">            </span><span class="p">}</span><span class="w">
+</span><span class="w">            </span><span class="n">image</span><span class="p">.</span><span class="n">put_pixel</span><span class="p">(</span><span class="n">px</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">py</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">color</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p><image src="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/line-sweeping-2.png" wdith=200px height=200px /></p>
+<p>详细代码见这里<a href="https://github.com/kirito41dd/tinyrenderer/tree/a1d23998dccac6a3f42130e3d57f21c399fab0d7" target="_blank" rel="noopener noreferrer">a1d23998dccac6a3f42130e3d57f21c399fab0d7</a></p>
+<h2 id="渲染阴影以及面剔除" class="headerLink">
+    <a href="#%e6%b8%b2%e6%9f%93%e9%98%b4%e5%bd%b1%e4%bb%a5%e5%8f%8a%e9%9d%a2%e5%89%94%e9%99%a4" class="header-mark"></a>渲染阴影以及面剔除</h2><p>把作者给的obj模型的每个三角形画出来，首先将obj文件里给的坐标转换为屏幕坐标，并随机给一个颜色：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="k">for</span><span class="w"> </span><span class="n">arr</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">model</span><span class="p">.</span><span class="n">indices</span><span class="p">.</span><span class="n">chunks</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span><span class="w">        </span><span class="n">model</span><span class="p">.</span><span class="n">vertices</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">).</span><span class="n">unwrap</span><span class="p">().</span><span class="n">position</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="n">model</span><span class="p">.</span><span class="n">vertices</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">).</span><span class="n">unwrap</span><span class="p">().</span><span class="n">position</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="n">model</span><span class="p">.</span><span class="n">vertices</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">).</span><span class="n">unwrap</span><span class="p">().</span><span class="n">position</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span><span class="w">        </span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span><span class="w">
+</span><span class="w">        </span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">b</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span><span class="w">
+</span><span class="w">        </span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">c</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span><span class="w">
+</span><span class="w">    </span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">sa</span><span class="p">,</span><span class="w"> </span><span class="n">sb</span><span class="p">,</span><span class="w"> </span><span class="n">sc</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span><span class="w">        </span><span class="n">glm</span>::<span class="n">ivec2</span><span class="p">(</span><span class="w">
+</span><span class="w">            </span><span class="p">(((</span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1.</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">width</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">2.</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="p">,</span><span class="w">
+</span><span class="w">            </span><span class="p">(((</span><span class="n">a</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1.</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">height</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">2.</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="p">),</span><span class="w">
+</span><span class="w">        </span><span class="n">glm</span>::<span class="n">ivec2</span><span class="p">(</span><span class="w">
+</span><span class="w">            </span><span class="p">(((</span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1.</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">width</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">2.</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="p">,</span><span class="w">
+</span><span class="w">            </span><span class="p">(((</span><span class="n">b</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1.</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">height</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">2.</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="p">),</span><span class="w">
+</span><span class="w">        </span><span class="n">glm</span>::<span class="n">ivec2</span><span class="p">(</span><span class="w">
+</span><span class="w">            </span><span class="p">(((</span><span class="n">c</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1.</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">width</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">2.</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="p">,</span><span class="w">
+</span><span class="w">            </span><span class="p">(((</span><span class="n">c</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1.</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">height</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">2.</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="p">),</span><span class="w">
+</span><span class="w">    </span><span class="p">);</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="n">draw</span>::<span class="n">triangle_with_barycentric</span><span class="p">(</span><span class="w">
+</span><span class="w">        </span><span class="n">sa</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="n">sb</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="n">sc</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">image</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="n">Rgba</span><span class="p">([</span><span class="w">
+</span><span class="w">            </span><span class="n">rand</span>::<span class="n">random</span>::<span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="p">()</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">255</span><span class="p">,</span><span class="w">
+</span><span class="w">            </span><span class="n">rand</span>::<span class="n">random</span>::<span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="p">()</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">255</span><span class="p">,</span><span class="w">
+</span><span class="w">            </span><span class="n">rand</span>::<span class="n">random</span>::<span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="p">()</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">255</span><span class="p">,</span><span class="w">
+</span><span class="w">            </span><span class="mi">255</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="p">]),</span><span class="w">
+</span><span class="w">    </span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p><image src="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/shadow-0.png" wdith=400px height=400px /></p>
+<p>这里有一个问题，模型中的每个三角形都被画出来了，正常来讲只有面对我们的三角形才应该被画出来，这就涉及到了面剔除，接下来给模型打上光照，同时进行面剔除。</p>
+<p>首先看光照，把一束光看作一个向量，然后再求出一个三角形的面向（三角形两条边做叉积，能得到方向垂直于两条边的向量）。面向与光照方向越接近，光照强度就越大。</p>
+<p>把面向和光照两个向量再做点积，点积如果是负的，说明该面向背对光源，如果光源方向是我们屏幕外向屏幕内，那么这个面我们是看不见的，应该被剔除。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">cross</span><span class="p">(</span><span class="n">c</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">a</span><span class="p">);</span><span class="w"> </span><span class="c1">// 计算三角形面向
+</span><span class="c1"></span><span class="kd">let</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">normalize</span><span class="p">(</span><span class="n">n</span><span class="p">);</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">intensity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">dot</span><span class="p">(</span><span class="n">light_dir</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">);</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">if</span><span class="w"> </span><span class="n">intensity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0.</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="c1">// 既是光照强度，也能当面剔除用，小于0说明背对我们
+</span><span class="c1"></span><span class="w">    </span><span class="n">draw</span>::<span class="n">triangle_with_barycentric</span><span class="p">(</span><span class="w">
+</span><span class="w">        </span><span class="n">sa</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="n">sb</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="n">sc</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">image</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="n">Rgba</span><span class="p">([</span><span class="w">
+</span><span class="w">            </span><span class="p">(</span><span class="mf">255.</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">intensity</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u8</span><span class="p">,</span><span class="w">
+</span><span class="w">            </span><span class="p">(</span><span class="mf">255.</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">intensity</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u8</span><span class="p">,</span><span class="w">
+</span><span class="w">            </span><span class="p">(</span><span class="mf">255.</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">intensity</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u8</span><span class="p">,</span><span class="w">
+</span><span class="w">            </span><span class="mi">255</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="p">]),</span><span class="w">
+</span><span class="w">    </span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>note: 模型文件中三角形的坐标是有顺序的，一般顺时针或逆时针排列，从而方便我们计算面向</p>
+<p><image src="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/shadow-1.png" wdith=400px height=400px /></p>
+<p>详细代码见这里<a href="https://github.com/kirito41dd/tinyrenderer/tree/990567294a9b58fb4a66a65704640ff0710bd522" target="_blank" rel="noopener noreferrer">990567294a9b58fb4a66a65704640ff0710bd522</a></p>
+</div>
+
+        <div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2022-07-03</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/graphics/">graphics</a>,&nbsp;<a href="/tags/tinyrenderer/">tinyrenderer</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/learn-opengl-env/" class="prev" rel="prev" title="LearnOpenGL环境搭建"><i class="fas fa-angle-left fa-fw"></i>LearnOpenGL环境搭建</a>
+            <a href="/tinyrenderer-note-1/" class="next" rel="next" title="TinyRenderer笔记1：Z-buffer和纹理插值">TinyRenderer笔记1：Z-buffer和纹理插值<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="twikoo"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://twikoo.js.org/">Twikoo</a>.
+            </noscript></div></article></div>
+        </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">      <a href="https://www.travellings.cn/go.html" target="_blank" rel="noopener" title="开往-友链接力"><img src="https://www.travellings.cn/assets/logo.gif" alt="开往-友链接力" width="120"></a><a href="https://www.foreverblog.cn/go.html" target="_blank" > <img src="https://img.foreverblog.cn/wormhole_3.gif" alt="" style="width:auto;height:32px;" title="穿梭虫洞-随机访问十年之约友链博客"> </a>
+      </br><small>1KiritobkMPpaWBjTDHSoiP5icv8PEFNdR</small>
+      </br><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+      </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2020 - 2024</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank" rel="noopener noreferrer">kirito</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+            <div class="footer-line"></div>
+            <div class="footer-line">
+            </div>
+        </div></footer></div>
+
+    <div id="fixed-buttons"><a href="#back-to-top" id="back-to-top-button" class="fixed-button" title="回到顶部">
+            <i class="fas fa-arrow-up fa-fw"></i>
+        </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+            <i class="fas fa-comment fa-fw"></i>
+        </a>
+    </div><div class="assets"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/katex/copy-tex.min.css">
+        <noscript><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"></noscript><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":30},"comment":{"twikoo":{"commentCount":true,"el":"#twikoo","envId":"https://comment-liard.vercel.app/","lang":"zh-cn"}},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"distance":null,"findAllMatches":null,"fuseIndexURL":"/index.json","highlightTag":"em","ignoreFieldNorm":null,"ignoreLocation":null,"isCaseSensitive":null,"location":null,"maxResultLength":10,"minMatchCharLength":null,"noResultsFound":"没有找到结果","snippetLength":50,"threshold":null,"type":"fuse","useExtendedSearch":null}};</script><script type="text/javascript" src="/lib/twikoo/twikoo.all.min.js" defer></script><script type="text/javascript" src="/js/twikoo.min.js" defer></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js" defer></script><script type="text/javascript" src="/lib/katex/auto-render.min.js" defer></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js" defer></script><script type="text/javascript" src="/lib/katex/mhchem.min.js" defer></script><script type="text/javascript" src="/js/katex.min.js" defer></script><script type="text/javascript" src="/js/theme.min.js" defer></script><script type="text/javascript">
+            window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());
+            gtag('config', 'G-ZKPP127E4F');
+        </script><script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id=G-ZKPP127E4F" async></script><script>
+			var _hmt = _hmt || [];
+			(function() {
+			  var hm = document.createElement("script");
+			  hm.src = "https://hm.baidu.com/hm.js?2004ef75aa13d757f75bf6f1f3add242";
+			  var s = document.getElementsByTagName("script")[0]; 
+			  s.parentNode.insertBefore(hm, s);
+			})();
+		</script><script>
+         
+         
+        var $cdnPrefix = "https://blog-1256556944.file.myqcloud.com";
+    </script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@2.1.3/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-backstretch@2.1.18/jquery.backstretch.min.js"></script>
+    <script type="text/javascript" src="/js/custom.js"></script>
+</div>
+</body>
+
+</html>

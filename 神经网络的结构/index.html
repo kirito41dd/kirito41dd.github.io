@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noodp" />
+    <title>神经网络的结构 - kirito&#39;s blog</title><meta name="Description" content="kirito&#39;s blog"><meta property="og:title" content="神经网络的结构" />
+<meta property="og:description" content="视频教程： 【官方双语】深度学习之神经网络的结构 Part 1 ver 2.0 【官方双语】深度学习之梯度下降法 Part 2 ver 0.9 beta 【官方双语】深度学习之反向传播算法 上/下 Part 3" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.kirito.info/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84/" /><meta property="og:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-01-09T11:51:25+00:00" />
+<meta property="article:modified_time" content="2024-03-30T08:57:14+00:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/>
+
+<meta name="twitter:title" content="神经网络的结构"/>
+<meta name="twitter:description" content="视频教程： 【官方双语】深度学习之神经网络的结构 Part 1 ver 2.0 【官方双语】深度学习之梯度下降法 Part 2 ver 0.9 beta 【官方双语】深度学习之反向传播算法 上/下 Part 3"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt">
+
+<meta name="theme-color" content="#f8f8f8"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="canonical" href="https://www.kirito.info/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84/" /><link rel="prev" href="https://www.kirito.info/tinyrenderer-note-2/" /><link rel="next" href="https://www.kirito.info/%E5%90%8C%E6%80%81%E5%8A%A0%E5%AF%86%E7%99%BB%E9%99%86/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/color.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/fontawesome-free/all.min.css">
+        <noscript><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"></noscript><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/animate/animate.min.css">
+        <noscript><link rel="stylesheet" href="/lib/animate/animate.min.css"></noscript><meta name="google-site-verification" content="5J8bsg9tKySrpONjEV2nAOqQ08TCVjsooCRIuDsxhD4" /><meta name="baidu-site-verification" content="code-NY7bFlUK92" /><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "神经网络的结构",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/www.kirito.info\/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84\/"
+        },"image": ["https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"],"genre": "posts","keywords": "神经网络, blog","wordcount":  4531 ,
+        "url": "https:\/\/www.kirito.info\/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84\/","datePublished": "2024-01-09T11:51:25+00:00","dateModified": "2024-03-30T08:57:14+00:00","publisher": {
+            "@type": "Organization",
+            "name": "kirito","logo": "https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"},"author": {
+                "@type": "Person",
+                "name": "kirito"
+            },"description": ""
+    }
+    </script><script src="//instant.page/5.1.1" defer type="module" integrity="sha384-MWfCL6g1OTGsbSwfuMHc8+8J2u71/LA8dzlIN3ycajckxuZZmF+DNjdm7O6H3PSq"></script>
+</head>
+
+<body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">
+        function setTheme(theme) {document.body.setAttribute('theme', theme); document.documentElement.style.setProperty('color-scheme', theme === 'light' ? 'light' : 'dark'); window.theme = theme; }
+        function saveTheme(theme) {window.localStorage && localStorage.setItem('theme', theme);}
+        function getMeta(metaName) {const metas = document.getElementsByTagName('meta'); for (let i = 0; i < metas.length; i++) if (metas[i].getAttribute('name') === metaName) return metas[i]; return '';}
+        if (window.localStorage && localStorage.getItem('theme')) {let theme = localStorage.getItem('theme');theme === 'light' || theme === 'dark' || theme === 'black' ? setTheme(theme) : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light')); } else { if ('auto' === 'light' || 'auto' === 'dark' || 'auto' === 'black') setTheme('auto'), saveTheme('auto'); else saveTheme('auto'), window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light');}
+        let metaColors = {'light': '#f8f8f8','dark': '#252627','black': '#000000'}
+        getMeta('theme-color').content = metaColors[document.body.getAttribute('theme')];
+    </script>
+    <div id="back-to-top"></div>
+    <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="kirito&#39;s blog">kirito</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="#" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="kirito&#39;s blog">kirito</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a href="#" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+            <div class="container"><div class="toc" id="toc-auto">
+        <h2 class="toc-title">目录</h2>
+        <div class="toc-content always-active" id="toc-content-auto"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#神经网络结构">神经网络结构</a></li>
+    <li><a href="#梯度下降法">梯度下降法</a></li>
+    <li><a href="#反向传播">反向传播</a></li>
+    <li><a href="#微积分原理">微积分原理</a></li>
+    <li><a href="#补充">补充</a></li>
+  </ul>
+</nav></div>
+    </div><script>document.getElementsByTagName("main")[0].setAttribute("pageStyle", "normal")</script><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "true")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">神经网络的结构</h1><div class="post-meta">
+            <div class="post-meta-line">
+                <span class="post-author"><i class="author fas fa-user-circle fa-fw"></i><a href="/" title="Author" rel=" author" class="author">kirito</a>
+                </span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-01-09">2024-01-09</time>&nbsp;<i class="far fa-edit fa-fw"></i>&nbsp;<time datetime="2024-03-30">2024-03-30</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 4531 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 10 分钟&nbsp;<span id="/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84/" class="leancloud_visitors" data-flag-title="神经网络的结构">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class="leancloud-visitors-count" id=twikoo_visitors></span>&nbsp;次阅读
+                    </span>&nbsp;<span id="/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84/" class="comment_count" data-flag-title="神经网络的结构">
+                        <i class="far fa-comments fa-fw"></i>&nbsp;<span class="twikoo-comment-count" id="twikoo-comment-count"></span>&nbsp;条评论
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#神经网络结构">神经网络结构</a></li>
+    <li><a href="#梯度下降法">梯度下降法</a></li>
+    <li><a href="#反向传播">反向传播</a></li>
+    <li><a href="#微积分原理">微积分原理</a></li>
+    <li><a href="#补充">补充</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>视频教程：<br>
+<a href="https://www.bilibili.com/video/BV1bx411M7Zx" target="_blank" rel="noopener noreferrer">【官方双语】深度学习之神经网络的结构 Part 1 ver 2.0</a><br>
+<a href="https://www.bilibili.com/video/BV1Ux411j7ri" target="_blank" rel="noopener noreferrer">【官方双语】深度学习之梯度下降法 Part 2 ver 0.9 beta</a><br>
+<a href="https://www.bilibili.com/video/BV16x411V7Qg" target="_blank" rel="noopener noreferrer">【官方双语】深度学习之反向传播算法 上/下 Part 3 ver 0.9 beta</a></p>
+<h2 id="神经网络结构" class="headerLink">
+    <a href="#%e7%a5%9e%e7%bb%8f%e7%bd%91%e7%bb%9c%e7%bb%93%e6%9e%84" class="header-mark"></a>神经网络结构</h2><p>如何识别尺寸28x28=784像素的数字图片：<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84.png" title="神经网络的结构.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84.png">
+    </a></figure></p>
+<p>神经网络的变种有很多：</p>
+<ul>
+<li>卷积神经网络 Convolutional neural network 擅长图像识别 image recognition</li>
+<li>长短期记忆网络 Long short-term memory network 擅长语音识别</li>
+<li>多层感知器 MLP(Multilayer Perceptron) 经典原版，就是下面的结构<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-1.png" title="神经网络的结构-1.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-1.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-1.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-1.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-1.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-1.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-1.png">
+    </a></figure><br>
+神经网络名字来源于人类大脑，<strong>神经元</strong>是什么又是如何<strong>连接</strong>的。<br>
+神经元看作一个装有数字的容器，一般是0到1区间，上面的结构把图片的每个像素都输入到网络对应的神经元中，值为像素的灰度值，值越大像素越白。<br>
+一般把神经元中装的值叫做 <strong>激活值 Activation</strong><br>
+网络中最后一层的十个神经元代表0到9十个数字，他们的激活值也在0到1之间，激活值表示系统认为输入的图像对应着哪个数字的可能性。<br>
+网络中间还有几层 <strong>隐含层 Hidden layers</strong>，例子中选择了两层隐含层，每层16个神经元，随便选的<br>
+神经网络运作时，上一层的激活值将决定下一层的激活值，所以神经处理信息的核心机制正是：<strong>一层的激活值是通过怎样的运算 算出下一层的激活值</strong>。可以看作是模仿生物中神经元组成的网络，某些神经元的触发，就会促使另一些神经元激发。<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-2.png" title="神经网络的结构-2.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-2.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-2.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-2.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-2.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-2.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-2.png">
+    </a></figure><br>
+上层神经元如何影响下层神经元的激活值，给第二层的每个神经元与第一层所有神经元的每一条连线都附上一个<strong>权重值 Weights</strong>，这些权重都是数字而已<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-3.png" title="神经网络的结构-3.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-3.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-3.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-3.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-3.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-3.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-3.png">
+    </a></figure><br>
+拿第一层的所有激活值，和每条边的权重一起，算出他们的加权和。这样算出来的值可能是任意大小，我们需要激活值都在0到1之间，可以通过某种函数来映射，比如：Sigmoid，这种函数一般叫<strong>激活函数Activation Function</strong><br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-4.png" title="神经网络的结构-4.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-4.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-4.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-4.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-4.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-4.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-4.png">
+    </a></figure><br>
+所以激活值就是把上面算出来的加权值塞进sigmoid函数映射一下，但有时候即使加权和大于0，也不想把神经元点亮，比如规定加权和大于10的时候才激发，可以加上一个-10之类的数，叫做<strong>偏置 bias</strong> 。再将它送到sigmoid函数<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-5.png" title="神经网络的结构-5.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-5.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-5.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-5.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-5.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-5.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-5.png">
+    </a></figure>权重表示神经元受哪些上层神经元的影响，偏执规定加权和得有多大，才能让神经元的激发有意义。除了第一层的神经元，后面每层的神经元都有偏置<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-6.png" title="神经网络的结构-6.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-6.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-6.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-6.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-6.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-6.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-6.png">
+    </a></figure><br>
+所有的权重和偏执都可以看作是旋钮开关供你调整，从而带来不一样的结果。学习或者说训练的过程，就是找到该如何设置这一坨参数，才能让它正确的解决问题。</li>
+</ul>
+<p><figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-7.png" title="神经网络的结构-7.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-7.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-7.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-7.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-7.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-7.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-7.png">
+    </a></figure><br>
+对于计算下层神经元的激活值，线性代数可以很方便表示<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-9.png" title="神经网络的结构-9.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-9.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-9.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-9.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-9.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-9.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-9.png">
+    </a></figure><br>
+整个神经网络可以看作一个函数，例子是一个输入784个值，输出10个值的函数</p>
+<h2 id="梯度下降法" class="headerLink">
+    <a href="#%e6%a2%af%e5%ba%a6%e4%b8%8b%e9%99%8d%e6%b3%95" class="header-mark"></a>梯度下降法</h2><p>神经网络训练的过程，是不断调整权重和偏置这些参数，提高网络对训练数据的表现。最终我们希望这个网络可以举一反三，给它没见过的测试数据它也能正确处理。</p>
+<p>在一开始，回完全随机的初始化所有的权重和偏置值，这个网络对于给定的训练示例，会表现的非常糟糕。</p>
+<p><figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-11.png" title="神经网络的结构-11.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-11.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-11.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-11.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-11.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-11.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-11.png">
+    </a></figure></p>
+<p>需要定义一个<strong>代价函数</strong>来告诉它，结果有多垃圾。<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-13.png" title="神经网络的结构-13.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-13.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-13.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-13.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-13.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-13.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-13.png">
+    </a></figure><br>
+需要将每个垃圾输出激活值，与你想要值之间的差的平方和加起来。我们称之为单个样本上的代价(<strong>Cost</strong> 也可以叫 <strong>Loss</strong>)，这个值越大，说明你的模型越找不到北。接下来要考虑所有训练样本中代价的平均值(这个值也叫 <strong>Empirical Risk 经验风险</strong>)，用这个值来评价网络有多糟糕。</p>
+<p>只告诉网络它有多糟糕是没啥用的，还得告诉他怎么改变这些权重和偏置值，才能有进步。<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-14.png" title="神经网络的结构-14.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-14.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-14.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-14.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-14.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-14.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-14.png">
+    </a></figure><br>
+先不考虑13000个参数的函数，而先考虑简单的一元函数，怎么找到输入值x，使函数值最小化呢？</p>
+<table>
+<thead>
+<tr>
+<th><figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-15.png" title="神经网络的结构-15.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-15.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-15.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-15.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-15.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-15.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-15.png">
+    </a></figure></th>
+<th><figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-16.png" title="神经网络的结构-16.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-16.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-16.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-16.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-16.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-16.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-16.png">
+    </a></figure></th>
+</tr>
+</thead>
+</table>
+<p>如果函数很简单，那么直接求斜率为0的位置就是答案，但如果函数很复杂，就不一定能写出来。对于13000个参数的网络，更加不可能。一个技巧是，先随便挑一个输入值，然后考虑向左走还是向右走，函数值才会变小。<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-17.png" title="神经网络的结构-17.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-17.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-17.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-17.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-17.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-17.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-17.png">
+    </a></figure><br>
+可以找到这个地方的斜率，如果为正0就往左走，为负就往右走，每次走一小步，不停的这样，就可以找到一个<strong>局部最小值</strong>。取决于一开始的输入，最后可能落到不同的坑里，可能并不是最优解，神经网络也会遇到这样的问题。<br>
+对于两个输入一个输出的二元函数，则可以看作为一个面，用同样的方法找到某个局部最深的坑<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-18.png" title="神经网络的结构-18.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-18.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-18.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-18.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-18.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-18.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-18.png">
+    </a></figure><br>
+问题变成哪个方向下山最快。和一元函数的斜率一样，多元函数也有斜率，叫做<strong>梯度</strong>，梯度指出了函数的最陡增长方向。这种算法总结下就是：随便一个输入后，先计算梯度，再按梯度负方向走一小步下山，然后循环。处理13000个输入的函数也一样，这就是<strong>梯度下降算法</strong></p>
+<p>想象13000个输入的情况是很复杂的，不借助空间，把梯度看着一个向量，负梯度的每一项值都告诉我们两件事，正负号告诉我们输入向量的这一项应该调大还是调小，每一项值的相对大小告诉我们改变哪个输入影响更大。</p>
+<p><figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-19.png" title="神经网络的结构-19.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-19.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-19.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-19.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-19.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-19.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-19.png">
+    </a></figure></p>
+<p>在网络中，把13000多个权重和偏置作为输入，通过训练数据，得出一个对网络糟糕程度的评分。代价函数的梯度，告诉我们如何微调权重和偏置的值，才可以让代价函数改变的最快。</p>
+<p>当你随机初始化权重和偏置，并通过梯度下降法调整了很多次参数之后，期望的是神经网络识别数字的正确率变高，包括识别从来没见过的图片。</p>
+<h2 id="反向传播" class="headerLink">
+    <a href="#%e5%8f%8d%e5%90%91%e4%bc%a0%e6%92%ad" class="header-mark"></a>反向传播</h2><p>神经网络学习的核心算法。为了让整个网络的代价值越来越小，我们要求的是代价函数的负梯度，它告诉你如何改变所有权重和偏置，好让代价下降的最快。反向传播算法正是用来求这个复杂到爆炸的梯度的。<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-20.png" title="神经网络的结构-20.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-20.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-20.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-20.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-20.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-20.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-20.png">
+    </a></figure><br>
+理论上因为代价函数牵扯到对成千上万个训练样本的代价取平均值，所以我们调整每一步梯度下降用的权重偏置，也会基于所有的训练样本。但为了计算效率，这里可以逃课，不必每一步都非得要计算所有的训练样本。<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-21.png" title="神经网络的结构-21.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-21.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-21.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-21.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-21.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-21.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-21.png">
+    </a></figure><br>
+先只关注一个训练样本“2”，会对调整权重偏置产生什么影响，假设网络现在还没训练好，所以输出层的激活值看起来都很随机，我们希望输出结果时2，我们希望对于神经元的激活值变大，其余神经元的激活值变小。并且变动的大小应该与现在值和目标值之间的差成正比，比如增加2对应神经与的激活值，就比减少8的激活值更重要，因为8的激活值已经很接近目标了。<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-22.png" title="神经网络的结构-22.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-22.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-22.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-22.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-22.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-22.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-22.png">
+    </a></figure><br>
+就先来关注一下2的神经元，它的激活值是上一层所有激活值的加权和 加上一个偏置，再通过sigmoid ReLu之类的激活函数算出来的。要增大这个激活值，有三条路：</p>
+<ol>
+<li>增加偏置$b$</li>
+<li>增加权重$w$</li>
+<li>改变上一层的激活值$a$（注意不能直接改激活值，只能改上上层的权重偏置）<br>
+先看增加权重，各个权重的影响力是不同的，前一层的激活值a越大，这条边权重的影响力就越大<br>
+梯度下降时候，并不只看每个参数是该增大还是减小，还看哪个参数的性价比最高<br>
+再看第三条路，改变上一层激活值，$w$为正时候，$a$越大越好，$w$为负时候$a$越小越好，和增加权重类似，改变上一层激活值，要依据对应权重大小，对激活值做出成比例的改变</li>
+</ol>
+<p><figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-23.png" title="神经网络的结构-23.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-23.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-23.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-23.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-23.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-23.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-23.png">
+    </a></figure><br>
+跳出2的神经元，从全局上看，我们还需要输出层其他神经元的激活值变弱，但输出层的每个神经元，对于如何改变倒数第二层都有各自的想法，所以我们会把2的神经元的期待，和别的输出神经元的期待全部加起来，作为如何改变倒数第二次神经元的指示。<br>
+这些期待变化不仅是对应的权重的倍数，也是每个神经元激活值改变量的倍数，这其实就是在实现<strong>反向传播</strong>的理念了。<br>
+把所有期待值加起来，就得到了一串对倒数第二层改动的变化量，重复这个过程，改变影响倒数第二层神经元激活值的相关参数，把这个过程循环到第一层。</p>
+<p>再放大局面，上面只是训练单个样本“2”的影响，还要对其他所有的训练样本，同样的过一遍反向传播</p>
+<p>记录下每个样本想怎样修改权重和偏置，在对每个参数的修改取一个平均值，不严格地说，这就是代价函数的负梯度，至少是标量的倍数：<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-24.png" title="神经网络的结构-24.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-24.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-24.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-24.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-24.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-24.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-24.png">
+    </a></figure></p>
+<p>顺便在实际操作总，如果梯度下降的每一步，都用上每一个训练样本来计算的话，那么花的时间就太长了，所以一般把训练数据打乱，分成不同组，然后按组算出下降的一步。这不是代价函数真正的梯度，然而是个不错的近似，主要是计算量会降低不少。这个技巧叫做<strong>随机梯度下降 Stochastic gradient descent</strong></p>
+<h2 id="微积分原理" class="headerLink">
+    <a href="#%e5%be%ae%e7%a7%af%e5%88%86%e5%8e%9f%e7%90%86" class="header-mark"></a>微积分原理</h2><p>反向传播最重要是对代价函数求导。<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-25.png" title="神经网络的结构-25.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-25.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-25.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-25.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-25.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-25.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-25.png">
+    </a></figure><br>
+先考虑最简单的网络结构，每层只有一个神经元，只有三个权重和三个偏置。我们目标是找到代价函数对这些变量有多敏感，这样就能知道怎么调整代价降低最快。<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-26.png" title="神经网络的结构-26.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-26.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-26.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-26.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-26.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-26.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-26.png">
+    </a></figure><br>
+先关注最后两个神经元，激活值$a$的上标$L$表示它处在第$L$层，给定一个样本，把样本最终激活值要接近的目标叫做$y$。<br>
+这个网络对于单个训练样本的代价就是图上$C_0(&hellip;)$ ，把计算最后一层样本用到的加权和与偏置的和叫做$z^{(L)}$  ，当然最终的激活值$a^{(L)}$还经过了一个激活函数$\sigma(z^{(L)})$ 。<br>
+左边的树状结构展示了代价计算过程的层级先后，首我们拿权重、上层的激活值、偏置算出了$z$ ，然后通过激活函数算出了$a$ ，最后再结合$y$算出了代价$C_0$<br>
+我们的第一个目标是理解代价函数对权重$W^{(L)}$的微小变化有多敏感，也就是求$C$对于$w^{(L)}$的导数:</p>
+<div>
+$$
+\frac{\partial C}{\partial w^{(L)}}
+$$
+</div>
+<p><figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-27.png" title="神经网络的结构-27.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-27.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-27.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-27.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-27.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-27.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-27.png">
+    </a></figure><br>
+概念上来说$w^{(L)}$的微小变化，会导致$z(L)$产生变化，然后会导致$a^{(L)}$产生变化，最终影响到代价值。<br>
+可以根据链式法则，把三个比相乘，就可以算出$C$对$w^{(L)}$的微小变化有多敏感：</p>
+<div>
+$$
+\frac{\partial C_0}{\partial w^{(L)}} = 
+\frac{\partial z^{L}}{\partial w^{(L)}}
+\frac{\partial a^{L}}{\partial z^{L}}
+\frac{\partial C_0}{\partial a^{L}}
+$$
+</div>
+<p><figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-29.png" title="神经网络的结构-29.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-29.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-29.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-29.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-29.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-29.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-29.png">
+    </a></figure></p>
+<p>一个个看：<br>
+$C_0$对$a^{(L)}$ 求导就是$2(a^{(L)}-y)$<br>
+$a^{(L)}$对$z^{(L)}$求导就是$\sigma &lsquo;(z^{L})$ ，即对激活函数求导<br>
+$z^{(L)}$对$w^{(L)}$求导就是$a^{(L-1)}$ , 常量被干掉了，然后$w^{(L)}$一次方变零次方就是1，所以只剩上层激活值了<br>
+这只是一个样本，由于总的代价函数是许许多多训练样本所有代价的平均，它对$w^{(L)}$的导数就需要求这个表达式之于每一个训练样本的平均<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-30.png" title="神经网络的结构-30.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-30.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-30.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-30.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-30.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-30.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-30.png">
+    </a></figure><br>
+当然这只是梯度向量$\nabla C$的一个分量：<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-31.png" title="神经网络的结构-31.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-31.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-31.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-31.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-31.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-31.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-31.png">
+    </a></figure><br>
+梯度向量$\nabla C$本身由代价函数对每一个权重和每一个偏置求偏导构成。对偏置求偏导步骤也基本相同，再树状结构上把$b^{(L)}$看作变量来求即可：<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-32.png" title="神经网络的结构-32.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-32.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-32.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-32.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-32.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-32.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-32.png">
+    </a></figure><br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-33.png" title="神经网络的结构-33.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-33.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-33.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-33.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-33.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-33.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-33.png">
+    </a></figure></p>
+<p>回到树的末梢，来看下这个代价函数对上一层的激活值$a^{(L-1)}$的敏感度，同样的计算思路：<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-34.png" title="神经网络的结构-34.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-34.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-34.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-34.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-34.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-34.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-34.png">
+    </a></figure><br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-35.png" title="神经网络的结构-35.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-35.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-35.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-35.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-35.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-35.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-35.png">
+    </a></figure><br>
+这样我们算出了代价函数对$(L-1)$层激活值的敏感度，虽说我们不能改变激活值，但我们仍然需要这个值，<strong>因为我们可以反向运用链式法则，来计算代价函数对之前的权重和偏置的敏感度。</strong><br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-36.png" title="神经网络的结构-36.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-36.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-36.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-36.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-36.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-36.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-36.png">
+    </a></figure><br>
+很显然，已经有$C_0$对$a^{(L-1)}$的导数的情况下，求更上面的节点的时候比如$w^{(L-1)}$，只要简单相乘就好了：</p>
+<div>
+$$
+\frac{\partial C_0}{\partial w^{(L-1)}} = 
+\frac{\partial z^{(L-1)}}{\partial w^{(L-1)}}
+\frac{\partial a^{(L-1)}}{\partial z^{(L-1)}}
+\frac{\partial C_0}{\partial a^{(L-1)}} 
+$$
+</div>
+<p>妙蛙~</p>
+<p>对于复杂的结构，无非是夺标几个下标，下标是神经元在当前层的节点编号：<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-37.png" title="神经网络的结构-37.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-37.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-37.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-37.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-37.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-37.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-37.png">
+    </a></figure><br>
+只是看着复杂，和每层只有一个神经元本质是一样的：<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-39.png" title="神经网络的结构-39.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-39.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-39.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-39.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-39.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-39.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-39.png">
+    </a></figure><br>
+唯一改变的是，代价对$(L-1)$层激活值的导数，需要SUM，因为它有多条出边，如图上它同时影响$a^{(L)}_0$  和$a^{(L)}_1$  进而影响激活函数，所以得把它们加起来。<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-40.png" title="神经网络的结构-40.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-40.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-40.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-40.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-40.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-40.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-40.png">
+    </a></figure><br>
+这样就完成了，只要算出来倒数第二层 代价函数对激活值的敏感度，接下来只要重复这个过程，计算喂给倒数第二层的权重和偏置就好了。这就是反向传播。</p>
+<p>链式法则表达式给出了决定梯度每个分量的偏导，使得我们能够不断下探，最小化神经网络的代价。</p>
+<p>ps:怎么更新，$w = w - 学习率 \times 偏导值$  ，学习率是梯度下降的步长</p>
+<h2 id="补充" class="headerLink">
+    <a href="#%e8%a1%a5%e5%85%85" class="header-mark"></a>补充</h2><p>激活函数：<br>
+早先都是使用Sigmoid映射加权值，后来发现ReLU(Rectified linear unit) 线性整流函数效果更好<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-10.png" title="神经网络的结构-10.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-10.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-10.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-10.png, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-10.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-10.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84-10.png">
+    </a></figure><br>
+疑问：ReLU好像并不能让激活值在0到1之间？</p>
+<p>训练数据：<br>
+<a href="http://yann.lecun.com/exdb/mnist/" target="_blank" rel="noopener noreferrer">MNIST数据库</a>有搜集数以万计的手写数字图像</p>
+</div>
+
+        <div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2024-03-30</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/">神经网络</a>,&nbsp;<a href="/tags/blog/">blog</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/tinyrenderer-note-2/" class="prev" rel="prev" title="TinyRenderer笔记2：透视投影"><i class="fas fa-angle-left fa-fw"></i>TinyRenderer笔记2：透视投影</a>
+            <a href="/%E5%90%8C%E6%80%81%E5%8A%A0%E5%AF%86%E7%99%BB%E9%99%86/" class="next" rel="next" title="同态加密登陆">同态加密登陆<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="twikoo"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://twikoo.js.org/">Twikoo</a>.
+            </noscript></div></article></div>
+        </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">      <a href="https://www.travellings.cn/go.html" target="_blank" rel="noopener" title="开往-友链接力"><img src="https://www.travellings.cn/assets/logo.gif" alt="开往-友链接力" width="120"></a><a href="https://www.foreverblog.cn/go.html" target="_blank" > <img src="https://img.foreverblog.cn/wormhole_3.gif" alt="" style="width:auto;height:32px;" title="穿梭虫洞-随机访问十年之约友链博客"> </a>
+      </br><small>1KiritobkMPpaWBjTDHSoiP5icv8PEFNdR</small>
+      </br><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+      </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2020 - 2024</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank" rel="noopener noreferrer">kirito</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+            <div class="footer-line"></div>
+            <div class="footer-line">
+            </div>
+        </div></footer></div>
+
+    <div id="fixed-buttons"><a href="#back-to-top" id="back-to-top-button" class="fixed-button" title="回到顶部">
+            <i class="fas fa-arrow-up fa-fw"></i>
+        </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+            <i class="fas fa-comment fa-fw"></i>
+        </a>
+    </div><div class="assets"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/katex/copy-tex.min.css">
+        <noscript><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"></noscript><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":30},"comment":{"twikoo":{"commentCount":true,"el":"#twikoo","envId":"https://comment-liard.vercel.app/","lang":"zh-cn"}},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"distance":null,"findAllMatches":null,"fuseIndexURL":"/index.json","highlightTag":"em","ignoreFieldNorm":null,"ignoreLocation":null,"isCaseSensitive":null,"location":null,"maxResultLength":10,"minMatchCharLength":null,"noResultsFound":"没有找到结果","snippetLength":50,"threshold":null,"type":"fuse","useExtendedSearch":null}};</script><script type="text/javascript" src="/lib/twikoo/twikoo.all.min.js" defer></script><script type="text/javascript" src="/js/twikoo.min.js" defer></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js" defer></script><script type="text/javascript" src="/lib/katex/auto-render.min.js" defer></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js" defer></script><script type="text/javascript" src="/lib/katex/mhchem.min.js" defer></script><script type="text/javascript" src="/js/katex.min.js" defer></script><script type="text/javascript" src="/js/theme.min.js" defer></script><script type="text/javascript">
+            window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());
+            gtag('config', 'G-ZKPP127E4F');
+        </script><script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id=G-ZKPP127E4F" async></script><script>
+			var _hmt = _hmt || [];
+			(function() {
+			  var hm = document.createElement("script");
+			  hm.src = "https://hm.baidu.com/hm.js?2004ef75aa13d757f75bf6f1f3add242";
+			  var s = document.getElementsByTagName("script")[0]; 
+			  s.parentNode.insertBefore(hm, s);
+			})();
+		</script><script>
+         
+         
+        var $cdnPrefix = "https://blog-1256556944.file.myqcloud.com";
+    </script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@2.1.3/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-backstretch@2.1.18/jquery.backstretch.min.js"></script>
+    <script type="text/javascript" src="/js/custom.js"></script>
+</div>
+</body>
+
+</html>
