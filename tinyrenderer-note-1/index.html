@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noodp" />
+    <title>TinyRenderer笔记1：Z-buffer和纹理插值 - kirito&#39;s blog</title><meta name="Description" content="kirito&#39;s blog"><meta property="og:title" content="TinyRenderer笔记1：Z-buffer和纹理插值" />
+<meta property="og:description" content="上一篇结尾渲染出了光照下的模型： 但是这个模型看起来有些奇怪，尤其是嘴巴的部分。因为渲染时候仅仅是按照从模型中读取的顶点信息，将三角形一个个的" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.kirito.info/tinyrenderer-note-1/" /><meta property="og:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-07-23T11:38:25+08:00" />
+<meta property="article:modified_time" content="2022-07-23T11:38:25+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/>
+
+<meta name="twitter:title" content="TinyRenderer笔记1：Z-buffer和纹理插值"/>
+<meta name="twitter:description" content="上一篇结尾渲染出了光照下的模型： 但是这个模型看起来有些奇怪，尤其是嘴巴的部分。因为渲染时候仅仅是按照从模型中读取的顶点信息，将三角形一个个的"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt">
+
+<meta name="theme-color" content="#f8f8f8"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="canonical" href="https://www.kirito.info/tinyrenderer-note-1/" /><link rel="prev" href="https://www.kirito.info/tinyrenderer-note-0/" /><link rel="next" href="https://www.kirito.info/water-water/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/color.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/fontawesome-free/all.min.css">
+        <noscript><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"></noscript><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/animate/animate.min.css">
+        <noscript><link rel="stylesheet" href="/lib/animate/animate.min.css"></noscript><meta name="google-site-verification" content="5J8bsg9tKySrpONjEV2nAOqQ08TCVjsooCRIuDsxhD4" /><meta name="baidu-site-verification" content="code-NY7bFlUK92" /><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "TinyRenderer笔记1：Z-buffer和纹理插值",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/www.kirito.info\/tinyrenderer-note-1\/"
+        },"image": ["https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"],"genre": "posts","keywords": "graphics, tinyrenderer","wordcount":  1410 ,
+        "url": "https:\/\/www.kirito.info\/tinyrenderer-note-1\/","datePublished": "2022-07-23T11:38:25+08:00","dateModified": "2022-07-23T11:38:25+08:00","publisher": {
+            "@type": "Organization",
+            "name": "kirito","logo": "https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"},"author": {
+                "@type": "Person",
+                "name": "kirito"
+            },"description": ""
+    }
+    </script><script src="//instant.page/5.1.1" defer type="module" integrity="sha384-MWfCL6g1OTGsbSwfuMHc8+8J2u71/LA8dzlIN3ycajckxuZZmF+DNjdm7O6H3PSq"></script>
+</head>
+
+<body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">
+        function setTheme(theme) {document.body.setAttribute('theme', theme); document.documentElement.style.setProperty('color-scheme', theme === 'light' ? 'light' : 'dark'); window.theme = theme; }
+        function saveTheme(theme) {window.localStorage && localStorage.setItem('theme', theme);}
+        function getMeta(metaName) {const metas = document.getElementsByTagName('meta'); for (let i = 0; i < metas.length; i++) if (metas[i].getAttribute('name') === metaName) return metas[i]; return '';}
+        if (window.localStorage && localStorage.getItem('theme')) {let theme = localStorage.getItem('theme');theme === 'light' || theme === 'dark' || theme === 'black' ? setTheme(theme) : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light')); } else { if ('auto' === 'light' || 'auto' === 'dark' || 'auto' === 'black') setTheme('auto'), saveTheme('auto'); else saveTheme('auto'), window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light');}
+        let metaColors = {'light': '#f8f8f8','dark': '#252627','black': '#000000'}
+        getMeta('theme-color').content = metaColors[document.body.getAttribute('theme')];
+    </script>
+    <div id="back-to-top"></div>
+    <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="kirito&#39;s blog">kirito</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="#" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="kirito&#39;s blog">kirito</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a href="#" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+            <div class="container"><div class="toc" id="toc-auto">
+        <h2 class="toc-title">目录</h2>
+        <div class="toc-content always-active" id="toc-content-auto"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#y-buffer">Y-buffer</a></li>
+    <li><a href="#z-buffer">Z-buffer</a></li>
+    <li><a href="#纹理">纹理</a></li>
+  </ul>
+</nav></div>
+    </div><script>document.getElementsByTagName("main")[0].setAttribute("pageStyle", "normal")</script><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "true")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">TinyRenderer笔记1：Z-buffer和纹理插值</h1><div class="post-meta">
+            <div class="post-meta-line">
+                <span class="post-author"><i class="author fas fa-user-circle fa-fw"></i><a href="/" title="Author" rel=" author" class="author">kirito</a>
+                </span>&nbsp;<span class="post-category">收录于 </span>&nbsp;<span class="post-category">类别 <a href="/categories/program/"><i class="far fa-folder fa-fw"></i>program</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-07-23">2022-07-23</time>&nbsp;<i class="far fa-edit fa-fw"></i>&nbsp;<time datetime="2022-07-23">2022-07-23</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1410 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 3 分钟&nbsp;<span id="/tinyrenderer-note-1/" class="leancloud_visitors" data-flag-title="TinyRenderer笔记1：Z-buffer和纹理插值">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class="leancloud-visitors-count" id=twikoo_visitors></span>&nbsp;次阅读
+                    </span>&nbsp;<span id="/tinyrenderer-note-1/" class="comment_count" data-flag-title="TinyRenderer笔记1：Z-buffer和纹理插值">
+                        <i class="far fa-comments fa-fw"></i>&nbsp;<span class="twikoo-comment-count" id="twikoo-comment-count"></span>&nbsp;条评论
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#y-buffer">Y-buffer</a></li>
+    <li><a href="#z-buffer">Z-buffer</a></li>
+    <li><a href="#纹理">纹理</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>上一篇结尾渲染出了光照下的模型：</p>
+<p><image src="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/shadow-1.png" wdith=400px height=400px /></p>
+<p>但是这个模型看起来有些奇怪，尤其是嘴巴的部分。因为渲染时候仅仅是按照从模型中读取的顶点信息，将三角形一个个的画了出来，但是并没有考虑三角形的遮挡关系。如果我们先画出了面部的三角形，然后又画了脑后勺的三角形，那最终展示出来的图形就会像上面一样很奇怪，原因是我们没有处理深度信息。</p>
+<h2 id="y-buffer" class="headerLink">
+    <a href="#y-buffer" class="header-mark"></a>Y-buffer</h2><p>渲染模型是将3维映射到2维，先来考虑将2维映射到1维该怎么做。目标是把几条2d空间的线段，映射到x轴上。</p>
+<p><image src="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/1-1.png" /></p>
+<p>如果我们以一维的视角从上往下看，看到的应该是一条彩色的线段，写一个函数来绘制这个线段：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">resterize</span><span class="o">&lt;</span><span class="n">I</span>: <span class="nc">GenericImage</span><span class="o">&gt;</span><span class="p">(</span><span class="w">
+</span><span class="w">    </span><span class="k">mut</span><span class="w"> </span><span class="n">a</span>: <span class="nc">glm</span>::<span class="n">IVec2</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="k">mut</span><span class="w"> </span><span class="n">b</span>: <span class="nc">glm</span>::<span class="n">IVec2</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">image</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">I</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">color</span>: <span class="nc">I</span>::<span class="n">Pixel</span><span class="p">,</span><span class="w">
+</span><span class="w"></span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="p">).</span><span class="n">abs</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">y</span><span class="p">).</span><span class="n">abs</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="n">swap</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">y</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="n">swap</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">y</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="p">..</span><span class="o">=</span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="p">..</span><span class="n">image</span><span class="p">.</span><span class="n">height</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">image</span><span class="p">.</span><span class="n">put_pixel</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">color</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">draw</span>::<span class="n">resterize</span><span class="p">(</span><span class="n">glm</span>::<span class="n">ivec2</span><span class="p">(</span><span class="mi">330</span><span class="p">,</span><span class="w"> </span><span class="mi">463</span><span class="p">),</span><span class="w"> </span><span class="n">glm</span>::<span class="n">ivec2</span><span class="p">(</span><span class="mi">594</span><span class="p">,</span><span class="w"> </span><span class="mi">200</span><span class="p">),</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">image</span><span class="p">,</span><span class="w"> </span><span class="n">BLUE</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="n">draw</span>::<span class="n">resterize</span><span class="p">(</span><span class="n">glm</span>::<span class="n">ivec2</span><span class="p">(</span><span class="mi">120</span><span class="p">,</span><span class="w"> </span><span class="mi">434</span><span class="p">),</span><span class="w"> </span><span class="n">glm</span>::<span class="n">ivec2</span><span class="p">(</span><span class="mi">444</span><span class="p">,</span><span class="w"> </span><span class="mi">400</span><span class="p">),</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">image</span><span class="p">,</span><span class="n">GREEN</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="n">draw</span>::<span class="n">resterize</span><span class="p">(</span><span class="n">glm</span>::<span class="n">ivec2</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">34</span><span class="p">),</span><span class="w"> </span><span class="n">glm</span>::<span class="n">ivec2</span><span class="p">(</span><span class="mi">744</span><span class="p">,</span><span class="w"> </span><span class="mi">400</span><span class="p">),</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">image</span><span class="p">,</span><span class="w"> </span><span class="n">RED</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>绘制出来的线段长这样：</p>
+<p><image src="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/1-2.png" /></p>
+<p>明显不太对，只看到了红色，因为我们是最后画的红色线段，红色线段又最长，所以直接覆盖了另外两条。</p>
+<p>为了正确画出线段，我们需要知道每个像素的深度信息。在这个例子中，y坐标更大的像素不能被更小的像素覆盖。</p>
+<p>引入y-buffer：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">resterize</span><span class="o">&lt;</span><span class="n">I</span>: <span class="nc">GenericImage</span><span class="o">&gt;</span><span class="p">(</span><span class="w">
+</span><span class="w">    </span><span class="k">mut</span><span class="w"> </span><span class="n">a</span>: <span class="nc">glm</span>::<span class="n">IVec2</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="k">mut</span><span class="w"> </span><span class="n">b</span>: <span class="nc">glm</span>::<span class="n">IVec2</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">image</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">I</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">ybuffer</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="p">[</span><span class="kt">i32</span><span class="p">],</span><span class="w">
+</span><span class="w">    </span><span class="n">color</span>: <span class="nc">I</span>::<span class="n">Pixel</span><span class="p">,</span><span class="w">
+</span><span class="w"></span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="p">).</span><span class="n">abs</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">y</span><span class="p">).</span><span class="n">abs</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="n">swap</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">y</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="n">swap</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">y</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="p">..</span><span class="o">=</span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">;</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mf">1.</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">t</span><span class="p">;</span><span class="w">
+</span><span class="w">
+</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">ybuffer</span><span class="p">[</span><span class="n">x</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">ybuffer</span><span class="p">[</span><span class="n">x</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="p">;</span><span class="w">
+</span><span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="p">..</span><span class="n">image</span><span class="p">.</span><span class="n">height</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">                </span><span class="n">image</span><span class="p">.</span><span class="n">put_pixel</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">color</span><span class="p">);</span><span class="w">
+</span><span class="w">            </span><span class="p">}</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">ybuffer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vec</span><span class="o">!</span><span class="p">[</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="mi">800</span><span class="p">];</span><span class="w">
+</span><span class="w">    </span><span class="n">draw</span>::<span class="n">resterize</span><span class="p">(</span><span class="n">glm</span>::<span class="n">ivec2</span><span class="p">(</span><span class="mi">330</span><span class="p">,</span><span class="w"> </span><span class="mi">463</span><span class="p">),</span><span class="w"> </span><span class="n">glm</span>::<span class="n">ivec2</span><span class="p">(</span><span class="mi">594</span><span class="p">,</span><span class="w"> </span><span class="mi">200</span><span class="p">),</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">image</span><span class="p">,</span><span class="w"> </span><span class="n">ybuffer</span><span class="p">,</span><span class="w"> </span><span class="n">BLUE</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="n">draw</span>::<span class="n">resterize</span><span class="p">(</span><span class="n">glm</span>::<span class="n">ivec2</span><span class="p">(</span><span class="mi">120</span><span class="p">,</span><span class="w"> </span><span class="mi">434</span><span class="p">),</span><span class="w"> </span><span class="n">glm</span>::<span class="n">ivec2</span><span class="p">(</span><span class="mi">444</span><span class="p">,</span><span class="w"> </span><span class="mi">400</span><span class="p">),</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">image</span><span class="p">,</span><span class="w"> </span><span class="n">ybuffer</span><span class="p">,</span><span class="w"> </span><span class="n">GREEN</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="n">draw</span>::<span class="n">resterize</span><span class="p">(</span><span class="n">glm</span>::<span class="n">ivec2</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">34</span><span class="p">),</span><span class="w"> </span><span class="n">glm</span>::<span class="n">ivec2</span><span class="p">(</span><span class="mi">744</span><span class="p">,</span><span class="w"> </span><span class="mi">400</span><span class="p">),</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">image</span><span class="p">,</span><span class="w"> </span><span class="n">ybuffer</span><span class="p">,</span><span class="w"> </span><span class="n">RED</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>现在得到了正确的线段颜色：</p>
+<p><image src="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/1-3.png" /></p>
+<p>详细代码见这里<a href="https://github.com/kirito41dd/tinyrenderer/tree/f23d87e4e34700767da9c6754d2b0aa6b37fe58f" target="_blank" rel="noopener noreferrer">f23d87e4e34700767da9c6754d2b0aa6b37fe58f</a></p>
+<h2 id="z-buffer" class="headerLink">
+    <a href="#z-buffer" class="header-mark"></a>Z-buffer</h2><p>回到3d，为了能映射到2d屏幕上，zbuffer需要两个维度：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">zbuffer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vec</span><span class="o">!</span><span class="p">[</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">width</span><span class="o">*</span><span class="n">height</span><span class="p">];</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>虽然需要的数组是二维的，但可以用一维数组来表示，只需要简单的变换:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">y</span><span class="o">*</span><span class="n">width</span><span class="p">;</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">width</span><span class="p">;</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">wdith</span><span class="p">;</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>与ybuffer唯一的不同是如何计算z值，前面y值是这样计算的:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p0</span><span class="p">.</span><span class="n">y</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">t</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">p1</span><span class="p">.</span><span class="n">y</span><span class="o">*</span><span class="n">t</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>上面的式子可以看作两个向量的点积: $(y_1, y_2) * (1-t, t)$，$(1-t, t)$ 其实是点x关于线段p0p1的重心坐标。</p>
+<p>所以对于z值，可以用三角形三个顶点z坐标和重心坐标计算: $(z_1,z_2,z_3)*(1-u-v, u, v)$</p>
+<p>在模型渲染的代码中引入zbuffer：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">triangle</span><span class="o">&lt;</span><span class="n">I</span>: <span class="nc">GenericImage</span><span class="o">&gt;</span><span class="p">(</span><span class="w">
+</span><span class="w">    </span><span class="c1">//...
+</span><span class="c1"></span><span class="w">    </span><span class="n">zbuffer</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="p">[</span><span class="kt">f32</span><span class="p">],</span><span class="w">
+</span><span class="w"></span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="c1">//...
+</span><span class="c1"></span><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">px</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">bboxmin</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="p">..</span><span class="o">=</span><span class="n">bboxmax</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">py</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">bboxmin</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="p">..</span><span class="o">=</span><span class="n">bboxmax</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">bc_screen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">barycentric</span><span class="p">(</span><span class="n">t0</span><span class="p">,</span><span class="w"> </span><span class="n">t1</span><span class="p">,</span><span class="w"> </span><span class="n">t2</span><span class="p">,</span><span class="w"> </span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="n">px</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">,</span><span class="w"> </span><span class="n">py</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">));</span><span class="w">
+</span><span class="w">
+</span><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">bc_screen</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">bc_screen</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">bc_screen</span><span class="p">.</span><span class="n">z</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">                </span><span class="k">continue</span><span class="p">;</span><span class="w">
+</span><span class="w">            </span><span class="p">}</span><span class="w">
+</span><span class="w">            </span><span class="c1">// 计算z值
+</span><span class="c1"></span><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">pz</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">dot</span><span class="p">(</span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="n">t0</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="n">t1</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="n">t2</span><span class="p">.</span><span class="n">z</span><span class="p">),</span><span class="w"> </span><span class="n">bc_screen</span><span class="p">);</span><span class="w">
+</span><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">px</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">py</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">image</span><span class="p">.</span><span class="n">width</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="p">;</span><span class="w">
+</span><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">zbuffer</span><span class="p">[</span><span class="n">idx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">pz</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">                </span><span class="n">zbuffer</span><span class="p">[</span><span class="n">idx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pz</span><span class="p">;</span><span class="w">
+</span><span class="w">                </span><span class="n">image</span><span class="p">.</span><span class="n">put_pixel</span><span class="p">(</span><span class="n">px</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">py</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">color</span><span class="p">);</span><span class="w">
+</span><span class="w">            </span><span class="p">}</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">zbuffer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vec</span><span class="o">!</span><span class="p">[</span><span class="kt">f32</span>::<span class="n">MIN</span><span class="p">;</span><span class="w"> </span><span class="p">(</span><span class="n">image</span><span class="p">.</span><span class="n">width</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">image</span><span class="p">.</span><span class="n">height</span><span class="p">())</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">];</span><span class="w"> </span><span class="c1">// 注意一定初始化为最小值
+</span><span class="c1"></span><span class="w">    </span><span class="c1">//...
+</span><span class="c1"></span><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">arr</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">model</span><span class="p">.</span><span class="n">indices</span><span class="p">.</span><span class="n">chunks</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="c1">//...
+</span><span class="c1"></span><span class="w">        </span><span class="n">draw</span>::<span class="n">triangle</span><span class="p">(</span><span class="n">sa</span><span class="p">,</span><span class="n">sb</span><span class="p">,</span><span class="n">sc</span><span class="p">,</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">image</span><span class="p">,</span><span class="w">
+</span><span class="w">            </span><span class="n">Rgba</span><span class="p">([(</span><span class="mf">255.</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">intensity</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u8</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="mf">255.</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">intensity</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u8</span><span class="w"> </span><span class="p">,(</span><span class="mf">255.</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">intensity</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u8</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="p">]),</span><span class="w">
+</span><span class="w">            </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">zbuffer</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>这样就能正确渲染了，效果如下：</p>
+<p><image src="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/1-4.png" wdith=400px height=400px /></p>
+<p>详细代码见这里<a href="https://github.com/kirito41dd/tinyrenderer/tree/7bd6b1b50f602336a3fbc8d345399c5f9872a19d" target="_blank" rel="noopener noreferrer">7bd6b1b50f602336a3fbc8d345399c5f9872a19d</a></p>
+<h2 id="纹理" class="headerLink">
+    <a href="#%e7%ba%b9%e7%90%86" class="header-mark"></a>纹理</h2><p>前面渲染的模型没有皮肤，都是用白色的强度来表示光照，接下来要进行纹理插值，通过纹理坐标算出每个像素应该是什么颜色。</p>
+<p>在模型文件里，有些行是这样的格式: <code>vt u v 0.0</code> 它给出了一个纹理(顶点)坐标。</p>
+<p>这些行<code>f x/x/x x/x/x x/x/x</code> 描述了一个面，每组数据(按/分割)中间的x，就是三角形该顶点的纹理坐标编号。</p>
+<p>根据纹理坐标对三角形进行插值，乘以纹理图像的宽度-高度，就会得到要渲染的颜色。</p>
+<p>作者是通过扫描线的方式计算纹理坐标的，我尝试了一下用重心坐标来计算，zbuffer那里给了我启发，没想到真的可以，体会下重心坐标的神奇。</p>
+<p>首先从<a href="https://raw.githubusercontent.com/kirito41dd/tinyrenderer/dd09711edb4fa1dcb129ccce64959a0fec749f42/obj/african_head/african_head_diffuse.tga" target="_blank" rel="noopener noreferrer">这里</a>可以下载作者提供的纹理图片。先读取图片：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">diffus</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">image</span>::<span class="n">open</span><span class="p">(</span><span class="s">&#34;obj/african_head/african_head_diffuse.tga&#34;</span><span class="p">).</span><span class="n">unwrap</span><span class="p">().</span><span class="n">to_rgba8</span><span class="p">();</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">diffuse</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">flip_vertical_in_place</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">diffus</span><span class="p">);</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>因为我们之前翻转了y轴，所以也需要将纹理图片翻转一下。</p>
+<p>接下来写一个新的函数来画三角形。上面zbuffer部分，我们用重心坐标算出了z值，现在我们有了三角形三个顶点的纹理坐标，同样可以用重心坐标
+算出当前位置的纹理坐标：</p>
+<div>
+$$
+\begin{aligned}
+x &= (x_1, x_2, x_3) * barycentric \\
+y &= (y_1, y_2, y_3) * barycentric
+\end{aligned}
+$$
+</div>
+<p>根据上面式子算出坐标后，放大到纹理图片比例即可：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">triangle_with_texture</span><span class="o">&lt;</span><span class="n">I</span>: <span class="nc">GenericImage</span><span class="o">&lt;</span><span class="n">Pixel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Rgba</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;&gt;&gt;</span><span class="p">(</span><span class="w">
+</span><span class="w">    </span><span class="n">a</span>: <span class="nc">glm</span>::<span class="n">Vec3</span><span class="p">,</span><span class="w"> </span><span class="c1">// 模型顶点
+</span><span class="c1"></span><span class="w">    </span><span class="n">b</span>: <span class="nc">glm</span>::<span class="n">Vec3</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">c</span>: <span class="nc">glm</span>::<span class="n">Vec3</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">ta</span>: <span class="nc">glm</span>::<span class="n">Vec3</span><span class="p">,</span><span class="w"> </span><span class="c1">// 纹理坐标顶点
+</span><span class="c1"></span><span class="w">    </span><span class="n">tb</span>: <span class="nc">glm</span>::<span class="n">Vec3</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">tc</span>: <span class="nc">glm</span>::<span class="n">Vec3</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">image</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">I</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">intensity</span>: <span class="kt">f32</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">zbuffer</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="p">[</span><span class="kt">f32</span><span class="p">],</span><span class="w">
+</span><span class="w">    </span><span class="n">diffuse</span>: <span class="kp">&amp;</span><span class="nc">I</span><span class="p">,</span><span class="w"> </span><span class="c1">// 纹理图片
+</span><span class="c1"></span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="c1">//...
+</span><span class="c1"></span><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">px</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">bboxmin</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="p">..</span><span class="o">=</span><span class="n">bboxmax</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">py</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">bboxmin</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="p">..</span><span class="o">=</span><span class="n">bboxmax</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">bc_screen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">barycentric</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="p">,</span><span class="w"> </span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="n">px</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">,</span><span class="w"> </span><span class="n">py</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">));</span><span class="w">
+</span><span class="w">
+</span><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">bc_screen</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">bc_screen</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">bc_screen</span><span class="p">.</span><span class="n">z</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">                </span><span class="k">continue</span><span class="p">;</span><span class="w">
+</span><span class="w">            </span><span class="p">}</span><span class="w">
+</span><span class="w">            </span><span class="c1">// 计算z值
+</span><span class="c1"></span><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">pz</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">dot</span><span class="p">(</span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="p">.</span><span class="n">z</span><span class="p">),</span><span class="w"> </span><span class="n">bc_screen</span><span class="p">);</span><span class="w">
+</span><span class="w">
+</span><span class="w">            </span><span class="c1">// 计算纹理坐标
+</span><span class="c1"></span><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">tx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">dot</span><span class="p">(</span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="n">ta</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">tb</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">tc</span><span class="p">.</span><span class="n">x</span><span class="p">),</span><span class="w"> </span><span class="n">bc_screen</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">diffuse</span><span class="p">.</span><span class="n">width</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">;</span><span class="w">
+</span><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">ty</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">dot</span><span class="p">(</span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="n">ta</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">tb</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">tc</span><span class="p">.</span><span class="n">y</span><span class="p">),</span><span class="w"> </span><span class="n">bc_screen</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">diffuse</span><span class="p">.</span><span class="n">height</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">;</span><span class="w">
+</span><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">px</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">py</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">image</span><span class="p">.</span><span class="n">width</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="p">;</span><span class="w">
+</span><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">pi</span>: <span class="nc">Rgba</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">diffuse</span><span class="p">.</span><span class="n">get_pixel</span><span class="p">(</span><span class="n">tx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">ty</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">);</span><span class="w"> </span><span class="c1">// 获取像素
+</span><span class="c1"></span><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">zbuffer</span><span class="p">[</span><span class="n">idx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">pz</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">                </span><span class="n">zbuffer</span><span class="p">[</span><span class="n">idx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pz</span><span class="p">;</span><span class="w">
+</span><span class="w">                </span><span class="n">image</span><span class="p">.</span><span class="n">put_pixel</span><span class="p">(</span><span class="w">
+</span><span class="w">                    </span><span class="n">px</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">,</span><span class="w">
+</span><span class="w">                    </span><span class="n">py</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">,</span><span class="w">
+</span><span class="w">                    </span><span class="n">Rgba</span><span class="p">([</span><span class="w">
+</span><span class="w">                        </span><span class="p">(</span><span class="n">pi</span><span class="p">.</span><span class="mi">0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">intensity</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u8</span><span class="p">,</span><span class="w">
+</span><span class="w">                        </span><span class="p">(</span><span class="n">pi</span><span class="p">.</span><span class="mi">0</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">intensity</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u8</span><span class="p">,</span><span class="w">
+</span><span class="w">                        </span><span class="p">(</span><span class="n">pi</span><span class="p">.</span><span class="mi">0</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">intensity</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u8</span><span class="p">,</span><span class="w">
+</span><span class="w">                        </span><span class="mi">255</span><span class="p">,</span><span class="w">
+</span><span class="w">                    </span><span class="p">]),</span><span class="w">
+</span><span class="w">                </span><span class="p">);</span><span class="w">
+</span><span class="w">            </span><span class="p">}</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>效果如下：</p>
+<p><image src="https://blog-1256556944.file.myqcloud.com/public/tinyrenderer/1-5.png" wdith=400px height=400px /></p>
+<p>详细代码见这里<a href="https://github.com/kirito41dd/tinyrenderer/tree/dd09711edb4fa1dcb129ccce64959a0fec749f42" target="_blank" rel="noopener noreferrer">dd09711edb4fa1dcb129ccce64959a0fec749f42</a></p>
+</div>
+
+        <div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2022-07-23</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/graphics/">graphics</a>,&nbsp;<a href="/tags/tinyrenderer/">tinyrenderer</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/tinyrenderer-note-0/" class="prev" rel="prev" title="TinyRenderer笔记0：画线和三角以及面剔除"><i class="fas fa-angle-left fa-fw"></i>TinyRenderer笔记0：画线和三角以及面剔除</a>
+            <a href="/water-water/" class="next" rel="next" title="水群学习法">水群学习法<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="twikoo"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://twikoo.js.org/">Twikoo</a>.
+            </noscript></div></article></div>
+        </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">      <a href="https://www.travellings.cn/go.html" target="_blank" rel="noopener" title="开往-友链接力"><img src="https://www.travellings.cn/assets/logo.gif" alt="开往-友链接力" width="120"></a><a href="https://www.foreverblog.cn/go.html" target="_blank" > <img src="https://img.foreverblog.cn/wormhole_3.gif" alt="" style="width:auto;height:32px;" title="穿梭虫洞-随机访问十年之约友链博客"> </a>
+      </br><small>1KiritobkMPpaWBjTDHSoiP5icv8PEFNdR</small>
+      </br><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+      </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2020 - 2025</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank" rel="noopener noreferrer">kirito</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+            <div class="footer-line"></div>
+            <div class="footer-line">
+            </div>
+        </div></footer></div>
+
+    <div id="fixed-buttons"><a href="#back-to-top" id="back-to-top-button" class="fixed-button" title="回到顶部">
+            <i class="fas fa-arrow-up fa-fw"></i>
+        </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+            <i class="fas fa-comment fa-fw"></i>
+        </a>
+    </div><div class="assets"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/katex/copy-tex.min.css">
+        <noscript><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"></noscript><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":30},"comment":{"twikoo":{"commentCount":true,"el":"#twikoo","envId":"https://comment-liard.vercel.app/","lang":"zh-cn"}},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"distance":null,"findAllMatches":null,"fuseIndexURL":"/index.json","highlightTag":"em","ignoreFieldNorm":null,"ignoreLocation":null,"isCaseSensitive":null,"location":null,"maxResultLength":10,"minMatchCharLength":null,"noResultsFound":"没有找到结果","snippetLength":50,"threshold":null,"type":"fuse","useExtendedSearch":null}};</script><script type="text/javascript" src="/lib/twikoo/twikoo.all.min.js" defer></script><script type="text/javascript" src="/js/twikoo.min.js" defer></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js" defer></script><script type="text/javascript" src="/lib/katex/auto-render.min.js" defer></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js" defer></script><script type="text/javascript" src="/lib/katex/mhchem.min.js" defer></script><script type="text/javascript" src="/js/katex.min.js" defer></script><script type="text/javascript" src="/js/theme.min.js" defer></script><script type="text/javascript">
+            window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());
+            gtag('config', 'G-ZKPP127E4F');
+        </script><script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id=G-ZKPP127E4F" async></script><script>
+			var _hmt = _hmt || [];
+			(function() {
+			  var hm = document.createElement("script");
+			  hm.src = "https://hm.baidu.com/hm.js?2004ef75aa13d757f75bf6f1f3add242";
+			  var s = document.getElementsByTagName("script")[0]; 
+			  s.parentNode.insertBefore(hm, s);
+			})();
+		</script><script>
+         
+         
+        var $cdnPrefix = "https://blog-1256556944.file.myqcloud.com";
+    </script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@2.1.3/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-backstretch@2.1.18/jquery.backstretch.min.js"></script>
+    <script type="text/javascript" src="/js/custom.js"></script>
+</div>
+</body>
+
+</html>

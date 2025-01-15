@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noodp" />
+    <title>同态加密登陆 - kirito&#39;s blog</title><meta name="Description" content="kirito&#39;s blog"><meta property="og:title" content="同态加密登陆" />
+<meta property="og:description" content="背景在服务器日常登录过程中，一般是前端传输账号和密码到服务器，然后服务器对账号密码进行校验。但在这个过程中有两个问题，假设传输过程中信息被截" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.kirito.info/%E5%90%8C%E6%80%81%E5%8A%A0%E5%AF%86%E7%99%BB%E9%99%86/" /><meta property="og:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-03-14T08:40:24+00:00" />
+<meta property="article:modified_time" content="2024-03-14T11:33:45+00:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/>
+
+<meta name="twitter:title" content="同态加密登陆"/>
+<meta name="twitter:description" content="背景在服务器日常登录过程中，一般是前端传输账号和密码到服务器，然后服务器对账号密码进行校验。但在这个过程中有两个问题，假设传输过程中信息被截"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt">
+
+<meta name="theme-color" content="#f8f8f8"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="canonical" href="https://www.kirito.info/%E5%90%8C%E6%80%81%E5%8A%A0%E5%AF%86%E7%99%BB%E9%99%86/" /><link rel="prev" href="https://www.kirito.info/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84/" /><link rel="next" href="https://www.kirito.info/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/color.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/fontawesome-free/all.min.css">
+        <noscript><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"></noscript><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/animate/animate.min.css">
+        <noscript><link rel="stylesheet" href="/lib/animate/animate.min.css"></noscript><meta name="google-site-verification" content="5J8bsg9tKySrpONjEV2nAOqQ08TCVjsooCRIuDsxhD4" /><meta name="baidu-site-verification" content="code-NY7bFlUK92" /><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "同态加密登陆",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/www.kirito.info\/%E5%90%8C%E6%80%81%E5%8A%A0%E5%AF%86%E7%99%BB%E9%99%86\/"
+        },"image": ["https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"],"genre": "posts","keywords": "blog","wordcount":  1641 ,
+        "url": "https:\/\/www.kirito.info\/%E5%90%8C%E6%80%81%E5%8A%A0%E5%AF%86%E7%99%BB%E9%99%86\/","datePublished": "2024-03-14T08:40:24+00:00","dateModified": "2024-03-14T11:33:45+00:00","publisher": {
+            "@type": "Organization",
+            "name": "kirito","logo": "https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"},"author": {
+                "@type": "Person",
+                "name": "fawkes"
+            },"description": ""
+    }
+    </script><script src="//instant.page/5.1.1" defer type="module" integrity="sha384-MWfCL6g1OTGsbSwfuMHc8+8J2u71/LA8dzlIN3ycajckxuZZmF+DNjdm7O6H3PSq"></script>
+</head>
+
+<body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">
+        function setTheme(theme) {document.body.setAttribute('theme', theme); document.documentElement.style.setProperty('color-scheme', theme === 'light' ? 'light' : 'dark'); window.theme = theme; }
+        function saveTheme(theme) {window.localStorage && localStorage.setItem('theme', theme);}
+        function getMeta(metaName) {const metas = document.getElementsByTagName('meta'); for (let i = 0; i < metas.length; i++) if (metas[i].getAttribute('name') === metaName) return metas[i]; return '';}
+        if (window.localStorage && localStorage.getItem('theme')) {let theme = localStorage.getItem('theme');theme === 'light' || theme === 'dark' || theme === 'black' ? setTheme(theme) : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light')); } else { if ('auto' === 'light' || 'auto' === 'dark' || 'auto' === 'black') setTheme('auto'), saveTheme('auto'); else saveTheme('auto'), window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light');}
+        let metaColors = {'light': '#f8f8f8','dark': '#252627','black': '#000000'}
+        getMeta('theme-color').content = metaColors[document.body.getAttribute('theme')];
+    </script>
+    <div id="back-to-top"></div>
+    <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="kirito&#39;s blog">kirito</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="#" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="kirito&#39;s blog">kirito</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a href="#" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+            <div class="container"><div class="toc" id="toc-auto">
+        <h2 class="toc-title">目录</h2>
+        <div class="toc-content always-active" id="toc-content-auto"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#背景">背景</a></li>
+    <li><a href="#同态简要">同态简要</a></li>
+    <li><a href="#方案简要">方案简要</a>
+      <ul>
+        <li><a href="#原理">原理</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+    </div><script>document.getElementsByTagName("main")[0].setAttribute("pageStyle", "normal")</script><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "true")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">同态加密登陆</h1><div class="post-meta">
+            <div class="post-meta-line">
+                <span class="post-author"><i class="author fas fa-user-circle fa-fw"></i><a href="https://github.com/1966412011" title="Author" target="_blank" rel="noopener noreferrer author" class="author">fawkes</a>
+                </span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-03-14">2024-03-14</time>&nbsp;<i class="far fa-edit fa-fw"></i>&nbsp;<time datetime="2024-03-14">2024-03-14</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1641 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 4 分钟&nbsp;<span id="/%E5%90%8C%E6%80%81%E5%8A%A0%E5%AF%86%E7%99%BB%E9%99%86/" class="leancloud_visitors" data-flag-title="同态加密登陆">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class="leancloud-visitors-count" id=twikoo_visitors></span>&nbsp;次阅读
+                    </span>&nbsp;<span id="/%E5%90%8C%E6%80%81%E5%8A%A0%E5%AF%86%E7%99%BB%E9%99%86/" class="comment_count" data-flag-title="同态加密登陆">
+                        <i class="far fa-comments fa-fw"></i>&nbsp;<span class="twikoo-comment-count" id="twikoo-comment-count"></span>&nbsp;条评论
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#背景">背景</a></li>
+    <li><a href="#同态简要">同态简要</a></li>
+    <li><a href="#方案简要">方案简要</a>
+      <ul>
+        <li><a href="#原理">原理</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h2 id="背景" class="headerLink">
+    <a href="#%e8%83%8c%e6%99%af" class="header-mark"></a>背景</h2><p>在服务器日常登录过程中，一般是前端传输账号和密码到服务器，然后服务器对账号密码进行校验。但在这个过程中有两个问题，假设传输过程中信息被截获（或者打印日志然后日志泄漏等操作），可能导致密码泄漏。如果服务器数据泄漏，也会导致密码泄漏。一般来说我们服务器中存储的是密码的sha256，这样可以解决服务器数据泄漏的问题，但是传输过程中的问题没有解决（前端hash再传输是无效的，因为这样做hash后的值等效于密码）。我们希望提出一种方案，同时满足传输过程中信息任意泄漏，服务器数据任意泄漏，也可以保证密码的安全。</p>
+<p>想法来源：</p>
+<ul>
+<li><a href="https://pdos.csail.mit.edu/papers/otfvec/paper.pdf" target="_blank" rel="noopener noreferrer">https://pdos.csail.mit.edu/papers/otfvec/paper.pdf</a></li>
+<li><a href="https://arxiv.org/pdf/1906.07221.pdf" target="_blank" rel="noopener noreferrer">https://arxiv.org/pdf/1906.07221.pdf</a></li>
+</ul>
+<h2 id="同态简要" class="headerLink">
+    <a href="#%e5%90%8c%e6%80%81%e7%ae%80%e8%a6%81" class="header-mark"></a>同态简要</h2><p>同态加密允许加密一个值，并使用加密后的值进行运算。实现同态加密有多种方式，这里简单介绍一个简要例子</p>
+<p>选择一个自然数作为基数（这个基数需要具备一些特定的属性），将基数记为g，用 g去加密一个值，即g为底数，需要加密的值为指数。比如，我们要加密一个数值 3，取 g为 5：</p>
+<p>$$
+5^3=125
+$$</p>
+<p>125是 3 加密过后的值，如果我们把需要加密的值E(3)乘2，我们就可以给加密后的值（125）提高两个阶数，</p>
+<p>$$
+125^2=15265=(5^3)^2=5^{2*3}=5^6
+$$</p>
+<p>同样，我们可以通过除法来使加密值相减，例如 5−3：</p>
+<p>$$
+{5^5}/{5^3}=5^{5-3}=5^2=25
+$$</p>
+<p>我们可以看出，同态加密可以实现加、减、乘操作</p>
+<h2 id="方案简要" class="headerLink">
+    <a href="#%e6%96%b9%e6%a1%88%e7%ae%80%e8%a6%81" class="header-mark"></a>方案简要</h2><h3 id="原理" class="headerLink">
+    <a href="#%e5%8e%9f%e7%90%86" class="header-mark"></a>原理</h3><p>$m为素数，g是m的原根之一，m数量级约 2^{256}，令 h(x) = {g^{x}}\bmod{m},定义 h(x)*h(y) = g^{x\ast y}\bmod{m}$</p>
+<p>在登录的时候，前端需要使用两个信息，1是密码本身，2是一些现场信息，比如当前时间戳、设备信息、当前浏览器、想要登录的服务器id、后端给的保证登录不可复用token等，我们称这部分信息为前端info。后端生成数据的时候需要一个salt，这个数据可以是一个保密的随机数。</p>
+<p>简单来说，我们需要使用三个数据。令sm=密码的sha256，sf=前端info的sha256，ss=后端salt的sha256，</p>
+<p>当用户注册的时候，后端拿到sm和ss，计算出 $hsmss=h(sm)*h(ss)=g^{sm\ast{ss}}\bmod{m}$存入数据库，同时丢弃sm。此时后端能拿到的数据有：ss、g、m、hsmss。</p>
+<p>当用户想要登录时，前端有sm和sf，计算出$hsmsf=h(sm)*h(sf)=g^{sm\ast{sf}}\bmod{m}$。把hsmsf和sf传入后端（实际上应该传sf的原文，因为后端需要校验时间戳等，这里为了简化使用sf）</p>
+<p>此时后端已知hsmss、sf、hsmsf、ss，可以校验</p>
+<p>$$
+hsmss^{sf} == hsmsf^{ss}(\bmod{m}) =&gt; g^{(sm\ast ss)\ast sf}==g^{(sm\ast sf)\ast ss}(\bmod{m})
+$$</p>
+<p>如果相等则密码正确，否则密码错误。</p>
+<p>我们可以验证这个方案是否满足需求，假设我们在多机部署，其中一台机器后端数据库泄漏，同时某用户在登录过程中传输的所有信息也泄漏了（例如登录信息打印在日志上，日志泄漏了），此时攻击者是否可以用这些信息登录别的服务器。</p>
+<p>为了简化问题，我们列出攻击者实际可以拿到的数据：g、m、ss、hsmss、hsmsf1、sf1（攻击者需要再次登录，被截获的登录的sf为sf1，攻击者登录为sf2）。攻击者需要做的是在不知道sm的情况下，构造出hsmsf2。</p>
+<p>$hsmsf2=(g^{sm})^{sf2}\bmod{m}或(g^{sf2})^{sm}\bmod{m}$ 所以攻击者需要计算出$g^{sm}\bmod{m}或sm\bmod{m}$</p>
+<p>而 $hsmss=(g^{sm})^{ss}\bmod{m}$</p>
+<p>我们可以将问题再次简化</p>
+<p>$m为素数，g是m的原根之一。h=g^{a * b}\bmod{m}，t=g^{a * c}\mod{m}，(a,b,c,g,m数量级都是2^{256})$</p>
+<p>问在已知h,b,c,g,m的情况下，是否存在非枚举的方法可以求出t.</p>
+<p>走到这步我们很高兴的可以说这个问题是不存在有限时间内的解的，因为证明密码的强度一般是将问题转化成公认的已知困难问题，比如离散对数问题，而这个问题本身就是离散对数问题。</p>
+<p>离散对数问题：<a href="https://zhuanlan.zhihu.com/p/523658036" target="_blank" rel="noopener noreferrer">https://zhuanlan.zhihu.com/p/523658036</a></p>
+<p>代码实现思路参考：</p>
+<ul>
+<li><a href="https://eprint.iacr.org/2019/458.pdf" target="_blank" rel="noopener noreferrer">https://eprint.iacr.org/2019/458.pdf</a></li>
+<li><a href="https://github.com/arnaucube/poseidon-rs" target="_blank" rel="noopener noreferrer">https://github.com/arnaucube/poseidon-rs</a></li>
+</ul>
+<p>这个库已经提供了m和g的值，以及大整数运算，稍加修改即可</p>
+<p>直接贴个m和g：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">21888242871839275222246405745257275088548364400416034343698204186575808495617
+
+7
+</code></pre></td></tr></table>
+</div>
+</div></div>
+
+        <div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2024-03-14</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/blog/">blog</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84/" class="prev" rel="prev" title="神经网络的结构"><i class="fas fa-angle-left fa-fw"></i>神经网络的结构</a>
+            <a href="/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" class="next" rel="next" title="rust手写神经网络">rust手写神经网络<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="twikoo"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://twikoo.js.org/">Twikoo</a>.
+            </noscript></div></article></div>
+        </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">      <a href="https://www.travellings.cn/go.html" target="_blank" rel="noopener" title="开往-友链接力"><img src="https://www.travellings.cn/assets/logo.gif" alt="开往-友链接力" width="120"></a><a href="https://www.foreverblog.cn/go.html" target="_blank" > <img src="https://img.foreverblog.cn/wormhole_3.gif" alt="" style="width:auto;height:32px;" title="穿梭虫洞-随机访问十年之约友链博客"> </a>
+      </br><small>1KiritobkMPpaWBjTDHSoiP5icv8PEFNdR</small>
+      </br><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+      </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2020 - 2025</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank" rel="noopener noreferrer">kirito</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+            <div class="footer-line"></div>
+            <div class="footer-line">
+            </div>
+        </div></footer></div>
+
+    <div id="fixed-buttons"><a href="#back-to-top" id="back-to-top-button" class="fixed-button" title="回到顶部">
+            <i class="fas fa-arrow-up fa-fw"></i>
+        </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+            <i class="fas fa-comment fa-fw"></i>
+        </a>
+    </div><div class="assets"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/katex/copy-tex.min.css">
+        <noscript><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"></noscript><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":30},"comment":{"twikoo":{"commentCount":true,"el":"#twikoo","envId":"https://comment-liard.vercel.app/","lang":"zh-cn"}},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"distance":null,"findAllMatches":null,"fuseIndexURL":"/index.json","highlightTag":"em","ignoreFieldNorm":null,"ignoreLocation":null,"isCaseSensitive":null,"location":null,"maxResultLength":10,"minMatchCharLength":null,"noResultsFound":"没有找到结果","snippetLength":50,"threshold":null,"type":"fuse","useExtendedSearch":null}};</script><script type="text/javascript" src="/lib/twikoo/twikoo.all.min.js" defer></script><script type="text/javascript" src="/js/twikoo.min.js" defer></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js" defer></script><script type="text/javascript" src="/lib/katex/auto-render.min.js" defer></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js" defer></script><script type="text/javascript" src="/lib/katex/mhchem.min.js" defer></script><script type="text/javascript" src="/js/katex.min.js" defer></script><script type="text/javascript" src="/js/theme.min.js" defer></script><script type="text/javascript">
+            window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());
+            gtag('config', 'G-ZKPP127E4F');
+        </script><script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id=G-ZKPP127E4F" async></script><script>
+			var _hmt = _hmt || [];
+			(function() {
+			  var hm = document.createElement("script");
+			  hm.src = "https://hm.baidu.com/hm.js?2004ef75aa13d757f75bf6f1f3add242";
+			  var s = document.getElementsByTagName("script")[0]; 
+			  s.parentNode.insertBefore(hm, s);
+			})();
+		</script><script>
+         
+         
+        var $cdnPrefix = "https://blog-1256556944.file.myqcloud.com";
+    </script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@2.1.3/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-backstretch@2.1.18/jquery.backstretch.min.js"></script>
+    <script type="text/javascript" src="/js/custom.js"></script>
+</div>
+</body>
+
+</html>

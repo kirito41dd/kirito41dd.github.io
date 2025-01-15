@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noodp" />
+    <title>Pratt Parsing - 自顶向下的算符优先级 - kirito&#39;s blog</title><meta name="Description" content="kirito&#39;s blog"><meta property="og:title" content="Pratt Parsing - 自顶向下的算符优先级" />
+<meta property="og:description" content="简介Pratt Parsing 是一种在手写递归下降解析器时处理表达式解析的好方法，通过给算符定义优先级，可以处理左递归的语法定义，写起来非常简单。 我学到这" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.kirito.info/pratt-parsing/" /><meta property="og:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-08-15T11:09:34+08:00" />
+<meta property="article:modified_time" content="2021-08-15T11:09:34+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/>
+
+<meta name="twitter:title" content="Pratt Parsing - 自顶向下的算符优先级"/>
+<meta name="twitter:description" content="简介Pratt Parsing 是一种在手写递归下降解析器时处理表达式解析的好方法，通过给算符定义优先级，可以处理左递归的语法定义，写起来非常简单。 我学到这"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt">
+
+<meta name="theme-color" content="#f8f8f8"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="canonical" href="https://www.kirito.info/pratt-parsing/" /><link rel="prev" href="https://www.kirito.info/use-vercel-as-free-faas/" /><link rel="next" href="https://www.kirito.info/learn-opengl-env/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/color.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/fontawesome-free/all.min.css">
+        <noscript><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"></noscript><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/animate/animate.min.css">
+        <noscript><link rel="stylesheet" href="/lib/animate/animate.min.css"></noscript><meta name="google-site-verification" content="5J8bsg9tKySrpONjEV2nAOqQ08TCVjsooCRIuDsxhD4" /><meta name="baidu-site-verification" content="code-NY7bFlUK92" /><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Pratt Parsing - 自顶向下的算符优先级",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/www.kirito.info\/pratt-parsing\/"
+        },"image": ["https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"],"genre": "posts","keywords": "compiler, parser","wordcount":  3341 ,
+        "url": "https:\/\/www.kirito.info\/pratt-parsing\/","datePublished": "2021-08-15T11:09:34+08:00","dateModified": "2021-08-15T11:09:34+08:00","publisher": {
+            "@type": "Organization",
+            "name": "kirito","logo": "https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"},"author": {
+                "@type": "Person",
+                "name": "kirito"
+            },"description": ""
+    }
+    </script><script src="//instant.page/5.1.1" defer type="module" integrity="sha384-MWfCL6g1OTGsbSwfuMHc8+8J2u71/LA8dzlIN3ycajckxuZZmF+DNjdm7O6H3PSq"></script>
+</head>
+
+<body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">
+        function setTheme(theme) {document.body.setAttribute('theme', theme); document.documentElement.style.setProperty('color-scheme', theme === 'light' ? 'light' : 'dark'); window.theme = theme; }
+        function saveTheme(theme) {window.localStorage && localStorage.setItem('theme', theme);}
+        function getMeta(metaName) {const metas = document.getElementsByTagName('meta'); for (let i = 0; i < metas.length; i++) if (metas[i].getAttribute('name') === metaName) return metas[i]; return '';}
+        if (window.localStorage && localStorage.getItem('theme')) {let theme = localStorage.getItem('theme');theme === 'light' || theme === 'dark' || theme === 'black' ? setTheme(theme) : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light')); } else { if ('auto' === 'light' || 'auto' === 'dark' || 'auto' === 'black') setTheme('auto'), saveTheme('auto'); else saveTheme('auto'), window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light');}
+        let metaColors = {'light': '#f8f8f8','dark': '#252627','black': '#000000'}
+        getMeta('theme-color').content = metaColors[document.body.getAttribute('theme')];
+    </script>
+    <div id="back-to-top"></div>
+    <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="kirito&#39;s blog">kirito</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="#" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="kirito&#39;s blog">kirito</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a href="#" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+            <div class="container"><div class="toc" id="toc-auto">
+        <h2 class="toc-title">目录</h2>
+        <div class="toc-content always-active" id="toc-content-auto"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#简介">简介</a></li>
+    <li><a href="#pratt-parsing-解决什么问题">Pratt Parsing 解决什么问题</a></li>
+    <li><a href="#如何做">如何做</a>
+      <ul>
+        <li><a href="#主流程">主流程</a></li>
+        <li><a href="#前缀算符关联函数">前缀算符关联函数</a>
+          <ul>
+            <li><a href="#标识符">标识符</a></li>
+            <li><a href="#整型字面量">整型字面量</a></li>
+            <li><a href="#负号">负号</a></li>
+            <li><a href="#分组">分组</a></li>
+          </ul>
+        </li>
+        <li><a href="#后缀算符关联函数">后缀算符关联函数</a>
+          <ul>
+            <li><a href="#算术运算">算术运算</a></li>
+            <li><a href="#函数调用">函数调用</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#总结">总结</a></li>
+  </ul>
+</nav></div>
+    </div><script>document.getElementsByTagName("main")[0].setAttribute("pageStyle", "normal")</script><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "true")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Pratt Parsing - 自顶向下的算符优先级</h1><div class="post-meta">
+            <div class="post-meta-line">
+                <span class="post-author"><i class="author fas fa-user-circle fa-fw"></i><a href="/" title="Author" rel=" author" class="author">kirito</a>
+                </span>&nbsp;<span class="post-category">收录于 </span>&nbsp;<span class="post-category">类别 <a href="/categories/compiler/"><i class="far fa-folder fa-fw"></i>compiler</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2021-08-15">2021-08-15</time>&nbsp;<i class="far fa-edit fa-fw"></i>&nbsp;<time datetime="2021-08-15">2021-08-15</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 3341 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 7 分钟&nbsp;<span id="/pratt-parsing/" class="leancloud_visitors" data-flag-title="Pratt Parsing - 自顶向下的算符优先级">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class="leancloud-visitors-count" id=twikoo_visitors></span>&nbsp;次阅读
+                    </span>&nbsp;<span id="/pratt-parsing/" class="comment_count" data-flag-title="Pratt Parsing - 自顶向下的算符优先级">
+                        <i class="far fa-comments fa-fw"></i>&nbsp;<span class="twikoo-comment-count" id="twikoo-comment-count"></span>&nbsp;条评论
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#简介">简介</a></li>
+    <li><a href="#pratt-parsing-解决什么问题">Pratt Parsing 解决什么问题</a></li>
+    <li><a href="#如何做">如何做</a>
+      <ul>
+        <li><a href="#主流程">主流程</a></li>
+        <li><a href="#前缀算符关联函数">前缀算符关联函数</a>
+          <ul>
+            <li><a href="#标识符">标识符</a></li>
+            <li><a href="#整型字面量">整型字面量</a></li>
+            <li><a href="#负号">负号</a></li>
+            <li><a href="#分组">分组</a></li>
+          </ul>
+        </li>
+        <li><a href="#后缀算符关联函数">后缀算符关联函数</a>
+          <ul>
+            <li><a href="#算术运算">算术运算</a></li>
+            <li><a href="#函数调用">函数调用</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#总结">总结</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h2 id="简介" class="headerLink">
+    <a href="#%e7%ae%80%e4%bb%8b" class="header-mark"></a>简介</h2><p>Pratt Parsing 是一种在手写递归下降解析器时处理表达式解析的好方法，通过给算符定义优先级，可以处理左递归的语法定义，写起来非常简单。</p>
+<p>我学到这个方法是在这本书里：<a href="https://interpreterbook.com/" target="_blank" rel="noopener noreferrer">《Writing An Interpreter In Go》</a>，作者用手写递归下降的方式实现了一个名为 Monky 的语言，其中解析表达式的部分就是用 Pratt Parsing 实现的。</p>
+<p>整一个解析器无非就两种方法：手写、使用parser generator工具生成。</p>
+<p>如果选择手写，那肯定是采用自顶向下的方式。</p>
+<p>选择生成器，也有两个流派：自顶向下、自底向上。比如：</p>
+<ul>
+<li>自顶向下：ANTLR - ALL(*)</li>
+<li>自底向上：Yacc/Bison - LALR</li>
+</ul>
+<p>我更喜欢年轻的ANTLR，甚至都没用过Yacc/Bison，自顶向下的方式更符合人类思维，而LALR算法生成的代码很难懂(<del>不光生成的代码难懂，算法思想本身也难懂</del>)。还有就是手写递归下降很流行，Go的编译器就是这么干的。</p>
+<p>自顶向下的方式缺点是无法处理左递归，但ANTLR允许定义<strong>直接</strong>左递归，它会帮你自动改写。在<a href="https://book.douban.com/subject/27082372/" target="_blank" rel="noopener noreferrer">《ANTRL4权威指南》</a>14章 移除直接左递归中提到了左递归规则转换的方法，和Pratt Parsing 的方式非常相似！</p>
+<h2 id="pratt-parsing-解决什么问题" class="headerLink">
+    <a href="#pratt-parsing-%e8%a7%a3%e5%86%b3%e4%bb%80%e4%b9%88%e9%97%ae%e9%a2%98" class="header-mark"></a>Pratt Parsing 解决什么问题</h2><p>写一个parser，最困难的地方可能就是解析表达式了，不同于其他语法结构，表达式涉及运算符优先级问题，并且在定义上也是递归的。</p>
+<p>比如这样一个表达式：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">1 + 2 * 3
+</code></pre></td></tr></table>
+</div>
+</div><p>乘法运算的优先级应该更高，所以parser在得到<code>1+2</code>的输入时，并不能直接构造一个算术表达式返回，我们希望的返回是 <code>1+(2*3)</code> 而不是 <code>(1+2)*3</code>。</p>
+<p>另外，一般语言中都支持分组，来自定义运算顺序：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">3 * (1 + 2)
+</code></pre></td></tr></table>
+</div>
+</div><p>即使乘法的优先级最高，parser在读入<code>3*</code>之后也不能从分组中把<code>1</code>抢过来构造<code>(3*1)+2</code>，正确的返回应该是<code>3*(1+2)</code></p>
+<p>再复杂一点，函数调用也可以参与表达式运算：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">5 * (add(2,3) + 1)
+</code></pre></td></tr></table>
+</div>
+</div><p>函数的参数也可以是更复杂的表达式，函数也可以嵌套：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">add(3 * (1 + 2), add(1,2)) * 100
+</code></pre></td></tr></table>
+</div>
+</div><p>很明显表达式的定义是递归的，对于上面所有case，给出表达式的定义：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-antlr" data-lang="antlr"><span class="nl">expr</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="nv">expr</span><span class="w"> </span><span class="o">(</span><span class="s">&#39;+&#39;</span><span class="o">|</span><span class="s">&#39;-&#39;</span><span class="o">|</span><span class="s">&#39;*&#39;</span><span class="o">|</span><span class="s">&#39;/&#39;</span><span class="o">)</span><span class="w"> </span><span class="nv">expr</span><span class="w">
+</span><span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="o">(</span><span class="s">&#39;-&#39;</span><span class="o">)</span><span class="w"> </span><span class="nv">expr</span><span class="w">
+</span><span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="s">&#39;(&#39;</span><span class="w"> </span><span class="nv">expr</span><span class="w"> </span><span class="s">&#39;)&#39;</span><span class="w">
+</span><span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="nv">literal</span><span class="p">;</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="nl">literal</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="no">IDENTIFIER</span><span class="w"> </span><span class="c">// 标识别符</span><span class="w">
+</span><span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="nv">integer</span><span class="w"> </span><span class="c">// 整数字面量</span><span class="w">
+</span><span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="s">&#39;(&#39;</span><span class="w"> </span><span class="o">(</span><span class="w"> </span><span class="nv">expr</span><span class="w"> </span><span class="o">(</span><span class="s">&#39;,&#39;</span><span class="w"> </span><span class="nv">expr</span><span class="o">)*</span><span class="w"> </span><span class="o">)?</span><span class="w"> </span><span class="s">&#39;)&#39;</span><span class="p">;</span><span class="w"> </span><span class="c">//参数列表</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>如何在手写递归下降解释器中，正确解析这样一个表达式，就是Pratt Parsing所解决的问题。</p>
+<h2 id="如何做" class="headerLink">
+    <a href="#%e5%a6%82%e4%bd%95%e5%81%9a" class="header-mark"></a>如何做</h2><p>Pratt Parsing 的基本思想是：为每一个算符定义一个优先级。算符会被分为两类，一类称为<strong><ruby>前缀<rt>prefix</rt></ruby></strong>算符，另一类称为<strong><ruby>中缀<rt>infix</rt></ruby></strong>算符。<code>-5</code>中的负号就是一个前缀算符，特别的是一个字面量或标识符也被划分为一个前缀算符，如<code>5</code>、<code>add</code>，因为他们都是一元的；像<code>1+2</code>中的加号是中缀算符，同样比较特别的是函数调用<code>add(1,2)</code>，函数名后面的<code>(</code>也被归类为中缀算符，因为函数名必须要与参数列表结合。前缀算符和后缀算符都会有关联函数，关联函数负责构造具体的子表达式，过程中会递归的调用主解析函数。通过算符优先级，来决定如何构造AST。</p>
+<p>一个算符既可以是前缀算符，也可以是中缀算符，如何定义取决于它们在表达式中所处的位置。在定义过算符之后，最重要的事情是定义算符优先级：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="c1">// 优先级从低到高排列
+</span><span class="c1"></span><span class="kd">const</span> <span class="p">(</span>
+	<span class="nx">_</span>           <span class="kt">int</span> <span class="p">=</span> <span class="kc">iota</span>
+	<span class="nx">LOWEST</span>          <span class="c1">// 最低的
+</span><span class="c1"></span>	<span class="nx">SUM</span>             <span class="c1">// + -
+</span><span class="c1"></span>	<span class="nx">PRODUCT</span>         <span class="c1">// * /
+</span><span class="c1"></span>	<span class="nx">PREFIX</span>          <span class="c1">// -1
+</span><span class="c1"></span>	<span class="nx">CALL</span>            <span class="c1">// 函数调用，最高
+</span><span class="c1"></span><span class="p">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>可以发现并没有关于分组的优先级，稍后会看到分组在解析过程中是如何巧妙处理的。</p>
+<h3 id="主流程" class="headerLink">
+    <a href="#%e4%b8%bb%e6%b5%81%e7%a8%8b" class="header-mark"></a>主流程</h3><p>先给出解析表达式的入口方法（下文都省略词法分析器）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="c1">// pratt parsing 的主要逻辑
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">Parser</span><span class="p">)</span> <span class="nf">parseExpr</span><span class="p">(</span><span class="nx">precedence</span> <span class="kt">int</span><span class="p">)</span> <span class="nx">ast</span><span class="p">.</span><span class="nx">Expr</span> <span class="p">{</span>
+	<span class="nx">prefix</span> <span class="o">:=</span> <span class="nx">p</span><span class="p">.</span><span class="nx">prefixParseFns</span><span class="p">[</span><span class="nx">p</span><span class="p">.</span><span class="nx">curToken</span><span class="p">.</span><span class="nx">Type</span><span class="p">]</span>
+	<span class="k">if</span> <span class="nx">prefix</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nx">p</span><span class="p">.</span><span class="nf">noPrefixParseFnError</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nx">curToken</span><span class="p">.</span><span class="nx">Type</span><span class="p">)</span>
+		<span class="k">return</span> <span class="kc">nil</span>
+	<span class="p">}</span>
+	<span class="nx">leftExpr</span> <span class="o">:=</span> <span class="nf">prefix</span><span class="p">()</span>
+
+	<span class="c1">// 如果外部算符优先级没有后面遇到的的高，会循环下去
+</span><span class="c1"></span>	<span class="k">for</span> <span class="p">!</span><span class="nx">p</span><span class="p">.</span><span class="nf">peekTokenIs</span><span class="p">(</span><span class="nx">token</span><span class="p">.</span><span class="nx">SEMICOLON</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">precedence</span> <span class="p">&lt;</span> <span class="nx">p</span><span class="p">.</span><span class="nf">peekPrecedence</span><span class="p">()</span> <span class="p">{</span>
+		<span class="nx">infix</span> <span class="o">:=</span> <span class="nx">p</span><span class="p">.</span><span class="nx">infixParseFns</span><span class="p">[</span><span class="nx">p</span><span class="p">.</span><span class="nx">peek_Tok</span><span class="p">.</span><span class="nx">Type</span><span class="p">]</span>
+		<span class="k">if</span> <span class="nx">infix</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
+			<span class="k">return</span> <span class="nx">leftExpr</span>
+		<span class="p">}</span>
+		<span class="nx">p</span><span class="p">.</span><span class="nf">nextToken</span><span class="p">()</span>
+		<span class="nx">leftExpr</span> <span class="p">=</span> <span class="nf">infix</span><span class="p">(</span><span class="nx">leftExpr</span><span class="p">)</span> <span class="c1">// 合并中缀表达式
+</span><span class="c1"></span>	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="nx">leftExpr</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><ol>
+<li>
+<p>解析开始时，传入的优先级参数一定是<code>LOWEST</code>，第一个遇到的算符一定是前缀算符。</p>
+</li>
+<li>
+<p>去预定好的<code>map</code>中查找该算符作为前缀算符的关联函数，就是代码中的<code>prefix</code>，在<code>prefix</code>函数中构建子表达式(<code>prefix</code>中可能会递归调用<code>parseExpr</code>函数)。</p>
+</li>
+<li>
+<p>得到<code>prefix</code>返回的子表达式后，窥探下一个算符的优先级。</p>
+</li>
+<li>
+<p>如果下个算符优先级更高，就在<code>map</code>中查找该算符作为中缀算符的关联函数<code>infix</code></p>
+</li>
+<li>
+<p>如果没有说明这不是一个中缀算符，把当前构造好的<code>leftExpr</code>返回。</p>
+</li>
+<li>
+<p>如果有，就读入这个算符，调用<code>infix</code>函数构造中缀表达式(<code>infix</code>同样可能递归调用<code>parseExpr</code>)。</p>
+</li>
+<li>
+<p>函数返回</p>
+</li>
+</ol>
+<p>算符关联函数的签名如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">prefixParseFn</span> <span class="kd">func</span><span class="p">()</span> <span class="nx">ast</span><span class="p">.</span><span class="nx">Expr</span>
+<span class="kd">type</span> <span class="nx">infixParseFn</span> <span class="kd">func</span><span class="p">(</span><span class="nx">ast</span><span class="p">.</span><span class="nx">Expr</span><span class="p">)</span> <span class="nx">ast</span><span class="p">.</span><span class="nx">Expr</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>各算符作为前缀、中缀算符的关联函数如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="c1">// 前缀算符关联函数
+</span><span class="c1"></span><span class="nx">p</span><span class="p">.</span><span class="nx">prefixParseFns</span> <span class="p">=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="nx">token</span><span class="p">.</span><span class="nx">Type</span><span class="p">]</span><span class="nx">prefixParseFn</span><span class="p">)</span>
+<span class="c1">// 标识符：变量名、函数名
+</span><span class="c1"></span><span class="nx">p</span><span class="p">.</span><span class="nf">registerPrefix</span><span class="p">(</span><span class="nx">token</span><span class="p">.</span><span class="nx">IDENT</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nx">parseIdentifier</span><span class="p">)</span>
+<span class="c1">// 整数字面量：5、10
+</span><span class="c1"></span><span class="nx">p</span><span class="p">.</span><span class="nf">registerPrefix</span><span class="p">(</span><span class="nx">token</span><span class="p">.</span><span class="nx">INT</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nx">parseIntLiteral</span><span class="p">)</span>
+<span class="c1">// 负号：-5
+</span><span class="c1"></span><span class="nx">p</span><span class="p">.</span><span class="nf">registerPrefix</span><span class="p">(</span><span class="nx">token</span><span class="p">.</span><span class="nx">MINUS</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nx">parsePrefixExpression</span><span class="p">)</span>
+<span class="c1">// 分组(左括号)：3*(1+2)
+</span><span class="c1"></span><span class="nx">p</span><span class="p">.</span><span class="nf">registerPrefix</span><span class="p">(</span><span class="nx">token</span><span class="p">.</span><span class="nx">LPAREN</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nx">parseGroupExpr</span><span class="p">)</span>
+
+<span class="c1">// 中缀算符关联函数
+</span><span class="c1"></span><span class="nx">p</span><span class="p">.</span><span class="nx">infixParseFns</span> <span class="p">=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="nx">token</span><span class="p">.</span><span class="nx">Type</span><span class="p">]</span><span class="nx">infixParseFn</span><span class="p">)</span>
+<span class="c1">// 二元算术运算：+ - * /
+</span><span class="c1"></span><span class="nx">p</span><span class="p">.</span><span class="nf">registerInfix</span><span class="p">(</span><span class="nx">token</span><span class="p">.</span><span class="nx">PLUS</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nx">parseInfixExpr</span><span class="p">)</span>
+<span class="nx">p</span><span class="p">.</span><span class="nf">registerInfix</span><span class="p">(</span><span class="nx">token</span><span class="p">.</span><span class="nx">MINUS</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nx">parseInfixExpr</span><span class="p">)</span>
+<span class="nx">p</span><span class="p">.</span><span class="nf">registerInfix</span><span class="p">(</span><span class="nx">token</span><span class="p">.</span><span class="nx">ASTERISK</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nx">parseInfixExpr</span><span class="p">)</span>
+<span class="nx">p</span><span class="p">.</span><span class="nf">registerInfix</span><span class="p">(</span><span class="nx">token</span><span class="p">.</span><span class="nx">SLASH</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nx">parseInfixExpr</span><span class="p">)</span>
+<span class="c1">// 函数调用(左括号)： add(1,2)
+</span><span class="c1"></span><span class="nx">p</span><span class="p">.</span><span class="nf">registerInfix</span><span class="p">(</span><span class="nx">token</span><span class="p">.</span><span class="nx">LPAREN</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nx">parseCallExpr</span><span class="p">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>然后看下各算符关联函数的实现(parser在解析过程中的原则是尽可能不要推进当前算符)。</p>
+<h3 id="前缀算符关联函数" class="headerLink">
+    <a href="#%e5%89%8d%e7%bc%80%e7%ae%97%e7%ac%a6%e5%85%b3%e8%81%94%e5%87%bd%e6%95%b0" class="header-mark"></a>前缀算符关联函数</h3><h4 id="标识符" class="headerLink">
+    <a href="#%e6%a0%87%e8%af%86%e7%ac%a6" class="header-mark"></a>标识符</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">Parser</span><span class="p">)</span> <span class="nf">parseIdentifier</span><span class="p">()</span> <span class="nx">ast</span><span class="p">.</span><span class="nx">Expr</span> <span class="p">{</span>
+	<span class="c1">// 注意这里不调用 nextToken, 这很重要
+</span><span class="c1"></span>	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">ast</span><span class="p">.</span><span class="nx">Identifier</span><span class="p">{</span>
+		<span class="nx">Token</span><span class="p">:</span> <span class="nx">p</span><span class="p">.</span><span class="nx">curToken</span><span class="p">,</span>
+		<span class="nx">Value</span><span class="p">:</span> <span class="nx">p</span><span class="p">.</span><span class="nx">curToken</span><span class="p">.</span><span class="nx">Literal</span><span class="p">,</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>很简单，就直接把单个token构造成AST上的Identifier节点返回。</p>
+<h4 id="整型字面量" class="headerLink">
+    <a href="#%e6%95%b4%e5%9e%8b%e5%ad%97%e9%9d%a2%e9%87%8f" class="header-mark"></a>整型字面量</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="c1">// int 作为prefix的关联函数
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">Parser</span><span class="p">)</span> <span class="nf">parseIntLiteral</span><span class="p">()</span> <span class="nx">ast</span><span class="p">.</span><span class="nx">Expr</span> <span class="p">{</span>
+	<span class="nx">lit</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">ast</span><span class="p">.</span><span class="nx">Int_Literal</span><span class="p">{</span><span class="nx">Token</span><span class="p">:</span> <span class="nx">p</span><span class="p">.</span><span class="nx">curToken</span><span class="p">}</span>
+
+	<span class="nx">v</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">strconv</span><span class="p">.</span><span class="nf">ParseInt</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nx">curToken</span><span class="p">.</span><span class="nx">Literal</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nx">p</span><span class="p">.</span><span class="nx">errs</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nx">errs</span><span class="p">,</span> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Sprintf</span><span class="p">(</span><span class="s">&#34;无法将%s转换为int&#34;</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nx">curToken</span><span class="p">.</span><span class="nx">Literal</span><span class="p">))</span>
+		<span class="k">return</span> <span class="kc">nil</span>
+	<span class="p">}</span>
+	<span class="nx">lit</span><span class="p">.</span><span class="nx">Value</span> <span class="p">=</span> <span class="nx">v</span>
+	<span class="k">return</span> <span class="nx">lit</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>也很简单，就是把源码中的字符串转换为int并构造节点。</p>
+<h4 id="负号" class="headerLink">
+    <a href="#%e8%b4%9f%e5%8f%b7" class="header-mark"></a>负号</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">Parser</span><span class="p">)</span> <span class="nf">parsePrefixExpression</span><span class="p">()</span> <span class="nx">ast</span><span class="p">.</span><span class="nx">Expr</span> <span class="p">{</span>
+	<span class="nx">expression</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">ast</span><span class="p">.</span><span class="nx">PrefixExpression</span><span class="p">{</span>
+		<span class="nx">Token</span><span class="p">:</span>    <span class="nx">p</span><span class="p">.</span><span class="nx">curToken</span><span class="p">,</span>
+		<span class="nx">Operator</span><span class="p">:</span> <span class="nx">p</span><span class="p">.</span><span class="nx">curToken</span><span class="p">.</span><span class="nx">Literal</span><span class="p">,</span>
+	<span class="p">}</span>
+	<span class="nx">p</span><span class="p">.</span><span class="nf">nextToken</span><span class="p">()</span>
+	<span class="c1">// 注意这里，是pratt parsing的关键
+</span><span class="c1"></span>	<span class="c1">// 传入优先级为 PREFIX, -3*5 , -add(1,2)  只有CALL大于此优先级
+</span><span class="c1"></span>	<span class="nx">expression</span><span class="p">.</span><span class="nx">Right</span> <span class="p">=</span> <span class="nx">p</span><span class="p">.</span><span class="nf">parseExpr</span><span class="p">(</span><span class="nx">PREFIX</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nx">expression</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这里开始递归了，直接递归调用<code>parseExpr</code>(注意传入优先级参数是<code>PREFIX</code>)得到负号后面跟的子表达式。<code>PREFIX</code>优先级很大，仅次于<code>CALL</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">-3*5 =&gt; (-3)*5
+-add(1,2) =&gt; -(add(1,2))
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="分组" class="headerLink">
+    <a href="#%e5%88%86%e7%bb%84" class="header-mark"></a>分组</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">Parser</span><span class="p">)</span> <span class="nf">parseGroupExpr</span><span class="p">()</span> <span class="nx">ast</span><span class="p">.</span><span class="nx">Expr</span> <span class="p">{</span>
+	<span class="nx">p</span><span class="p">.</span><span class="nf">nextToken</span><span class="p">()</span>
+	<span class="nx">exp</span> <span class="o">:=</span> <span class="nx">p</span><span class="p">.</span><span class="nf">parseExpr</span><span class="p">(</span><span class="nx">LOWEST</span><span class="p">)</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">p</span><span class="p">.</span><span class="nf">expectPeek</span><span class="p">(</span><span class="nx">token</span><span class="p">.</span><span class="nx">RPAREN</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// 吃掉 )
+</span><span class="c1"></span>		<span class="k">return</span> <span class="kc">nil</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="nx">exp</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>分组的实现很简单，也很奇妙。读入<code>(</code>后，直接把优先级降到<code>LOWEST</code>，这样相当于屏蔽了前面的优先级，不管前面优先级多高，后面都看不见，思考：<code>3*(1+2)</code>。结束后读出<code>)</code>到<code>curToken</code>，如果下个字符不是<code>)</code>就说明输入语法错误。</p>
+<h3 id="后缀算符关联函数" class="headerLink">
+    <a href="#%e5%90%8e%e7%bc%80%e7%ae%97%e7%ac%a6%e5%85%b3%e8%81%94%e5%87%bd%e6%95%b0" class="header-mark"></a>后缀算符关联函数</h3><h4 id="算术运算" class="headerLink">
+    <a href="#%e7%ae%97%e6%9c%af%e8%bf%90%e7%ae%97" class="header-mark"></a>算术运算</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="c1">// 中缀算符的关联函数 + - * /
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">Parser</span><span class="p">)</span> <span class="nf">parseInfixExpr</span><span class="p">(</span><span class="nx">left</span> <span class="nx">ast</span><span class="p">.</span><span class="nx">Expr</span><span class="p">)</span> <span class="nx">ast</span><span class="p">.</span><span class="nx">Expr</span> <span class="p">{</span>
+	<span class="nx">expr</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">ast</span><span class="p">.</span><span class="nx">Infix_Expr</span><span class="p">{</span>
+		<span class="nx">Token</span><span class="p">:</span>    <span class="nx">p</span><span class="p">.</span><span class="nx">curToken</span><span class="p">,</span>
+		<span class="nx">Left</span><span class="p">:</span>     <span class="nx">left</span><span class="p">,</span>
+		<span class="nx">Operator</span><span class="p">:</span> <span class="nx">p</span><span class="p">.</span><span class="nx">curToken</span><span class="p">.</span><span class="nx">Literal</span><span class="p">,</span>
+	<span class="p">}</span>
+
+	<span class="nx">precedence</span> <span class="o">:=</span> <span class="nx">p</span><span class="p">.</span><span class="nf">curPrecedence</span><span class="p">()</span>
+	<span class="nx">p</span><span class="p">.</span><span class="nf">nextToken</span><span class="p">()</span>
+	<span class="nx">expr</span><span class="p">.</span><span class="nx">Right</span> <span class="p">=</span> <span class="nx">p</span><span class="p">.</span><span class="nf">parseExpr</span><span class="p">(</span><span class="nx">precedence</span><span class="p">)</span>
+
+	<span class="k">return</span> <span class="nx">expr</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>最终构造的节点有三部分：left、op、right，读取当前算符的优先级(<code>SUM</code>/<code>PRODUCT</code>)，传入<code>parseExpr</code>解析得到right部分，构造结束。</p>
+<h4 id="函数调用" class="headerLink">
+    <a href="#%e5%87%bd%e6%95%b0%e8%b0%83%e7%94%a8" class="header-mark"></a>函数调用</h4><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">Parser</span><span class="p">)</span> <span class="nf">parseCallExpr</span><span class="p">(</span><span class="nx">fn</span> <span class="nx">ast</span><span class="p">.</span><span class="nx">Expr</span><span class="p">)</span> <span class="nx">ast</span><span class="p">.</span><span class="nx">Expr</span> <span class="p">{</span>
+	<span class="nx">exp</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">ast</span><span class="p">.</span><span class="nx">Call_Expr</span><span class="p">{</span><span class="nx">Token</span><span class="p">:</span> <span class="nx">p</span><span class="p">.</span><span class="nx">curToken</span><span class="p">,</span> <span class="nx">Function</span><span class="p">:</span> <span class="nx">fn</span><span class="p">}</span>
+	<span class="nx">exp</span><span class="p">.</span><span class="nx">Arguments</span> <span class="p">=</span> <span class="nx">p</span><span class="p">.</span><span class="nf">parseCallArgs</span><span class="p">()</span>
+	<span class="k">return</span> <span class="nx">exp</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">Parser</span><span class="p">)</span> <span class="nf">parseCallArgs</span><span class="p">()</span> <span class="p">[]</span><span class="nx">ast</span><span class="p">.</span><span class="nx">Expr</span> <span class="p">{</span>
+	<span class="nx">args</span> <span class="o">:=</span> <span class="p">[]</span><span class="nx">ast</span><span class="p">.</span><span class="nx">Expr</span><span class="p">{}</span>
+
+	<span class="c1">// 没有参数的情况
+</span><span class="c1"></span>	<span class="k">if</span> <span class="nx">p</span><span class="p">.</span><span class="nf">peekTokenIs</span><span class="p">(</span><span class="nx">token</span><span class="p">.</span><span class="nx">RPAREN</span><span class="p">)</span> <span class="p">{</span>
+		<span class="nx">p</span><span class="p">.</span><span class="nf">nextToken</span><span class="p">()</span>
+		<span class="k">return</span> <span class="nx">args</span>
+	<span class="p">}</span>
+	<span class="c1">// 解析参数
+</span><span class="c1"></span>	<span class="nx">p</span><span class="p">.</span><span class="nf">nextToken</span><span class="p">()</span>
+	<span class="nx">args</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">args</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nf">parseExpr</span><span class="p">(</span><span class="nx">LOWEST</span><span class="p">))</span>
+	<span class="k">for</span> <span class="nx">p</span><span class="p">.</span><span class="nf">peekTokenIs</span><span class="p">(</span><span class="nx">token</span><span class="p">.</span><span class="nx">COMMA</span><span class="p">)</span> <span class="p">{</span>
+		<span class="nx">p</span><span class="p">.</span><span class="nf">nextToken</span><span class="p">()</span>
+		<span class="nx">p</span><span class="p">.</span><span class="nf">nextToken</span><span class="p">()</span>
+		<span class="nx">args</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">args</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nf">parseExpr</span><span class="p">(</span><span class="nx">LOWEST</span><span class="p">))</span>
+	<span class="p">}</span>
+	<span class="k">if</span> <span class="p">!</span><span class="nx">p</span><span class="p">.</span><span class="nf">expectPeek</span><span class="p">(</span><span class="nx">token</span><span class="p">.</span><span class="nx">RPAREN</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="kc">nil</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="nx">args</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>主要是解析参数列表，有多个参数情况下，都是逗号分割，直接循环处理，每次递归调用<code>parseExpr</code>传入的优先级都是<code>LOWEST</code>，因为每个参数都是独立的expr。</p>
+<h2 id="总结" class="headerLink">
+    <a href="#%e6%80%bb%e7%bb%93" class="header-mark"></a>总结</h2><p>整个算法的核心思想是使用优先级，来控制当前应该返回已构造的expr，还是继续解析。再贴一遍主流程：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">Parser</span><span class="p">)</span> <span class="nf">parseExpr</span><span class="p">(</span><span class="nx">precedence</span> <span class="kt">int</span><span class="p">)</span> <span class="nx">ast</span><span class="p">.</span><span class="nx">Expr</span> <span class="p">{</span>
+	<span class="nx">prefix</span> <span class="o">:=</span> <span class="nx">p</span><span class="p">.</span><span class="nx">prefixParseFns</span><span class="p">[</span><span class="nx">p</span><span class="p">.</span><span class="nx">curToken</span><span class="p">.</span><span class="nx">Type</span><span class="p">]</span>
+	<span class="k">if</span> <span class="nx">prefix</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nx">p</span><span class="p">.</span><span class="nf">noPrefixParseFnError</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nx">curToken</span><span class="p">.</span><span class="nx">Type</span><span class="p">)</span>
+		<span class="k">return</span> <span class="kc">nil</span>
+	<span class="p">}</span>
+	<span class="nx">leftExpr</span> <span class="o">:=</span> <span class="nf">prefix</span><span class="p">()</span>
+
+	<span class="c1">// 如果当前算符优先级没有后面的高，会循环下去
+</span><span class="c1"></span>	<span class="k">for</span> <span class="p">!</span><span class="nx">p</span><span class="p">.</span><span class="nf">peekTokenIs</span><span class="p">(</span><span class="nx">token</span><span class="p">.</span><span class="nx">SEMICOLON</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">precedence</span> <span class="p">&lt;</span> <span class="nx">p</span><span class="p">.</span><span class="nf">peekPrecedence</span><span class="p">()</span> <span class="p">{</span>
+		<span class="nx">infix</span> <span class="o">:=</span> <span class="nx">p</span><span class="p">.</span><span class="nx">infixParseFns</span><span class="p">[</span><span class="nx">p</span><span class="p">.</span><span class="nx">peek_Tok</span><span class="p">.</span><span class="nx">Type</span><span class="p">]</span>
+		<span class="k">if</span> <span class="nx">infix</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
+			<span class="k">return</span> <span class="nx">leftExpr</span>
+		<span class="p">}</span>
+		<span class="nx">p</span><span class="p">.</span><span class="nf">nextToken</span><span class="p">()</span>
+		<span class="nx">leftExpr</span> <span class="p">=</span> <span class="nf">infix</span><span class="p">(</span><span class="nx">leftExpr</span><span class="p">)</span> <span class="c1">// 合并中缀表达式
+</span><span class="c1"></span>	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="nx">leftExpr</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>用一个例子来演示下整个执行流程：</p>
+<p>假设要解析<code>1 + 2 * 5</code></p>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th style="text-align:left">剩余算符</th>
+<th style="text-align:center">当前算符</th>
+<th style="text-align:left">执行操作</th>
+<th style="text-align:center">说明</th>
+<th style="text-align:left">局部AST构造stack</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td style="text-align:left">1+2*5</td>
+<td style="text-align:center"></td>
+<td style="text-align:left">parseExpr(LOWEST)</td>
+<td style="text-align:center">开始解析，传入最低优先级</td>
+<td></td>
+</tr>
+<tr>
+<td>1</td>
+<td style="text-align:left">+2*5</td>
+<td style="text-align:center">1</td>
+<td style="text-align:left">parserIntLiteral()</td>
+<td style="text-align:center">从映射中找到当前算符的prefix关联函数，执行后得到ast节点</td>
+<td style="text-align:left">1</td>
+</tr>
+<tr>
+<td>2</td>
+<td style="text-align:left">2*5</td>
+<td style="text-align:center">+</td>
+<td style="text-align:left">parseInfixExpr(left)</td>
+<td style="text-align:center">窥探得知+的算符优先级SUM大于LOWEST，执行+的关联函数</td>
+<td style="text-align:left">1+</td>
+</tr>
+<tr>
+<td>3</td>
+<td style="text-align:left">2*5</td>
+<td style="text-align:center">+</td>
+<td style="text-align:left">parseExpr(SUM)</td>
+<td style="text-align:center">在2中递归调用了解析，并且传入优先级为SUM</td>
+<td></td>
+</tr>
+<tr>
+<td>4</td>
+<td style="text-align:left">*5</td>
+<td style="text-align:center">2</td>
+<td style="text-align:left">parserIntLiteral()</td>
+<td style="text-align:center">解析函数发现算符还是整数，继续调用关联函数</td>
+<td style="text-align:left">2</td>
+</tr>
+<tr>
+<td>5</td>
+<td style="text-align:left">5</td>
+<td style="text-align:center">*</td>
+<td style="text-align:left">parseInfixExpr(left)</td>
+<td style="text-align:center">发现<em>的优先级PRODUCT大于当前优先级SUM，调用</em>的关联函数</td>
+<td style="text-align:left">2*</td>
+</tr>
+<tr>
+<td>6</td>
+<td style="text-align:left">5</td>
+<td style="text-align:center">*</td>
+<td style="text-align:left">parseExpr(PRODUCT)</td>
+<td style="text-align:center">在5中递归调用解析，并传入优先级为PRODUCT</td>
+<td></td>
+</tr>
+<tr>
+<td>7</td>
+<td style="text-align:left"></td>
+<td style="text-align:center">5</td>
+<td style="text-align:left">parserIntLiteral</td>
+<td style="text-align:center">算符还是整数，继续调用关联函数</td>
+<td style="text-align:left">5</td>
+</tr>
+<tr>
+<td>8</td>
+<td style="text-align:left"></td>
+<td style="text-align:center"></td>
+<td style="text-align:left">7-&gt;6</td>
+<td style="text-align:center">输入结束，7返回到6，并得到ast</td>
+<td style="text-align:left">{5}</td>
+</tr>
+<tr>
+<td>9</td>
+<td style="text-align:left"></td>
+<td style="text-align:center"></td>
+<td style="text-align:left">6-&gt;3</td>
+<td style="text-align:center">6返回到3，并得到ast</td>
+<td style="text-align:left">{2*{5}}</td>
+</tr>
+<tr>
+<td>10</td>
+<td style="text-align:left"></td>
+<td style="text-align:center"></td>
+<td style="text-align:left">3-&gt;0</td>
+<td style="text-align:center">6返回到0，并得到ast</td>
+<td style="text-align:left">{1+{2*{5}}}</td>
+</tr>
+</tbody>
+</table>
+<p>基本上是对简介中那本书中实现内容的裁剪，强烈建议读一读。</p>
+</div>
+
+        <div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2021-08-15</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/compiler/">compiler</a>,&nbsp;<a href="/tags/parser/">parser</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/use-vercel-as-free-faas/" class="prev" rel="prev" title="白嫖vercel当FaaS用"><i class="fas fa-angle-left fa-fw"></i>白嫖vercel当FaaS用</a>
+            <a href="/learn-opengl-env/" class="next" rel="next" title="LearnOpenGL环境搭建">LearnOpenGL环境搭建<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="twikoo"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://twikoo.js.org/">Twikoo</a>.
+            </noscript></div></article></div>
+        </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">      <a href="https://www.travellings.cn/go.html" target="_blank" rel="noopener" title="开往-友链接力"><img src="https://www.travellings.cn/assets/logo.gif" alt="开往-友链接力" width="120"></a><a href="https://www.foreverblog.cn/go.html" target="_blank" > <img src="https://img.foreverblog.cn/wormhole_3.gif" alt="" style="width:auto;height:32px;" title="穿梭虫洞-随机访问十年之约友链博客"> </a>
+      </br><small>1KiritobkMPpaWBjTDHSoiP5icv8PEFNdR</small>
+      </br><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+      </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2020 - 2025</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank" rel="noopener noreferrer">kirito</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+            <div class="footer-line"></div>
+            <div class="footer-line">
+            </div>
+        </div></footer></div>
+
+    <div id="fixed-buttons"><a href="#back-to-top" id="back-to-top-button" class="fixed-button" title="回到顶部">
+            <i class="fas fa-arrow-up fa-fw"></i>
+        </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+            <i class="fas fa-comment fa-fw"></i>
+        </a>
+    </div><div class="assets"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/katex/copy-tex.min.css">
+        <noscript><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"></noscript><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":30},"comment":{"twikoo":{"commentCount":true,"el":"#twikoo","envId":"https://comment-liard.vercel.app/","lang":"zh-cn"}},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"distance":null,"findAllMatches":null,"fuseIndexURL":"/index.json","highlightTag":"em","ignoreFieldNorm":null,"ignoreLocation":null,"isCaseSensitive":null,"location":null,"maxResultLength":10,"minMatchCharLength":null,"noResultsFound":"没有找到结果","snippetLength":50,"threshold":null,"type":"fuse","useExtendedSearch":null}};</script><script type="text/javascript" src="/lib/twikoo/twikoo.all.min.js" defer></script><script type="text/javascript" src="/js/twikoo.min.js" defer></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js" defer></script><script type="text/javascript" src="/lib/katex/auto-render.min.js" defer></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js" defer></script><script type="text/javascript" src="/lib/katex/mhchem.min.js" defer></script><script type="text/javascript" src="/js/katex.min.js" defer></script><script type="text/javascript" src="/js/theme.min.js" defer></script><script type="text/javascript">
+            window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());
+            gtag('config', 'G-ZKPP127E4F');
+        </script><script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id=G-ZKPP127E4F" async></script><script>
+			var _hmt = _hmt || [];
+			(function() {
+			  var hm = document.createElement("script");
+			  hm.src = "https://hm.baidu.com/hm.js?2004ef75aa13d757f75bf6f1f3add242";
+			  var s = document.getElementsByTagName("script")[0]; 
+			  s.parentNode.insertBefore(hm, s);
+			})();
+		</script><script>
+         
+         
+        var $cdnPrefix = "https://blog-1256556944.file.myqcloud.com";
+    </script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@2.1.3/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-backstretch@2.1.18/jquery.backstretch.min.js"></script>
+    <script type="text/javascript" src="/js/custom.js"></script>
+</div>
+</body>
+
+</html>

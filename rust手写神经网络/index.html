@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noodp" />
+    <title>rust手写神经网络 - kirito&#39;s blog</title><meta name="Description" content="kirito&#39;s blog"><meta property="og:title" content="rust手写神经网络" />
+<meta property="og:description" content="用rust实现上篇笔记：神经网络的结构 中描述的神经网络 还在实现中。。。 https://github.com/kirito41dd/Hello-NN 训练过程 确定loss函数,$f(x)$为样本的推理结果,$y$是目标" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.kirito.info/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" /><meta property="og:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-03-30T08:43:20+00:00" />
+<meta property="article:modified_time" content="2024-04-21T15:00:57+00:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/>
+
+<meta name="twitter:title" content="rust手写神经网络"/>
+<meta name="twitter:description" content="用rust实现上篇笔记：神经网络的结构 中描述的神经网络 还在实现中。。。 https://github.com/kirito41dd/Hello-NN 训练过程 确定loss函数,$f(x)$为样本的推理结果,$y$是目标"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt">
+
+<meta name="theme-color" content="#f8f8f8"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="canonical" href="https://www.kirito.info/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" /><link rel="prev" href="https://www.kirito.info/%E5%90%8C%E6%80%81%E5%8A%A0%E5%AF%86%E7%99%BB%E9%99%86/" /><link rel="next" href="https://www.kirito.info/%E5%B8%B8%E7%94%A8%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E5%92%8C%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/color.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/fontawesome-free/all.min.css">
+        <noscript><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"></noscript><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/animate/animate.min.css">
+        <noscript><link rel="stylesheet" href="/lib/animate/animate.min.css"></noscript><meta name="google-site-verification" content="5J8bsg9tKySrpONjEV2nAOqQ08TCVjsooCRIuDsxhD4" /><meta name="baidu-site-verification" content="code-NY7bFlUK92" /><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "rust手写神经网络",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/www.kirito.info\/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C\/"
+        },"image": ["https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"],"genre": "posts","keywords": "神经网络, blog","wordcount":  2123 ,
+        "url": "https:\/\/www.kirito.info\/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C\/","datePublished": "2024-03-30T08:43:20+00:00","dateModified": "2024-04-21T15:00:57+00:00","publisher": {
+            "@type": "Organization",
+            "name": "kirito","logo": "https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"},"author": {
+                "@type": "Person",
+                "name": "kirito"
+            },"description": ""
+    }
+    </script><script src="//instant.page/5.1.1" defer type="module" integrity="sha384-MWfCL6g1OTGsbSwfuMHc8+8J2u71/LA8dzlIN3ycajckxuZZmF+DNjdm7O6H3PSq"></script>
+</head>
+
+<body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">
+        function setTheme(theme) {document.body.setAttribute('theme', theme); document.documentElement.style.setProperty('color-scheme', theme === 'light' ? 'light' : 'dark'); window.theme = theme; }
+        function saveTheme(theme) {window.localStorage && localStorage.setItem('theme', theme);}
+        function getMeta(metaName) {const metas = document.getElementsByTagName('meta'); for (let i = 0; i < metas.length; i++) if (metas[i].getAttribute('name') === metaName) return metas[i]; return '';}
+        if (window.localStorage && localStorage.getItem('theme')) {let theme = localStorage.getItem('theme');theme === 'light' || theme === 'dark' || theme === 'black' ? setTheme(theme) : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light')); } else { if ('auto' === 'light' || 'auto' === 'dark' || 'auto' === 'black') setTheme('auto'), saveTheme('auto'); else saveTheme('auto'), window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light');}
+        let metaColors = {'light': '#f8f8f8','dark': '#252627','black': '#000000'}
+        getMeta('theme-color').content = metaColors[document.body.getAttribute('theme')];
+    </script>
+    <div id="back-to-top"></div>
+    <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="kirito&#39;s blog">kirito</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="#" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="kirito&#39;s blog">kirito</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a href="#" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+            <div class="container"><div class="toc" id="toc-auto">
+        <h2 class="toc-title">目录</h2>
+        <div class="toc-content always-active" id="toc-content-auto"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#训练过程">训练过程</a></li>
+    <li><a href="#神经网络的表示">神经网络的表示</a>
+      <ul>
+        <li><a href="#激活函数层">激活函数层</a></li>
+        <li><a href="#全连接层">全连接层</a></li>
+      </ul>
+    </li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav></div>
+    </div><script>document.getElementsByTagName("main")[0].setAttribute("pageStyle", "normal")</script><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "true")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">rust手写神经网络</h1><div class="post-meta">
+            <div class="post-meta-line">
+                <span class="post-author"><i class="author fas fa-user-circle fa-fw"></i><a href="/" title="Author" rel=" author" class="author">kirito</a>
+                </span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2024-03-30">2024-03-30</time>&nbsp;<i class="far fa-edit fa-fw"></i>&nbsp;<time datetime="2024-04-21">2024-04-21</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 2123 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 5 分钟&nbsp;<span id="/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" class="leancloud_visitors" data-flag-title="rust手写神经网络">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class="leancloud-visitors-count" id=twikoo_visitors></span>&nbsp;次阅读
+                    </span>&nbsp;<span id="/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" class="comment_count" data-flag-title="rust手写神经网络">
+                        <i class="far fa-comments fa-fw"></i>&nbsp;<span class="twikoo-comment-count" id="twikoo-comment-count"></span>&nbsp;条评论
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#训练过程">训练过程</a></li>
+    <li><a href="#神经网络的表示">神经网络的表示</a>
+      <ul>
+        <li><a href="#激活函数层">激活函数层</a></li>
+        <li><a href="#全连接层">全连接层</a></li>
+      </ul>
+    </li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>用rust实现上篇笔记：<a href="/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84" rel="">神经网络的结构</a> 中描述的神经网络<br>
+还在实现中。。。</p>
+<ul>
+<li><a href="https://github.com/kirito41dd/Hello-NN" target="_blank" rel="noopener noreferrer">https://github.com/kirito41dd/Hello-NN</a></li>
+</ul>
+<h2 id="训练过程" class="headerLink">
+    <a href="#%e8%ae%ad%e7%bb%83%e8%bf%87%e7%a8%8b" class="header-mark"></a>训练过程</h2><ul>
+<li>确定loss函数,$f(x)$为样本的推理结果,$y$是目标结果，多个样本sum得出loss</li>
+</ul>
+<div>
+$$
+loss=\frac{1}{n}\sum^n_{i=1} (f(x_i)-y_i)^2
+$$
+</div>
+<ul>
+<li>将训练样本分为n个batch，每个batch n个样本</li>
+<li>按batch进行训练，将batch中每个样本进行正向传播</li>
+<li>记录每个样本的结果，以及这个样本正向传播过程中的所有中间结果</li>
+<li>遍历完每个样本后，计算loss</li>
+<li>通过loss值对每个样本进行反向传播，过程中需要用到前面缓存的中间结果</li>
+<li>记录每个样本反向传播过得到的梯度，将所有样本的梯度求平均值，得到最终调整网络的梯度。因为loss是sum的，所以在算一个样本偏导时，其他样本为常量，求导是0，所以每个样本梯度可以独立计算。</li>
+</ul>
+<div>
+$$
+a^2 -2ab + b2 => 2a-2b => 2(a-b) => \frac{2(a-b)}{n}
+$$
+</div>
+<ul>
+<li>根据学习率调整网络参数</li>
+<li>将所有batch如此循环来一遍，完成一轮训练</li>
+<li>用所有训练样本计算下loss，多轮训练后得到满意的模型</li>
+</ul>
+<h2 id="神经网络的表示" class="headerLink">
+    <a href="#%e7%a5%9e%e7%bb%8f%e7%bd%91%e7%bb%9c%e7%9a%84%e8%a1%a8%e7%a4%ba" class="header-mark"></a>神经网络的表示</h2><p>要实现的是一个全连接神经网络，整个网络模型有很多层(Layer)，除了输入层输出层，其余层都统称为隐藏层，对于要实现的网络可以叫全连接层。在每层里都有若干神经元，每个神经元上都保存着该神经元的<strong>偏置</strong>$b$和与上层神经元链接的<strong>每条边的权重</strong>$w$。 可以对Layer进行一定程度抽象，每一层都支持正向传播、反向传播、更新参数</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">NeuralNetworkModel</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">layers</span>: <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span><span class="w"> </span><span class="n">Layer</span><span class="o">&gt;&gt;</span><span class="p">,</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">trait</span><span class="w"> </span><span class="n">Layer</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="c1">// 正向传播
+</span><span class="c1"></span><span class="w">    </span><span class="c1">// 返回：本层输出 &amp; 本层中间结果
+</span><span class="c1"></span><span class="w">    </span><span class="k">fn</span> <span class="nf">forward</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">input</span>: <span class="kp">&amp;</span><span class="nc">MatView</span><span class="p">,</span><span class="w"> </span><span class="n">training</span>: <span class="kt">bool</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="p">(</span><span class="n">Mat</span><span class="p">,</span><span class="w"> </span><span class="n">LayerCache</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="c1">// 反向传播
+</span><span class="c1"></span><span class="w">    </span><span class="c1">// grads: 后面一层传递过来的梯度
+</span><span class="c1"></span><span class="w">    </span><span class="c1">// cache_forward: 本层正向传播时的输入和激活值，内容为forward的返回
+</span><span class="c1"></span><span class="w">    </span><span class="c1">// 返回: 本层向前一层传递的梯度 &amp; 本层所有梯度值
+</span><span class="c1"></span><span class="w">    </span><span class="k">fn</span> <span class="nf">backward</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">grads</span>: <span class="kp">&amp;</span><span class="nc">MatView</span><span class="p">,</span><span class="w"> </span><span class="n">cache_forward</span>: <span class="kp">&amp;</span><span class="nc">LayerCache</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="p">(</span><span class="n">Mat</span><span class="p">,</span><span class="w"> </span><span class="n">LayerCache</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="c1">// 更新权重和偏置
+</span><span class="c1"></span><span class="w">    </span><span class="c1">// grads: 本层调整参考的梯度, 内容格式与backward返回的一致
+</span><span class="c1"></span><span class="w">    </span><span class="k">fn</span> <span class="nf">update</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">learning_rate</span>: <span class="kt">f32</span><span class="p">,</span><span class="w"> </span><span class="n">grads</span>: <span class="kp">&amp;</span><span class="nc">LayerCache</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>在实际操作中，可以把一个全连接层拆为两层，即将激活函数抽出单独虚拟为一层，这样更加灵活</p>
+<p><figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C.png" title="rust手写神经网络.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C.png, /ob/z%E9%99%84%E4%BB%B6/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C.png">
+    </a></figure></p>
+<h3 id="激活函数层" class="headerLink">
+    <a href="#%e6%bf%80%e6%b4%bb%e5%87%bd%e6%95%b0%e5%b1%82" class="header-mark"></a>激活函数层</h3><p>先看简单的激活函数层，使用sigmod作为激活函数，激活函数层上没有任何权重和偏置，所以不需要存储任何参数：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="c1">// 使用激活函数sigmod的层
+</span><span class="c1"></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">SigmodLayer</span><span class="w"> </span><span class="p">{}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>正向传播时只需要求每个输入的sigmod值即可，sigmod的公式是：</p>
+<div>
+$$
+\sigma(x) = \frac{1}{1+e^{-x}}
+$$
+</div>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="c1">// 激活函数层每个神经元只有一条入边, 只是对上层的输出做一个转换, 矩阵形状n行1列
+</span><span class="c1"></span><span class="k">fn</span> <span class="nf">forward</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">input</span>: <span class="kp">&amp;</span><span class="nc">MatView</span><span class="p">,</span><span class="w"> </span><span class="n">training</span>: <span class="kt">bool</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="p">(</span><span class="n">Mat</span><span class="p">,</span><span class="w"> </span><span class="n">LayerCache</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">input</span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">x</span><span class="o">|</span><span class="w"> </span><span class="n">sigmod</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">));</span><span class="w">
+</span><span class="w">	</span><span class="c1">// 只有在训练时候才保存输出值，反向传播会用到
+</span><span class="c1"></span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">cache</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vec</span><span class="o">!</span><span class="p">[];</span><span class="w">
+</span><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="n">training</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">		</span><span class="n">cache</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">out</span><span class="p">.</span><span class="n">clone</span><span class="p">());</span><span class="w">
+</span><span class="w">	</span><span class="p">}</span><span class="w">
+</span><span class="w">	</span><span class="p">(</span><span class="n">out</span><span class="p">,</span><span class="w"> </span><span class="n">cache</span><span class="p">)</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>求导公式如下 详见：<a href="https://zhuanlan.zhihu.com/p/452684332" target="_blank" rel="noopener noreferrer">Sigmoid函数求导</a></p>
+<div>
+$$
+\sigma' = \sigma(x)(1-\sigma(x))
+$$
+</div>
+<p>有了求导公式，就可以写出sigmod层反向传播的实现：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="c1">// 激活函数层反向传播, 对sigmod(x)求导即可, 每个神经元只有一条入边,返回的梯度是 n行1列
+</span><span class="c1">// simod(x)求导是 sigmod(x)*(1-sigmod(x))
+</span><span class="c1">// 每个神经元有多条出边,链式法则后要累加结果
+</span><span class="c1"></span><span class="k">fn</span> <span class="nf">backward</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">grads</span>: <span class="kp">&amp;</span><span class="nc">MatView</span><span class="p">,</span><span class="w"> </span><span class="n">cache_forward</span>: <span class="kp">&amp;</span><span class="nc">LayerCache</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="p">(</span><span class="n">Mat</span><span class="p">,</span><span class="w"> </span><span class="n">LayerCache</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">	</span><span class="c1">// sigmod(x)的值
+</span><span class="c1"></span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cache_forward</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">view</span><span class="p">();</span><span class="w">
+</span><span class="w">
+</span><span class="w">	</span><span class="c1">// 激活函数层的输入和输出数量是相等的, 返回值长度和前一层神经元数量一致
+</span><span class="c1"></span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Mat</span>::<span class="n">from_shape_fn</span><span class="p">((</span><span class="n">a</span><span class="p">.</span><span class="n">len</span><span class="p">(),</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="o">|</span><span class="p">(</span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">)</span><span class="o">|</span><span class="w"> </span><span class="mf">0.</span><span class="p">);</span><span class="w">
+</span><span class="w">
+</span><span class="w">	</span><span class="c1">// 对每个神经元求梯度
+</span><span class="c1"></span><span class="w">	</span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">iter</span><span class="p">().</span><span class="n">enumerate</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">		</span><span class="c1">// 累加当前神经元每条出边的偏导
+</span><span class="c1"></span><span class="w">		</span><span class="k">for</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">grads</span><span class="p">.</span><span class="n">rows</span><span class="p">().</span><span class="n">into_iter</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">			</span><span class="c1">// 链式法则,与输入偏导相乘
+</span><span class="c1"></span><span class="w">			</span><span class="c1">// 当前神经元为 i, 所以g也取每行第i个
+</span><span class="c1"></span><span class="w">			</span><span class="n">r</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)]</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">g</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">out</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">out</span><span class="p">));</span><span class="w">
+</span><span class="w">		</span><span class="p">}</span><span class="w">
+</span><span class="w">	</span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w">	</span><span class="c1">// 激活函数层没有任何存储任何权重和偏置,无需update
+</span><span class="c1"></span><span class="w">	</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="w"> </span><span class="n">vec</span><span class="o">!</span><span class="p">[])</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>没有参数，所以不需要根据梯度更新参数：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-RUST" data-lang="RUST"><span class="k">fn</span> <span class="nf">update</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">_learning_rate</span>: <span class="kt">f32</span><span class="p">,</span><span class="w"> </span><span class="n">_gradss</span>: <span class="kp">&amp;</span><span class="nc">LayerCache</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">	</span><span class="c1">//不需要做任何事情
+</span><span class="c1"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>测试：<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C-1.png" title="rust手写神经网络-1.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C-1.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C-1.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C-1.png, /ob/z%E9%99%84%E4%BB%B6/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C-1.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C-1.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C-1.png">
+    </a></figure></p>
+<p>正向传播：输入两个$0$，sigmod层激活值是$0.5$，输出层值为$1$<br>
+反向传播：$z=wa+b$对$w$求偏导为$a$，所以输出层每个边的偏导为$0.5$<br>
+sigmod层的偏导为 $\sum \sigma \times (1-\sigma) \times g = 0.5 \times (1-0.5) \times 0.5 = 0.125$，每个神经元只有一条出边所以不用sum</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SigmodLayer</span>::<span class="n">new</span><span class="p">();</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">forward</span><span class="p">(</span><span class="o">&amp;</span><span class="n">array</span><span class="o">!</span><span class="p">[[</span><span class="mf">0.</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">0.</span><span class="p">]].</span><span class="n">view</span><span class="p">(),</span><span class="w"> </span><span class="kc">true</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;a:\n{}&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="n">assert_eq</span><span class="o">!</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">array</span><span class="o">!</span><span class="p">[[</span><span class="mf">0.5</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">0.5</span><span class="p">]]);</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">backward_and_update</span><span class="p">(</span><span class="o">&amp;</span><span class="n">array</span><span class="o">!</span><span class="p">[[</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">]].</span><span class="n">view</span><span class="p">(),</span><span class="w"> </span><span class="mf">0.1</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;g:\n{}&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="n">assert_eq</span><span class="o">!</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="n">array</span><span class="o">!</span><span class="p">[[</span><span class="mf">0.125</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">0.125</span><span class="p">]])</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p><a href="https://github.com/kirito41dd/Hello-NN/blob/4157fcb9ecb383116aa1a951a76ce6fb1d01ba0a/src/layer_impls/sigmod.rs" target="_blank" rel="noopener noreferrer">完整代码 4157fcb</a></p>
+<h3 id="全连接层" class="headerLink">
+    <a href="#%e5%85%a8%e8%bf%9e%e6%8e%a5%e5%b1%82" class="header-mark"></a>全连接层</h3><p>全连接层需要存储w和b，并且特地不带激活函数：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="c1">// 没有激活函数的全连接层
+</span><span class="c1"></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">DenseLayerNoActive</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="c1">// 每个神经元与上一层所有神经元边的权重, n行j列,n是本层神经元个数,j是前一层神经元个数
+</span><span class="c1"></span><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">w</span>: <span class="nc">Mat</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="c1">// 每个神经元的偏置, n行1列
+</span><span class="c1"></span><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">b</span>: <span class="nc">Mat</span><span class="p">,</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>正向传播公式很简单，单个节点的激活值：</p>
+<div>
+$$
+z = w_1\times a_1 + w_2\times a_2 +\ ... + w_n*a_n + b
+$$
+</div>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-RUST" data-lang="RUST"><span class="k">fn</span> <span class="nf">forward</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">input</span>: <span class="kp">&amp;</span><span class="nc">MatView</span><span class="p">,</span><span class="w"> </span><span class="n">training</span>: <span class="kt">bool</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="p">(</span><span class="n">Mat</span><span class="p">,</span><span class="w"> </span><span class="n">LayerCache</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">	</span><span class="c1">// 计算每个神经元激活值 w1*a1 + w2*a2 + ... + wn*an + b
+</span><span class="c1"></span><span class="w">	</span><span class="c1">// 矩阵计算,一次算出结果, w的每行乘以输入的一列最后加b
+</span><span class="c1"></span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">w</span><span class="p">.</span><span class="n">dot</span><span class="p">(</span><span class="n">input</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="o">&amp;</span><span class="bp">self</span><span class="p">.</span><span class="n">b</span><span class="p">;</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">cache</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vec</span><span class="o">!</span><span class="p">[];</span><span class="w">
+</span><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="n">training</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">		</span><span class="n">cache</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">input</span><span class="p">.</span><span class="n">to_owned</span><span class="p">());</span><span class="w">
+</span><span class="w">	</span><span class="p">}</span><span class="w">
+</span><span class="w">	</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="w"> </span><span class="n">cache</span><span class="p">)</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>对 $w_i$ 求偏导为$a_i$  对$b$求偏导为$1$<br>
+反向传播：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="c1">// 每个神经元有多(k)条入边返回的梯度是 n行k列
+</span><span class="c1">// z=w*a+b 对w求导是a, 对b求导是1
+</span><span class="c1">// 每个神经元看作有多条出边,链式法则后仍要累加(大多情况后一层是激活函数层,只有1条出边,但不排除其他可能)
+</span><span class="c1"></span><span class="k">fn</span> <span class="nf">backward</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">grads</span>: <span class="kp">&amp;</span><span class="nc">MatView</span><span class="p">,</span><span class="w"> </span><span class="n">cache_forward</span>: <span class="kp">&amp;</span><span class="nc">LayerCache</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="p">(</span><span class="n">Mat</span><span class="p">,</span><span class="w"> </span><span class="n">LayerCache</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cache_forward</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">view</span><span class="p">();</span><span class="w">
+</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">bias_grads</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Mat</span>::<span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">b</span><span class="p">.</span><span class="n">raw_dim</span><span class="p">());</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">w_grads</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Mat</span>::<span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">w</span><span class="p">.</span><span class="n">raw_dim</span><span class="p">());</span><span class="w">
+</span><span class="w">
+</span><span class="w">	</span><span class="c1">// 对每个神经元求所有w和b的偏导, 每个w的导数都是与其相乘的a, w不需要参与, 对b的偏导是1
+</span><span class="c1"></span><span class="w">	</span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">)</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">w</span><span class="p">.</span><span class="n">columns</span><span class="p">().</span><span class="n">into_iter</span><span class="p">().</span><span class="n">enumerate</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">		</span><span class="c1">// 累加当前神经元每条出边上的偏导, grads的每行,都是前一层某个神经元和本层连线的偏导
+</span><span class="c1"></span><span class="w">		</span><span class="k">for</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">grads</span><span class="p">.</span><span class="n">rows</span><span class="p">().</span><span class="n">into_iter</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">			</span><span class="c1">// b在这里求 链式法则相乘
+</span><span class="c1"></span><span class="w">			</span><span class="n">bias_grads</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)]</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">g</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">1.</span><span class="p">;</span><span class="w">
+</span><span class="w">			</span><span class="c1">//每个神经元上都有和前一层神经元的边, 连接w和a
+</span><span class="c1"></span><span class="w">			</span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">)</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">rows</span><span class="p">().</span><span class="n">into_iter</span><span class="p">().</span><span class="n">enumerate</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">				</span><span class="n">w_grads</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">k</span><span class="p">)]</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">g</span><span class="p">[</span><span class="n">i</span><span class="p">];</span><span class="w">
+</span><span class="w">			</span><span class="p">}</span><span class="w">
+</span><span class="w">		</span><span class="p">}</span><span class="w">
+</span><span class="w">	</span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">grads_cache</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vec</span><span class="o">!</span><span class="p">[</span><span class="n">bias_grads</span><span class="p">,</span><span class="w"> </span><span class="n">w_grads</span><span class="p">.</span><span class="n">clone</span><span class="p">()];</span><span class="w">
+</span><span class="w">
+</span><span class="w">	</span><span class="c1">// 入边只和w有关系,不用返回偏置上的偏导
+</span><span class="c1"></span><span class="w">	</span><span class="p">(</span><span class="n">w_grads</span><span class="p">,</span><span class="w"> </span><span class="n">grads_cache</span><span class="p">)</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>最后实现参数更新：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">update</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">learning_rate</span>: <span class="kt">f32</span><span class="p">,</span><span class="w"> </span><span class="n">grades</span>: <span class="kp">&amp;</span><span class="nc">LayerCache</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">bias_grads</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">grades</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">view</span><span class="p">();</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">w_grads</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">grades</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">view</span><span class="p">();</span><span class="w">
+</span><span class="w">	</span><span class="c1">// 更新偏置
+</span><span class="c1"></span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">w</span><span class="p">.</span><span class="n">shape</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">w</span><span class="p">.</span><span class="n">shape</span><span class="p">()[</span><span class="mi">1</span><span class="p">]);</span><span class="w">
+</span><span class="w">	</span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="p">..</span><span class="n">i</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">		</span><span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="p">..</span><span class="n">j</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">			</span><span class="bp">self</span><span class="p">.</span><span class="n">w</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">)]</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">learning_rate</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">w_grads</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">)];</span><span class="w">
+</span><span class="w">		</span><span class="p">}</span><span class="w">
+</span><span class="w">		</span><span class="bp">self</span><span class="p">.</span><span class="n">b</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)]</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">learning_rate</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">bias_grads</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)];</span><span class="w">
+</span><span class="w">	</span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>测试：<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C-2.png" title="rust手写神经网络-2.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C-2.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C-2.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C-2.png, /ob/z%E9%99%84%E4%BB%B6/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C-2.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C-2.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/rust%E6%89%8B%E5%86%99%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C-2.png">
+    </a></figure></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DenseLayerNoActive</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">	</span><span class="n">w</span>: <span class="nc">array</span><span class="o">!</span><span class="p">[[</span><span class="mf">2.</span><span class="p">,</span><span class="w"> </span><span class="mf">2.</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">2.</span><span class="p">,</span><span class="w"> </span><span class="mf">2.</span><span class="p">]],</span><span class="w">
+</span><span class="w">	</span><span class="n">b</span>: <span class="nc">array</span><span class="o">!</span><span class="p">[[</span><span class="mf">0.1</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">0.1</span><span class="p">]],</span><span class="w">
+</span><span class="w"></span><span class="p">};</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">f_cache</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">d</span><span class="p">.</span><span class="n">forward</span><span class="p">(</span><span class="o">&amp;</span><span class="n">array</span><span class="o">!</span><span class="p">[[</span><span class="mf">0.5</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">1.</span><span class="p">]].</span><span class="n">view</span><span class="p">(),</span><span class="w"> </span><span class="kc">true</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;a:\n{}&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="n">assert_eq</span><span class="o">!</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">array</span><span class="o">!</span><span class="p">[[</span><span class="mf">3.1</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">3.1</span><span class="p">]]);</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="n">b_cache</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">d</span><span class="p">.</span><span class="n">backward</span><span class="p">(</span><span class="o">&amp;</span><span class="n">array</span><span class="o">!</span><span class="p">[[</span><span class="mf">3.1</span><span class="p">,</span><span class="w"> </span><span class="mf">3.1</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">3.1</span><span class="p">,</span><span class="w"> </span><span class="mf">3.1</span><span class="p">]].</span><span class="n">view</span><span class="p">(),</span><span class="w"> </span><span class="o">&amp;</span><span class="n">f_cache</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="w">
+</span><span class="w">	</span><span class="s">&#34;g:\n{}, b_cache:\ng_b:\n{}\ng_w\n{}&#34;</span><span class="p">,</span><span class="w">
+</span><span class="w">	</span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="n">b_cache</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="n">b_cache</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w">
+</span><span class="w"></span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="n">assert_eq</span><span class="o">!</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="n">array</span><span class="o">!</span><span class="p">[[</span><span class="mf">3.1</span><span class="p">,</span><span class="w"> </span><span class="mf">6.2</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">3.1</span><span class="p">,</span><span class="w"> </span><span class="mf">6.2</span><span class="p">]]);</span><span class="w">
+</span><span class="w"></span><span class="n">d</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">b_cache</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;d.w:\n{}\nd.b\n{}&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="p">.</span><span class="n">w</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="p">.</span><span class="n">b</span><span class="p">);</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p><a href="https://github.com/kirito41dd/Hello-NN/blob/4157fcb9ecb383116aa1a951a76ce6fb1d01ba0a/src/layer_impls/dense_no_active.rs" target="_blank" rel="noopener noreferrer">完整代码 4157fcb</a></p>
+<h2 id="参考" class="headerLink">
+    <a href="#%e5%8f%82%e8%80%83" class="header-mark"></a>参考</h2><ul>
+<li><a href="/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84" rel="">神经网络的结构</a></li>
+<li><a href="https://vaktibabat.github.io/posts/Rust_WASM_Digit_Recognition_1/" target="_blank" rel="noopener noreferrer">Digit Recognition with Rust and WASM - Part 1</a></li>
+<li><a href="https://github.com/Lyn-liyuan/hetu" target="_blank" rel="noopener noreferrer">A tiny artificial neural network rust library</a>(每个样本都立即反向传播，相当于只能batch size都是1，不知道是故意的还是不小心的)</li>
+</ul>
+<div>
+$$
+ C_x = \frac{(y-a)^2}{2}
+                a = \sigma(z)
+                \delta^L= a - y
+$$
+</div>
+</div>
+
+        <div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2024-04-21</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/">神经网络</a>,&nbsp;<a href="/tags/blog/">blog</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/%E5%90%8C%E6%80%81%E5%8A%A0%E5%AF%86%E7%99%BB%E9%99%86/" class="prev" rel="prev" title="同态加密登陆"><i class="fas fa-angle-left fa-fw"></i>同态加密登陆</a>
+            <a href="/%E5%B8%B8%E7%94%A8%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E5%92%8C%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/" class="next" rel="next" title="常用激活函数和损失函数">常用激活函数和损失函数<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="twikoo"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://twikoo.js.org/">Twikoo</a>.
+            </noscript></div></article></div>
+        </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">      <a href="https://www.travellings.cn/go.html" target="_blank" rel="noopener" title="开往-友链接力"><img src="https://www.travellings.cn/assets/logo.gif" alt="开往-友链接力" width="120"></a><a href="https://www.foreverblog.cn/go.html" target="_blank" > <img src="https://img.foreverblog.cn/wormhole_3.gif" alt="" style="width:auto;height:32px;" title="穿梭虫洞-随机访问十年之约友链博客"> </a>
+      </br><small>1KiritobkMPpaWBjTDHSoiP5icv8PEFNdR</small>
+      </br><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+      </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2020 - 2025</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank" rel="noopener noreferrer">kirito</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+            <div class="footer-line"></div>
+            <div class="footer-line">
+            </div>
+        </div></footer></div>
+
+    <div id="fixed-buttons"><a href="#back-to-top" id="back-to-top-button" class="fixed-button" title="回到顶部">
+            <i class="fas fa-arrow-up fa-fw"></i>
+        </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+            <i class="fas fa-comment fa-fw"></i>
+        </a>
+    </div><div class="assets"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/katex/copy-tex.min.css">
+        <noscript><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"></noscript><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":30},"comment":{"twikoo":{"commentCount":true,"el":"#twikoo","envId":"https://comment-liard.vercel.app/","lang":"zh-cn"}},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"distance":null,"findAllMatches":null,"fuseIndexURL":"/index.json","highlightTag":"em","ignoreFieldNorm":null,"ignoreLocation":null,"isCaseSensitive":null,"location":null,"maxResultLength":10,"minMatchCharLength":null,"noResultsFound":"没有找到结果","snippetLength":50,"threshold":null,"type":"fuse","useExtendedSearch":null}};</script><script type="text/javascript" src="/lib/twikoo/twikoo.all.min.js" defer></script><script type="text/javascript" src="/js/twikoo.min.js" defer></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js" defer></script><script type="text/javascript" src="/lib/katex/auto-render.min.js" defer></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js" defer></script><script type="text/javascript" src="/lib/katex/mhchem.min.js" defer></script><script type="text/javascript" src="/js/katex.min.js" defer></script><script type="text/javascript" src="/js/theme.min.js" defer></script><script type="text/javascript">
+            window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());
+            gtag('config', 'G-ZKPP127E4F');
+        </script><script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id=G-ZKPP127E4F" async></script><script>
+			var _hmt = _hmt || [];
+			(function() {
+			  var hm = document.createElement("script");
+			  hm.src = "https://hm.baidu.com/hm.js?2004ef75aa13d757f75bf6f1f3add242";
+			  var s = document.getElementsByTagName("script")[0]; 
+			  s.parentNode.insertBefore(hm, s);
+			})();
+		</script><script>
+         
+         
+        var $cdnPrefix = "https://blog-1256556944.file.myqcloud.com";
+    </script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@2.1.3/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-backstretch@2.1.18/jquery.backstretch.min.js"></script>
+    <script type="text/javascript" src="/js/custom.js"></script>
+</div>
+</body>
+
+</html>

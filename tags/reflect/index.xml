@@ -1,0 +1,112 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>reflect - 标签 - kirito&#39;s blog</title>
+        <link>https://www.kirito.info/tags/reflect/</link>
+        <description>reflect - 标签 - kirito&#39;s blog</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sat, 17 Jul 2021 18:13:04 &#43;0800</lastBuildDate><atom:link href="https://www.kirito.info/tags/reflect/" rel="self" type="application/rss+xml" /><item>
+    <title>Go反射: 将切片按指定大小分块</title>
+    <link>https://www.kirito.info/slice-chunking-in-go/</link>
+    <pubDate>Sat, 17 Jul 2021 18:13:04 &#43;0800</pubDate><author>
+        <name>kirito</name>
+    </author><guid>https://www.kirito.info/slice-chunking-in-go/</guid>
+    <description><![CDATA[<h2 id="背景" class="headerLink">
+    <a href="#%e8%83%8c%e6%99%af" class="header-mark"></a>背景</h2><p>在写代码过程中，有时候需要做一些批量 查询/操作，往往会涉及将一个很大的数组或切片进行分块。</p>
+<p>比如我们有一个存着id的数组，要根据id请求某个接口查询信息，这个接口支持批量查询，但是每次查询的数量上限是100。最好的做法是每次从数组中取最多100个id，进行批量查询，直到遍历完数组。</p>
+<p>这个操作不复杂，可以简单的用循环实现，但是每次遇到这种场景都需要写一次代码，有点写吐了。所以就想写一个函数，可以将<code>[]T</code>按需求拆分成<code>[][]T</code>。</p>
+<p>但是go的泛型还没有来，所以只能用反射来搞了。</p>
+<p><del>献祭我的周六饭后时光</del></p>
+<h2 id="成果" class="headerLink">
+    <a href="#%e6%88%90%e6%9e%9c" class="header-mark"></a>成果</h2><p>传入<code>[]T</code>，<code>T</code>可以是任意类型，按指定大小分块，返回<code>[][]T</code>。</p>
+<p>例子中将<code>[0,1,2,3,4,5,6,7,8,9]</code>划分成了<code>[0,1,2]</code>、<code>[3,4,5]</code>、<code>[6,7,8]</code>、<code>[9]</code></p>
+<p><a href="https://github.com/kirito41dd/xslice" target="_blank" rel="noopener noreferrer">https://github.com/kirito41dd/xslice</a></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+	<span class="s">&#34;fmt&#34;</span>
+	<span class="s">&#34;github.com/kirito41dd/xslice&#34;</span>
+<span class="p">)</span>
+
+<span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="nx">s</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">}</span>
+	<span class="nx">i</span> <span class="o">:=</span> <span class="nx">xslice</span><span class="p">.</span><span class="nf">SplitToChunks</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+	<span class="nx">ss</span> <span class="o">:=</span> <span class="nx">i</span><span class="p">.([][]</span><span class="kt">int</span><span class="p">)</span>
+	<span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nx">ss</span><span class="p">)</span> <span class="c1">// [[0 1 2] [3 4 5] [6 7 8] [9]]
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="代码实现" class="headerLink">
+    <a href="#%e4%bb%a3%e7%a0%81%e5%ae%9e%e7%8e%b0" class="header-mark"></a>代码实现</h2><p>反射一把梭，自然离不了可爱的<code>interface{}</code></p>
+<p>欢迎复制或引包<code>github.com/kirito41dd/xslice</code>使用，如果以后搬砖遇到其他场景，也会继续扩充。</p>
+<p>还是期待go泛型早点到来（<del>那时候我rust应该已经很6了吧</del></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">SplitToChunks</span><span class="p">(</span><span class="nx">slice</span> <span class="kd">interface</span><span class="p">{},</span> <span class="nx">chunkSize</span> <span class="kt">int</span><span class="p">)</span> <span class="kd">interface</span><span class="p">{}</span> <span class="p">{</span>
+	<span class="nx">sliceType</span> <span class="o">:=</span> <span class="nx">reflect</span><span class="p">.</span><span class="nf">TypeOf</span><span class="p">(</span><span class="nx">slice</span><span class="p">)</span>
+	<span class="nx">sliceVal</span> <span class="o">:=</span> <span class="nx">reflect</span><span class="p">.</span><span class="nf">ValueOf</span><span class="p">(</span><span class="nx">slice</span><span class="p">)</span>
+	<span class="nx">length</span> <span class="o">:=</span> <span class="nx">sliceVal</span><span class="p">.</span><span class="nf">Len</span><span class="p">()</span>
+	<span class="k">if</span> <span class="nx">sliceType</span><span class="p">.</span><span class="nf">Kind</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">reflect</span><span class="p">.</span><span class="nx">Slice</span> <span class="p">{</span>
+		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;parameter must be []T&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="nx">n</span> <span class="o">:=</span> <span class="mi">0</span>
+	<span class="k">if</span> <span class="nx">length</span><span class="o">%</span><span class="nx">chunkSize</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
+		<span class="nx">n</span> <span class="p">=</span> <span class="mi">1</span>
+	<span class="p">}</span>
+	<span class="nx">SST</span> <span class="o">:=</span> <span class="nx">reflect</span><span class="p">.</span><span class="nf">MakeSlice</span><span class="p">(</span><span class="nx">reflect</span><span class="p">.</span><span class="nf">SliceOf</span><span class="p">(</span><span class="nx">sliceType</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">length</span><span class="o">/</span><span class="nx">chunkSize</span><span class="o">+</span><span class="nx">n</span><span class="p">)</span>
+	<span class="nx">st</span><span class="p">,</span> <span class="nx">ed</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+	<span class="k">for</span> <span class="nx">st</span> <span class="p">&lt;</span> <span class="nx">length</span> <span class="p">{</span>
+		<span class="nx">ed</span> <span class="p">=</span> <span class="nx">st</span> <span class="o">+</span> <span class="nx">chunkSize</span>
+		<span class="k">if</span> <span class="nx">ed</span> <span class="p">&gt;</span> <span class="nx">length</span> <span class="p">{</span>
+			<span class="nx">ed</span> <span class="p">=</span> <span class="nx">length</span>
+		<span class="p">}</span>
+		<span class="nx">SST</span> <span class="p">=</span> <span class="nx">reflect</span><span class="p">.</span><span class="nf">Append</span><span class="p">(</span><span class="nx">SST</span><span class="p">,</span> <span class="nx">sliceVal</span><span class="p">.</span><span class="nf">Slice</span><span class="p">(</span><span class="nx">st</span><span class="p">,</span> <span class="nx">ed</span><span class="p">))</span>
+		<span class="nx">st</span> <span class="p">=</span> <span class="nx">ed</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="nx">SST</span><span class="p">.</span><span class="nf">Interface</span><span class="p">()</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div>]]></description>
+</item></channel>
+</rss>

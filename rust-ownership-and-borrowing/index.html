@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noodp" />
+    <title>Rust所有权与借用 - kirito&#39;s blog</title><meta name="Description" content="kirito&#39;s blog"><meta property="og:title" content="Rust所有权与借用" />
+<meta property="og:description" content="学习笔记，对标cpp理解下rust所有权以及借用的概念，顺便提下比较特殊的切片(DST) [所有权]^(Ownership)rust中每个值都" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.kirito.info/rust-ownership-and-borrowing/" /><meta property="og:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-07-10T18:50:44+08:00" />
+<meta property="article:modified_time" content="2021-07-10T18:50:44+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/>
+
+<meta name="twitter:title" content="Rust所有权与借用"/>
+<meta name="twitter:description" content="学习笔记，对标cpp理解下rust所有权以及借用的概念，顺便提下比较特殊的切片(DST) [所有权]^(Ownership)rust中每个值都"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt">
+
+<meta name="theme-color" content="#f8f8f8"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="canonical" href="https://www.kirito.info/rust-ownership-and-borrowing/" /><link rel="prev" href="https://www.kirito.info/read-copy-update/" /><link rel="next" href="https://www.kirito.info/zhuangbi-with-vim/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/color.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/fontawesome-free/all.min.css">
+        <noscript><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"></noscript><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/animate/animate.min.css">
+        <noscript><link rel="stylesheet" href="/lib/animate/animate.min.css"></noscript><meta name="google-site-verification" content="5J8bsg9tKySrpONjEV2nAOqQ08TCVjsooCRIuDsxhD4" /><meta name="baidu-site-verification" content="code-NY7bFlUK92" /><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Rust所有权与借用",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/www.kirito.info\/rust-ownership-and-borrowing\/"
+        },"image": ["https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"],"genre": "posts","keywords": "rust, ownership, DST","wordcount":  1981 ,
+        "url": "https:\/\/www.kirito.info\/rust-ownership-and-borrowing\/","datePublished": "2021-07-10T18:50:44+08:00","dateModified": "2021-07-10T18:50:44+08:00","publisher": {
+            "@type": "Organization",
+            "name": "kirito","logo": "https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"},"author": {
+                "@type": "Person",
+                "name": "kirito"
+            },"description": ""
+    }
+    </script><script src="//instant.page/5.1.1" defer type="module" integrity="sha384-MWfCL6g1OTGsbSwfuMHc8+8J2u71/LA8dzlIN3ycajckxuZZmF+DNjdm7O6H3PSq"></script>
+</head>
+
+<body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">
+        function setTheme(theme) {document.body.setAttribute('theme', theme); document.documentElement.style.setProperty('color-scheme', theme === 'light' ? 'light' : 'dark'); window.theme = theme; }
+        function saveTheme(theme) {window.localStorage && localStorage.setItem('theme', theme);}
+        function getMeta(metaName) {const metas = document.getElementsByTagName('meta'); for (let i = 0; i < metas.length; i++) if (metas[i].getAttribute('name') === metaName) return metas[i]; return '';}
+        if (window.localStorage && localStorage.getItem('theme')) {let theme = localStorage.getItem('theme');theme === 'light' || theme === 'dark' || theme === 'black' ? setTheme(theme) : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light')); } else { if ('auto' === 'light' || 'auto' === 'dark' || 'auto' === 'black') setTheme('auto'), saveTheme('auto'); else saveTheme('auto'), window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light');}
+        let metaColors = {'light': '#f8f8f8','dark': '#252627','black': '#000000'}
+        getMeta('theme-color').content = metaColors[document.body.getAttribute('theme')];
+    </script>
+    <div id="back-to-top"></div>
+    <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="kirito&#39;s blog">kirito</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="#" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="kirito&#39;s blog">kirito</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a href="#" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+            <div class="container"><div class="toc" id="toc-auto">
+        <h2 class="toc-title">目录</h2>
+        <div class="toc-content always-active" id="toc-content-auto"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#所有权ownership"><strong><ruby>所有权<rt>Ownership</rt></ruby></strong></a></li>
+    <li><a href="#引用references借用borrowing"><strong><ruby>引用<rt>references</rt></ruby></strong>&amp;<strong><ruby>借用<rt>borrowing</rt></ruby></strong></a>
+      <ul>
+        <li><a href="#切片slice"><strong><ruby>切片<rt>slice</rt></ruby></strong></a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+    </div><script>document.getElementsByTagName("main")[0].setAttribute("pageStyle", "normal")</script><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "true")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">Rust所有权与借用</h1><div class="post-meta">
+            <div class="post-meta-line">
+                <span class="post-author"><i class="author fas fa-user-circle fa-fw"></i><a href="/" title="Author" rel=" author" class="author">kirito</a>
+                </span>&nbsp;<span class="post-category">收录于 </span>&nbsp;<span class="post-category">类别 <a href="/categories/program/"><i class="far fa-folder fa-fw"></i>program</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2021-07-10">2021-07-10</time>&nbsp;<i class="far fa-edit fa-fw"></i>&nbsp;<time datetime="2021-07-10">2021-07-10</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 1981 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 4 分钟&nbsp;<span id="/rust-ownership-and-borrowing/" class="leancloud_visitors" data-flag-title="Rust所有权与借用">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class="leancloud-visitors-count" id=twikoo_visitors></span>&nbsp;次阅读
+                    </span>&nbsp;<span id="/rust-ownership-and-borrowing/" class="comment_count" data-flag-title="Rust所有权与借用">
+                        <i class="far fa-comments fa-fw"></i>&nbsp;<span class="twikoo-comment-count" id="twikoo-comment-count"></span>&nbsp;条评论
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#所有权ownership"><strong><ruby>所有权<rt>Ownership</rt></ruby></strong></a></li>
+    <li><a href="#引用references借用borrowing"><strong><ruby>引用<rt>references</rt></ruby></strong>&amp;<strong><ruby>借用<rt>borrowing</rt></ruby></strong></a>
+      <ul>
+        <li><a href="#切片slice"><strong><ruby>切片<rt>slice</rt></ruby></strong></a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>学习笔记，对标cpp理解下rust所有权以及借用的概念，顺便提下比较特殊的切片(DST)</p>
+<h2 id="所有权ownership" class="headerLink">
+    <a href="#%e6%89%80%e6%9c%89%e6%9d%83ownership" class="header-mark"></a><strong><ruby>所有权<rt>Ownership</rt></ruby></strong></h2><p>rust中每个值都有一个所有者变量，并且同一时间只有能一个所有者，当值的所有者变量超出作用域，值的内存会被释放。</p>
+<p>下面的代码<code>String</code>的所有权从<code>s1</code>转移到了<code>s2</code>，发生了<strong>Move</strong>，此时再访问<code>s1</code>是非法的。<a href="https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html#ways-variables-and-data-interact-move" target="_blank" rel="noopener noreferrer">参考</a></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">s1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&#34;hello&#34;</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">s2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">s1</span><span class="p">;</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>下面的代码<code>i32</code>的所有权<strong>没有</strong>从<code>x</code>转移到<code>y</code>，而是<code>y</code>复制了<code>x</code>，发生了<strong>Copy</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">x</span>: <span class="kt">i32</span> <span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>Move本质上也是浅拷贝：比如<code>String</code>内部实现是有一个指针指向了保存的字符串，所有权转移，其实只是拷贝了这个指针的值，并没有拷贝这个字符串。这时<code>s1</code>和<code>s2</code>的内存空间都保存着这个指针地址，由于所有权的存在，编译器保证了访问<code>s1</code>是非法的，所以<code>s1</code>虽然还指向字符串，但是什么都做不了，保证了安全。</p>
+<p>关于内存释放：由于只有在所有者生命完结后，才会发生释放，所有权保证同一时间只有一个所有者，所以字符串所在地址并不会被<strong><ruby>释放两次<rt>double free</rt></ruby></strong>。</p>
+<p>这里我想对标cpp：cpp实现类似高效转移使用的是右值引用与移动构造函数。在<code>s2</code>的移动构造函数中把<code>s1</code>的指针偷过来，然后把<code>s1</code>的指针指向一个空字符串的地址或标记其无效。<code>s1</code>是作为右值引用传过来的，在语义上是将亡值，所以可以修改<code>s1</code>内部结构。但是，cpp没有所有权概念，编译器不会阻止你继续访问<code>s1</code>。<del>这很安全（个屁</del></p>
+<p>rust在什么情况下Move什么情况下Copy，取决于类型是否实现了<code>Copy</code>Trait。上面<code>i32</code>本来已经很小了，也没东西可以浅拷贝（就4个字节折腾啥），所以<code>i32</code>是拷贝语义。</p>
+<p>rust基本类型几乎都实现了<code>Copy</code>Trait：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="k">pub</span><span class="w"> </span><span class="k">trait</span><span class="w"> </span><span class="nb">Copy</span>: <span class="nb">Clone</span> <span class="p">{</span><span class="w">
+</span><span class="w"></span><span class="c1">// Empty. 只是个Marker
+</span><span class="c1"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>对于tuple、array，如果元素都实现了<code>Copy</code>，也会传拷贝。对于复杂类型，如果一个类型的某个部分实现了<code>Drop</code>Trait，那么这个类型无法实现<code>Copy</code>；如果组成部分都实现了<code>Copy</code>，复杂类型也可以实现<code>Copy</code>。</p>
+<p>所有权转移可以发生在赋值、传参、函数返回。</p>
+<h2 id="引用references借用borrowing" class="headerLink">
+    <a href="#%e5%bc%95%e7%94%a8references%e5%80%9f%e7%94%a8borrowing" class="header-mark"></a><strong><ruby>引用<rt>references</rt></ruby></strong>&amp;<strong><ruby>借用<rt>borrowing</rt></ruby></strong></h2><p>下面的代码中<code>b</code>并没有拿走所有权，而是通过<code>&amp;</code>取得了<code>a</code>的引用。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&#34;123&#34;</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">a</span><span class="p">;</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p><code>b</code>是对<code>a</code>的引用也可以描述为<code>b</code>借用了<code>a</code>，rust引用的底层可以对标为其他语言中的指针，只不过rust的引用带了生命周期和借用检查所以很安全。如cpp中的指针只是记录值了一个内存地址，与一个整型并没有啥差别，可以被保存被带到任何地方，容易发生内存泄漏。而rust编译器会保证引用的生命周期不会超过其指向的值的生命周期。</p>
+<p>引用分为<strong><ruby>不可变引用<rt>immutable references</rt></ruby></strong>与<strong><ruby>可变引用<rt>mutable references</rt></ruby></strong>，获取可变引用使用<code>let b = &amp;mut a</code>，前提是<code>a</code>是可变的才能获取可变引用，可变引用与不可变引用的关系类似读写锁：</p>
+<ol>
+<li>可以同时存在多个不可变引用(读锁)</li>
+<li>可变引用与不可变引用不能同时存在(读、写锁互斥)</li>
+<li>只能同时有一个可变引用(写锁)</li>
+</ol>
+<h3 id="切片slice" class="headerLink">
+    <a href="#%e5%88%87%e7%89%87slice" class="header-mark"></a><strong><ruby>切片<rt>slice</rt></ruby></strong></h3><p>切片很特殊，用来引用数组中的连续元素序列。</p>
+<ol>
+<li><strong><ruby>字符串切片<rt>string slices</rt></ruby></strong> - <code>&amp;str</code>
+<ul>
+<li><code>let s = String::from(&quot;hello world&quot;); let hello = &amp;s[0..5];</code></li>
+<li><code>let s: &amp;str = &quot;xxx&quot;; let s2: &amp;str = &amp;s[..];</code></li>
+<li>字符串切片特殊点是范围只能取有效的utf8字符边界</li>
+</ul>
+</li>
+<li>数组切片 - <code>&amp;[T]</code>
+<ul>
+<li><code>let a = [1, 2, 3, 4, 5];  let slice = &amp;a[1..3];</code></li>
+</ul>
+</li>
+</ol>
+<p>切片用[start..end]来确定引用范围，区间左闭右开<code>[start,end)</code>。范围还可以简写为<code>[..2]</code>、<code>[3..]</code>、<code>[..]</code>，省略表示取边界。</p>
+<p>切片是个胖指针，会保存目标集合的指针，与引用范围。</p>
+<p>切片之所以特殊，需要说下rust的<strong><ruby>动态大小类型<rt>Dynamic Sized Type,DST</rt></ruby></strong>，DST表示编译期无法获取大小的类型。</p>
+<p>从数组说起，数组的类型表示为<code>[T; N]</code>，<code>T</code>是元素类型而<code>N</code>是元素个数，所以数组的大小编译期是可以确定的，数组不是DST。注意<code>&amp;[i32; 3]</code>是一个普通的数组引用，而<code>&amp;[i32]</code>才是一个数组切片。</p>
+<p><strong>切片是DST</strong>，准确来说<code>[i32]</code>才叫做切片，<code>[T]</code>这种类型表示由<code>T</code>组成的切片，这个切片的长度在编译期是不确定的（DST），编译器无法为一个不确定大小的类型分配空间，所以也无法声明DST类型的变量，只能用胖指针<code>&amp;[T]</code>来引用。</p>
+<p><code>&amp;[T]</code>的大小是固定的，里面有用于存储数据地址和长度的空间，这样就可以在运行时获取长度信息。比如要制造切片<code>[1..n]</code>，n的大小是编译期间无法得到的，所以只能在运行期间计算n的值，然后初始化胖指针完成引用。</p>
+<p>字符串切片<code>str</code>也是DST，对应胖指针是<code>&amp;str</code>，可以把<code>str</code>理解为<code>[T]</code>的特殊形式，主要是用来表示utf8字符串。</p>
+<p>除了切片，<code>dyn Trait</code>(Trait对象)也是DST，对应的胖指针是<code>&amp;dyn Trait</code>。（只要是DST类型，就无法声明对应类型变量</p>
+</div>
+
+        <div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2021-07-10</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/rust/">rust</a>,&nbsp;<a href="/tags/ownership/">ownership</a>,&nbsp;<a href="/tags/dst/">DST</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/read-copy-update/" class="prev" rel="prev" title="Read Copy Update"><i class="fas fa-angle-left fa-fw"></i>Read Copy Update</a>
+            <a href="/zhuangbi-with-vim/" class="next" rel="next" title="vim装逼要点">vim装逼要点<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"><div id="twikoo"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://twikoo.js.org/">Twikoo</a>.
+            </noscript></div></article></div>
+        </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">      <a href="https://www.travellings.cn/go.html" target="_blank" rel="noopener" title="开往-友链接力"><img src="https://www.travellings.cn/assets/logo.gif" alt="开往-友链接力" width="120"></a><a href="https://www.foreverblog.cn/go.html" target="_blank" > <img src="https://img.foreverblog.cn/wormhole_3.gif" alt="" style="width:auto;height:32px;" title="穿梭虫洞-随机访问十年之约友链博客"> </a>
+      </br><small>1KiritobkMPpaWBjTDHSoiP5icv8PEFNdR</small>
+      </br><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+      </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2020 - 2025</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank" rel="noopener noreferrer">kirito</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+            <div class="footer-line"></div>
+            <div class="footer-line">
+            </div>
+        </div></footer></div>
+
+    <div id="fixed-buttons"><a href="#back-to-top" id="back-to-top-button" class="fixed-button" title="回到顶部">
+            <i class="fas fa-arrow-up fa-fw"></i>
+        </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+            <i class="fas fa-comment fa-fw"></i>
+        </a>
+    </div><div class="assets"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/katex/copy-tex.min.css">
+        <noscript><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"></noscript><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":30},"comment":{"twikoo":{"commentCount":true,"el":"#twikoo","envId":"https://comment-liard.vercel.app/","lang":"zh-cn"}},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"distance":null,"findAllMatches":null,"fuseIndexURL":"/index.json","highlightTag":"em","ignoreFieldNorm":null,"ignoreLocation":null,"isCaseSensitive":null,"location":null,"maxResultLength":10,"minMatchCharLength":null,"noResultsFound":"没有找到结果","snippetLength":50,"threshold":null,"type":"fuse","useExtendedSearch":null}};</script><script type="text/javascript" src="/lib/twikoo/twikoo.all.min.js" defer></script><script type="text/javascript" src="/js/twikoo.min.js" defer></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js" defer></script><script type="text/javascript" src="/lib/katex/auto-render.min.js" defer></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js" defer></script><script type="text/javascript" src="/lib/katex/mhchem.min.js" defer></script><script type="text/javascript" src="/js/katex.min.js" defer></script><script type="text/javascript" src="/js/theme.min.js" defer></script><script type="text/javascript">
+            window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());
+            gtag('config', 'G-ZKPP127E4F');
+        </script><script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id=G-ZKPP127E4F" async></script><script>
+			var _hmt = _hmt || [];
+			(function() {
+			  var hm = document.createElement("script");
+			  hm.src = "https://hm.baidu.com/hm.js?2004ef75aa13d757f75bf6f1f3add242";
+			  var s = document.getElementsByTagName("script")[0]; 
+			  s.parentNode.insertBefore(hm, s);
+			})();
+		</script><script>
+         
+         
+        var $cdnPrefix = "https://blog-1256556944.file.myqcloud.com";
+    </script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@2.1.3/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-backstretch@2.1.18/jquery.backstretch.min.js"></script>
+    <script type="text/javascript" src="/js/custom.js"></script>
+</div>
+</body>
+
+</html>

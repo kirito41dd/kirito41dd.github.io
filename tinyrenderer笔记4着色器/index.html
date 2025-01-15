@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noodp" />
+    <title>TinyRenderer笔记4：着色器 - kirito&#39;s blog</title><meta name="Description" content="kirito&#39;s blog"><meta property="og:title" content="TinyRenderer笔记4：着色器" />
+<meta property="og:description" content="顶点着色器和片段着色器OpenGL 2的渲染管道可以表示如下(新版本也差不多)： 在较新的OpenGL中还有其他着色器，在这个课程中只关心顶点着" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.kirito.info/tinyrenderer%E7%AC%94%E8%AE%B04%E7%9D%80%E8%89%B2%E5%99%A8/" /><meta property="og:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2025-01-06T11:58:35+00:00" />
+<meta property="article:modified_time" content="2025-01-15T13:19:28+00:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://gravatar.com/userimage/233561364/5e4a3c3ac6c7c5342d9a6ff360895297.png?size=512"/>
+
+<meta name="twitter:title" content="TinyRenderer笔记4：着色器"/>
+<meta name="twitter:description" content="顶点着色器和片段着色器OpenGL 2的渲染管道可以表示如下(新版本也差不多)： 在较新的OpenGL中还有其他着色器，在这个课程中只关心顶点着"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt">
+
+<meta name="theme-color" content="#f8f8f8"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="canonical" href="https://www.kirito.info/tinyrenderer%E7%AC%94%E8%AE%B04%E7%9D%80%E8%89%B2%E5%99%A8/" /><link rel="prev" href="https://www.kirito.info/tinyrenderer%E7%AC%94%E8%AE%B03%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/color.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/fontawesome-free/all.min.css">
+        <noscript><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"></noscript><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/animate/animate.min.css">
+        <noscript><link rel="stylesheet" href="/lib/animate/animate.min.css"></noscript><meta name="google-site-verification" content="5J8bsg9tKySrpONjEV2nAOqQ08TCVjsooCRIuDsxhD4" /><meta name="baidu-site-verification" content="code-NY7bFlUK92" /><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "TinyRenderer笔记4：着色器",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/www.kirito.info\/tinyrenderer%E7%AC%94%E8%AE%B04%E7%9D%80%E8%89%B2%E5%99%A8\/"
+        },"image": ["https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"],"genre": "posts","keywords": "blog, tinyrenderer, graphics","wordcount":  3026 ,
+        "url": "https:\/\/www.kirito.info\/tinyrenderer%E7%AC%94%E8%AE%B04%E7%9D%80%E8%89%B2%E5%99%A8\/","datePublished": "2025-01-06T11:58:35+00:00","dateModified": "2025-01-15T13:19:28+00:00","publisher": {
+            "@type": "Organization",
+            "name": "kirito","logo": "https:\/\/blog-1256556944.file.myqcloud.com\/public\/yy.PNG"},"author": {
+                "@type": "Person",
+                "name": "kirito"
+            },"description": ""
+    }
+    </script><script src="//instant.page/5.1.1" defer type="module" integrity="sha384-MWfCL6g1OTGsbSwfuMHc8+8J2u71/LA8dzlIN3ycajckxuZZmF+DNjdm7O6H3PSq"></script>
+</head>
+
+<body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">
+        function setTheme(theme) {document.body.setAttribute('theme', theme); document.documentElement.style.setProperty('color-scheme', theme === 'light' ? 'light' : 'dark'); window.theme = theme; }
+        function saveTheme(theme) {window.localStorage && localStorage.setItem('theme', theme);}
+        function getMeta(metaName) {const metas = document.getElementsByTagName('meta'); for (let i = 0; i < metas.length; i++) if (metas[i].getAttribute('name') === metaName) return metas[i]; return '';}
+        if (window.localStorage && localStorage.getItem('theme')) {let theme = localStorage.getItem('theme');theme === 'light' || theme === 'dark' || theme === 'black' ? setTheme(theme) : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light')); } else { if ('auto' === 'light' || 'auto' === 'dark' || 'auto' === 'black') setTheme('auto'), saveTheme('auto'); else saveTheme('auto'), window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? setTheme('dark') : setTheme('light');}
+        let metaColors = {'light': '#f8f8f8','dark': '#252627','black': '#000000'}
+        getMeta('theme-color').content = metaColors[document.body.getAttribute('theme')];
+    </script>
+    <div id="back-to-top"></div>
+    <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="kirito&#39;s blog">kirito</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/friends/"> 友链 </a><a class="menu-item" href="/about/"> 关于 </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="#" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a></div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="kirito&#39;s blog">kirito</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="#" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="#" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="#" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/friends/" title="">友链</a><a class="menu-item" href="/about/" title="">关于</a><a href="#" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+            <div class="container"><div class="toc" id="toc-auto">
+        <h2 class="toc-title">目录</h2>
+        <div class="toc-content always-active" id="toc-content-auto"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#顶点着色器和片段着色器">顶点着色器和片段着色器</a></li>
+    <li><a href="#实现一个着色器">实现一个着色器</a>
+      <ul>
+        <li><a href="#修改片段着色器">修改片段着色器</a></li>
+        <li><a href="#纹理">纹理</a></li>
+      </ul>
+    </li>
+    <li><a href="#几种着色方法介绍">几种着色方法介绍</a></li>
+    <li><a href="#法线贴图normal-mapping">法线贴图(Normal Mapping)</a></li>
+    <li><a href="#高光贴图specular-mapping">高光贴图(Specular Mapping)</a></li>
+  </ul>
+</nav></div>
+    </div><script>document.getElementsByTagName("main")[0].setAttribute("pageStyle", "normal")</script><script>document.getElementsByTagName("main")[0].setAttribute("autoTOC", "true")</script><article class="page single"><h1 class="single-title animate__animated animate__flipInX">TinyRenderer笔记4：着色器</h1><div class="post-meta">
+            <div class="post-meta-line">
+                <span class="post-author"><i class="author fas fa-user-circle fa-fw"></i><a href="/" title="Author" rel=" author" class="author">kirito</a>
+                </span>&nbsp;<span class="post-category">收录于 </span>&nbsp;<span class="post-category">类别 <a href="/categories/program/"><i class="far fa-folder fa-fw"></i>program</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2025-01-06">2025-01-06</time>&nbsp;<i class="far fa-edit fa-fw"></i>&nbsp;<time datetime="2025-01-15">2025-01-15</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 3026 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 7 分钟&nbsp;<span id="/tinyrenderer%E7%AC%94%E8%AE%B04%E7%9D%80%E8%89%B2%E5%99%A8/" class="leancloud_visitors" data-flag-title="TinyRenderer笔记4：着色器">
+                        <i class="far fa-eye fa-fw"></i>&nbsp;<span class="leancloud-visitors-count" id=twikoo_visitors></span>&nbsp;次阅读
+                    </span>&nbsp;<span id="/tinyrenderer%E7%AC%94%E8%AE%B04%E7%9D%80%E8%89%B2%E5%99%A8/" class="comment_count" data-flag-title="TinyRenderer笔记4：着色器">
+                        <i class="far fa-comments fa-fw"></i>&nbsp;<span class="twikoo-comment-count" id="twikoo-comment-count"></span>&nbsp;条评论
+                    </span>&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#顶点着色器和片段着色器">顶点着色器和片段着色器</a></li>
+    <li><a href="#实现一个着色器">实现一个着色器</a>
+      <ul>
+        <li><a href="#修改片段着色器">修改片段着色器</a></li>
+        <li><a href="#纹理">纹理</a></li>
+      </ul>
+    </li>
+    <li><a href="#几种着色方法介绍">几种着色方法介绍</a></li>
+    <li><a href="#法线贴图normal-mapping">法线贴图(Normal Mapping)</a></li>
+    <li><a href="#高光贴图specular-mapping">高光贴图(Specular Mapping)</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h2 id="顶点着色器和片段着色器" class="headerLink">
+    <a href="#%e9%a1%b6%e7%82%b9%e7%9d%80%e8%89%b2%e5%99%a8%e5%92%8c%e7%89%87%e6%ae%b5%e7%9d%80%e8%89%b2%e5%99%a8" class="header-mark"></a>顶点着色器和片段着色器</h2><p>OpenGL 2的渲染管道可以表示如下(新版本也差不多)：<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-21.png" title="TinyRenderer笔记4：着色器-21.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-21.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-21.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-21.png, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-21.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-21.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-21.png">
+    </a></figure><br>
+在较新的OpenGL中还有其他着色器，在这个课程中只关心顶点着色器(vertex shader)和片段着色器(fragment shader)。<br>
+在上面图片中，我们无法触摸的阶段都用蓝色表示，我们的回调用橙色表示。<br>
+事实上现在的<code>main()</code>函数是原始的处理程序(<strong>primitive processing</strong> routine)，它可以叫做顶点着色器。我们在这里没有primitive assembly的步骤，由于我们仅绘制三角形在我们的代码中，它与primitive processing合并。现在的<code>triangle()</code>函数是是<strong>rasterizer</strong>，对于在三角形中的每个像素都调用了了片段着色器的功能，然后执行深度检查之类的。<br>
+知道了什么是着色器就可以开始创建着色器了。</p>
+<p><strong>顶点着色器的主要目标是变换顶点的坐标，第二个目标是为片段着色器准备数据。<br>
+片段着色器的主要目标是确定当前像素的颜色，次要目标是我们可以通过返回true丢弃当前像素。</strong></p>
+<p>着色器的定义：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="k">pub</span><span class="w"> </span><span class="k">trait</span><span class="w"> </span><span class="n">IShader</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="sd">/// 顶点着色器
+</span><span class="sd"></span><span class="w">    </span><span class="sd">/// iface 第i个面, nth_vert 面的第n个顶点
+</span><span class="sd"></span><span class="w">    </span><span class="sd">/// 返回顶点在裁剪空间的坐标(齐次坐标)
+</span><span class="sd"></span><span class="w">    </span><span class="k">fn</span> <span class="nf">vertex</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">i_face</span>: <span class="kt">usize</span><span class="p">,</span><span class="w"> </span><span class="n">nth_vert</span>: <span class="kt">usize</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">glm</span>::<span class="n">Vec4</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="sd">/// 片段着色器
+</span><span class="sd"></span><span class="w">    </span><span class="sd">/// bar 当前像素在三角形中的重心坐标 color 像素颜色
+</span><span class="sd"></span><span class="w">    </span><span class="sd">/// 返回true表示丢弃当前像素
+</span><span class="sd"></span><span class="w">    </span><span class="k">fn</span> <span class="nf">fragment</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">bar</span>: <span class="nc">Vec3</span><span class="p">,</span><span class="w"> </span><span class="n">color</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">image</span>::<span class="n">Rgba</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">bool</span><span class="p">;</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><h2 id="实现一个着色器" class="headerLink">
+    <a href="#%e5%ae%9e%e7%8e%b0%e4%b8%80%e4%b8%aa%e7%9d%80%e8%89%b2%e5%99%a8" class="header-mark"></a>实现一个着色器</h2><p>实现一个简单的<a href="https://zh.wikipedia.org/wiki/Gouraud%E7%9D%80%E8%89%B2%E6%B3%95" target="_blank" rel="noopener noreferrer">Gouraud着色器</a>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">GouraudShader</span><span class="o">&lt;</span><span class="na">&#39;a</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">model</span>: <span class="kp">&amp;</span><span class="na">&#39;a</span><span class="w"> </span><span class="n">obj</span>::<span class="n">Obj</span><span class="o">&lt;</span><span class="n">TexturedVertex</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="o">&gt;</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">varying_intensity</span>: <span class="nc">glm</span>::<span class="n">Vec3</span><span class="p">,</span><span class="w"> </span><span class="c1">// 强度变化，由顶点着色器写入，由片段着色器读取
+</span><span class="c1"></span><span class="w">    </span><span class="n">view_port</span>: <span class="nc">Mat4</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">projection</span>: <span class="nc">Mat4</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">model_view</span>: <span class="nc">Mat4</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">light_dir</span>: <span class="nc">Vec3</span><span class="p">,</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">impl</span><span class="o">&lt;</span><span class="na">&#39;a</span><span class="o">&gt;</span><span class="w"> </span><span class="n">GouraudShader</span><span class="o">&lt;</span><span class="na">&#39;a</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">new</span><span class="p">(</span><span class="w">
+</span><span class="w">        </span><span class="n">model</span>: <span class="kp">&amp;</span><span class="na">&#39;a</span><span class="w"> </span><span class="n">obj</span>::<span class="n">Obj</span><span class="o">&lt;</span><span class="n">TexturedVertex</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="o">&gt;</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="n">model_view</span>: <span class="nc">Mat4</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="n">projection</span>: <span class="nc">Mat4</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="n">view_port</span>: <span class="nc">Mat4</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="n">light_dir</span>: <span class="nc">Vec3</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="p">)</span><span class="c1">// 实现省略;
+</span><span class="c1"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">impl</span><span class="o">&lt;</span><span class="na">&#39;a</span><span class="o">&gt;</span><span class="w"> </span><span class="n">IShader</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">GouraudShader</span><span class="o">&lt;</span><span class="na">&#39;a</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">fn</span> <span class="nf">vertex</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">i_face</span>: <span class="kt">usize</span><span class="p">,</span><span class="w"> </span><span class="n">nth_vert</span>: <span class="kt">usize</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">glm</span>::<span class="n">Vec4</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">i_vert</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">model</span><span class="p">.</span><span class="n">indices</span><span class="p">[</span><span class="n">i_face</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">nth_vert</span><span class="p">];</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">vert</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">model</span><span class="p">.</span><span class="n">vertices</span><span class="p">[</span><span class="n">i_vert</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">];</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">normal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Vec3</span>::<span class="n">from_array</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vert</span><span class="p">.</span><span class="n">normal</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Vec3</span>::<span class="n">from_array</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vert</span><span class="p">.</span><span class="n">position</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">gl_v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">view_port</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">projection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">model_view</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">v</span><span class="p">.</span><span class="n">extend</span><span class="p">(</span><span class="mf">1.</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="bp">self</span><span class="p">.</span><span class="n">varying_intensity</span><span class="p">[</span><span class="n">nth_vert</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">dot</span><span class="p">(</span><span class="o">*</span><span class="n">normal</span><span class="p">,</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">light_dir</span><span class="p">).</span><span class="n">max</span><span class="p">(</span><span class="mf">0.</span><span class="p">);</span><span class="w"> </span><span class="c1">// 计算每个顶点的光照强度
+</span><span class="c1"></span><span class="w">        </span><span class="n">gl_v</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="k">fn</span> <span class="nf">fragment</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">bar</span>: <span class="nc">glm</span>::<span class="n">Vec3</span><span class="p">,</span><span class="w"> </span><span class="n">color</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">image</span>::<span class="n">Rgba</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">bool</span> <span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">intensity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">varying_intensity</span><span class="p">,</span><span class="w"> </span><span class="n">bar</span><span class="p">);</span><span class="w"> </span><span class="c1">// 当前像素的插值强度，重心坐标计算相对三个顶点的强度
+</span><span class="c1"></span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="mf">255.</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">intensity</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u8</span><span class="p">;</span><span class="w">
+</span><span class="w">        </span><span class="o">*</span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">image</span>::<span class="n">Rgba</span><span class="p">([</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="p">]);</span><span class="w">
+</span><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w"> </span><span class="c1">// 不丢弃任何像素
+</span><span class="c1"></span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>使用这个着色器，重新实现main函数绘制模型：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">eye</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span><span class="w"> </span><span class="mf">3.</span><span class="p">);</span><span class="w"> </span><span class="c1">// camera
+</span><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">center</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">1.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">light_dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">normalize</span><span class="p">(</span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span><span class="w"> </span><span class="mf">1.</span><span class="p">,</span><span class="w"> </span><span class="mf">1.</span><span class="p">));</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="mi">800</span><span class="p">,</span><span class="w"> </span><span class="mi">800</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">image</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ImageBuffer</span>::<span class="o">&lt;</span><span class="n">Rgba</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="o">&gt;</span>::<span class="n">from_pixel</span><span class="p">(</span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">,</span><span class="w"> </span><span class="n">BLACK</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">zbuffer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ImageBuffer</span>::<span class="o">&lt;</span><span class="n">Luma</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="o">&gt;</span>::<span class="n">from_pixel</span><span class="p">(</span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">,</span><span class="w"> </span><span class="n">Luma</span><span class="p">([</span><span class="mi">0</span><span class="p">]));</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">obj</span>::<span class="n">load_obj</span>::<span class="o">&lt;</span><span class="n">obj</span>::<span class="n">TexturedVertex</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="kt">u32</span><span class="o">&gt;</span><span class="p">(</span><span class="n">input</span><span class="p">).</span><span class="n">unwrap</span><span class="p">();</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">model_view</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lookat</span><span class="p">(</span><span class="n">eye</span><span class="p">,</span><span class="w"> </span><span class="n">center</span><span class="p">,</span><span class="w"> </span><span class="n">up</span><span class="p">);</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="cp">#[rustfmt::skip]</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">projection</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">mat4</span><span class="p">(</span><span class="w">
+</span><span class="w">        </span><span class="mf">1.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">1.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">1.</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">1.</span><span class="o">/</span><span class="w"> </span><span class="n">glm</span>::<span class="n">distance</span><span class="p">(</span><span class="n">eye</span><span class="p">,</span><span class="w"> </span><span class="n">center</span><span class="p">),</span><span class="w">
+</span><span class="w">        </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">1.</span><span class="p">);</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">view_port</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">viewport</span><span class="p">(</span><span class="w">
+</span><span class="w">        </span><span class="n">width</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="n">height</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="n">width</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="n">height</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="p">);</span><span class="w">
+</span><span class="w">
+</span><span class="w">	</span><span class="c1">// 创建着色器
+</span><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">shader</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GouraudShader</span>::<span class="n">new</span><span class="p">(</span><span class="o">&amp;</span><span class="n">model</span><span class="p">,</span><span class="w"> </span><span class="n">model_view</span><span class="p">,</span><span class="w"> </span><span class="n">projection</span><span class="p">,</span><span class="w"> </span><span class="n">view_port</span><span class="p">,</span><span class="w"> </span><span class="n">light_dir</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="c1">// 遍历每个面
+</span><span class="c1"></span><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="p">..</span><span class="n">model</span><span class="p">.</span><span class="n">indices</span><span class="p">.</span><span class="n">len</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">screen_coords</span>: <span class="p">[</span><span class="n">glm</span>::<span class="n">Vec4</span><span class="p">;</span><span class="w"> </span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">glm</span>::<span class="n">Vec4</span>::<span class="n">zero</span><span class="p">();</span><span class="w"> </span><span class="mi">3</span><span class="p">];</span><span class="w">
+</span><span class="w">        </span><span class="c1">// 遍历每个面的每个顶点
+</span><span class="c1"></span><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="p">..</span><span class="mi">3</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">screen_coords</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">shader</span><span class="p">.</span><span class="n">vertex</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">        </span><span class="n">triangle_with_shader</span><span class="p">(</span><span class="w">
+</span><span class="w">            </span><span class="n">screen_coords</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w">
+</span><span class="w">            </span><span class="n">screen_coords</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w">
+</span><span class="w">            </span><span class="n">screen_coords</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w">
+</span><span class="w">            </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">shader</span><span class="p">,</span><span class="w">
+</span><span class="w">            </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">image</span><span class="p">,</span><span class="w">
+</span><span class="w">            </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">zbuffer</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="n">flip_vertical_in_place</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">image</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="n">image</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&#34;a.png&#34;</span><span class="p">).</span><span class="n">unwrap</span><span class="p">();</span><span class="w">
+</span><span class="w">    </span><span class="n">flip_vertical_in_place</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">zbuffer</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="n">zbuffer</span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&#34;b.png&#34;</span><span class="p">).</span><span class="n">unwrap</span><span class="p">();</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>在遍历每个顶点时，调用顶点着色器，在对三角行进行栅格化的时候会调用片段着色器：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="sd">/// 注意现在输入的顶点坐标是齐次坐标
+</span><span class="sd"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">triangle_with_shader</span><span class="o">&lt;</span><span class="w">
+</span><span class="w">    </span><span class="n">I</span>: <span class="nc">GenericImage</span><span class="o">&lt;</span><span class="n">Pixel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Rgba</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;&gt;</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">I2</span>: <span class="nc">GenericImage</span><span class="o">&lt;</span><span class="n">Pixel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Luma</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;&gt;</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">S</span>: <span class="nc">IShader</span><span class="p">,</span><span class="w">
+</span><span class="w"></span><span class="o">&gt;</span><span class="p">(</span><span class="w">
+</span><span class="w">    </span><span class="n">a_4d</span>: <span class="nc">glm</span>::<span class="n">Vec4</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">b_4d</span>: <span class="nc">glm</span>::<span class="n">Vec4</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">c_4d</span>: <span class="nc">glm</span>::<span class="n">Vec4</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">shader</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">S</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">image</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">I</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">zbuffer</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">I2</span><span class="p">,</span><span class="w">
+</span><span class="w"></span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v4p2v3</span><span class="p">(</span><span class="n">a_4d</span><span class="p">);</span><span class="w"> </span><span class="c1">// a b c是齐次坐标投影到屏幕上的坐标
+</span><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v4p2v3</span><span class="p">(</span><span class="n">b_4d</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v4p2v3</span><span class="p">(</span><span class="n">c_4d</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="c1">// 确定枚举像素的边界
+</span><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">bboxmin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">vec2</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="p">.</span><span class="n">min</span><span class="p">(</span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="p">).</span><span class="n">min</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="n">x</span><span class="p">).</span><span class="n">max</span><span class="p">(</span><span class="mf">0.</span><span class="p">),</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">y</span><span class="p">.</span><span class="n">min</span><span class="p">(</span><span class="n">b</span><span class="p">.</span><span class="n">y</span><span class="p">).</span><span class="n">min</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="n">y</span><span class="p">).</span><span class="n">max</span><span class="p">(</span><span class="mf">0.</span><span class="p">));</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">bboxmax</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">vec2</span><span class="p">(</span><span class="w">
+</span><span class="w">        </span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="p">.</span><span class="n">max</span><span class="p">(</span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="p">).</span><span class="n">max</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="n">x</span><span class="p">).</span><span class="n">min</span><span class="p">(</span><span class="n">image</span><span class="p">.</span><span class="n">width</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">1.</span><span class="p">),</span><span class="w">
+</span><span class="w">        </span><span class="n">a</span><span class="p">.</span><span class="n">y</span><span class="p">.</span><span class="n">max</span><span class="p">(</span><span class="n">b</span><span class="p">.</span><span class="n">y</span><span class="p">).</span><span class="n">max</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="n">y</span><span class="p">).</span><span class="n">min</span><span class="p">(</span><span class="n">image</span><span class="p">.</span><span class="n">height</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">1.</span><span class="p">),</span><span class="w">
+</span><span class="w">    </span><span class="p">);</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">px</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">bboxmin</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="p">..</span><span class="o">=</span><span class="n">bboxmax</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">py</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">bboxmin</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="p">..</span><span class="o">=</span><span class="n">bboxmax</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">bc_screen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">barycentric</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="p">,</span><span class="w"> </span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="n">px</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">,</span><span class="w"> </span><span class="n">py</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">));</span><span class="w">
+</span><span class="w">            </span><span class="c1">// 留意下这里，z和w都使用齐次坐标算的
+</span><span class="c1"></span><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">dot</span><span class="p">(</span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="n">a_4d</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="n">b_4d</span><span class="p">.</span><span class="n">z</span><span class="p">,</span><span class="w"> </span><span class="n">c_4d</span><span class="p">.</span><span class="n">z</span><span class="p">),</span><span class="w"> </span><span class="n">bc_screen</span><span class="p">);</span><span class="w">
+</span><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">w</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">dot</span><span class="p">(</span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="n">a_4d</span><span class="p">.</span><span class="n">w</span><span class="p">,</span><span class="w"> </span><span class="n">b_4d</span><span class="p">.</span><span class="n">w</span><span class="p">,</span><span class="w"> </span><span class="n">c_4d</span><span class="p">.</span><span class="n">w</span><span class="p">),</span><span class="w"> </span><span class="n">bc_screen</span><span class="p">);</span><span class="w">
+</span><span class="w">
+</span><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">frag_depth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">z</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">w</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.5</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u8</span><span class="p">;</span><span class="w">
+</span><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">frag_depth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">frag_depth</span><span class="p">.</span><span class="n">min</span><span class="p">(</span><span class="mi">255</span><span class="p">).</span><span class="n">max</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span><span class="w">
+</span><span class="w">
+</span><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">bc_screen</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">bc_screen</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">bc_screen</span><span class="p">.</span><span class="n">z</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">                </span><span class="k">continue</span><span class="p">;</span><span class="w">
+</span><span class="w">            </span><span class="p">}</span><span class="w">
+</span><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">image</span>::<span class="n">Rgba</span><span class="p">([</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="mi">4</span><span class="p">]);</span><span class="w">
+</span><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">discard</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">shader</span><span class="p">.</span><span class="n">fragment</span><span class="p">(</span><span class="n">bc_screen</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">color</span><span class="p">);</span><span class="w">
+</span><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">px</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">py</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">image</span><span class="p">.</span><span class="n">width</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i32</span><span class="p">;</span><span class="w">
+</span><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">zb</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">Luma</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">zbuffer</span><span class="p">.</span><span class="n">get_pixel_mut</span><span class="p">(</span><span class="n">px</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="n">py</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">_</span><span class="p">);</span><span class="w">
+</span><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">zb</span><span class="p">.</span><span class="mi">0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">frag_depth</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">                </span><span class="n">zb</span><span class="p">.</span><span class="mi">0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">frag_depth</span><span class="p">;</span><span class="w">
+</span><span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="n">discard</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">                    </span><span class="n">image</span><span class="p">.</span><span class="n">put_pixel</span><span class="p">(</span><span class="n">px</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">py</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u32</span><span class="p">,</span><span class="w"> </span><span class="n">color</span><span class="p">);</span><span class="w">
+</span><span class="w">                </span><span class="p">}</span><span class="w">
+</span><span class="w">            </span><span class="p">}</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>最终画出来的图片如下，一个模型，一个zbuffer的灰度图：</p>
+<table>
+<thead>
+<tr>
+<th>a.png</th>
+<th>b.png</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-22.png" title="TinyRenderer笔记4：着色器-22.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-22.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-22.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-22.png, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-22.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-22.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-22.png">
+    </a></figure></td>
+<td><figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-23.png" title="TinyRenderer笔记4：着色器-23.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-23.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-23.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-23.png, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-23.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-23.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-23.png">
+    </a></figure></td>
+</tr>
+</tbody>
+</table>
+<p>这里是完整代码: <a href="https://github.com/kirito41dd/tinyrenderer/tree/11e8d2cbfc251d694bb65ae40ec463b54636b0c0" target="_blank" rel="noopener noreferrer">11e8d2cbfc251d694bb65ae40ec463b54636b0c0</a></p>
+<h3 id="修改片段着色器" class="headerLink">
+    <a href="#%e4%bf%ae%e6%94%b9%e7%89%87%e6%ae%b5%e7%9d%80%e8%89%b2%e5%99%a8" class="header-mark"></a>修改片段着色器</h3><p>令强度仅具有6个值：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">eye</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span><span class="w"> </span><span class="mf">1.</span><span class="p">,</span><span class="w"> </span><span class="mf">3.</span><span class="p">);</span><span class="w"> </span><span class="c1">// camera
+</span><span class="c1"></span><span class="kd">let</span><span class="w"> </span><span class="n">center</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span><span class="w"> </span><span class="mf">1.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">light_dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">normalize</span><span class="p">(</span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span><span class="w"> </span><span class="mf">1.</span><span class="p">,</span><span class="w"> </span><span class="mf">0.9</span><span class="p">));</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">fn</span> <span class="nf">fragment</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">bar</span>: <span class="nc">glm</span>::<span class="n">Vec3</span><span class="p">,</span><span class="w"> </span><span class="n">color</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">image</span>::<span class="n">Rgba</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">bool</span> <span class="p">{</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">intensity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">varying_intensity</span><span class="p">,</span><span class="w"> </span><span class="n">bar</span><span class="p">);</span><span class="w"> 
+</span><span class="w">	</span><span class="n">intensity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">intensity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0.85</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">		</span><span class="mf">1.</span><span class="w">
+</span><span class="w">	</span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">intensity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0.6</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">		</span><span class="mf">0.8</span><span class="w">
+</span><span class="w">	</span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">intensity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0.45</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">		</span><span class="mf">0.6</span><span class="w">
+</span><span class="w">	</span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">intensity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0.3</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">		</span><span class="mf">0.45</span><span class="w">
+</span><span class="w">	</span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">intensity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0.15</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">		</span><span class="mf">0.3</span><span class="w">
+</span><span class="w">	</span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">		</span><span class="mf">0.</span><span class="w">
+</span><span class="w">	</span><span class="p">};</span><span class="w">
+</span><span class="w">
+</span><span class="w">	</span><span class="o">*</span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">image</span>::<span class="n">Rgba</span><span class="p">([(</span><span class="mf">255.</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">intensity</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u8</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="mf">155.</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">intensity</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u8</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="p">]);</span><span class="w">
+</span><span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>查看变化<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-24.png" title="TinyRenderer笔记4：着色器-24.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-24.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-24.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-24.png, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-24.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-24.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-24.png">
+    </a></figure></p>
+<h3 id="纹理" class="headerLink">
+    <a href="#%e7%ba%b9%e7%90%86" class="header-mark"></a>纹理</h3><p>现在只计算了每个点的光照，修改着色器带上纹理：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="n">varying_uv</span>: <span class="nc">glm</span>::<span class="n">Mat3</span><span class="p">,</span><span class="w">        </span><span class="c1">// 三个顶点的纹理坐标
+</span><span class="c1"></span><span class="w">
+</span><span class="w"></span><span class="k">fn</span> <span class="nf">vertex</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">i_face</span>: <span class="kt">usize</span><span class="p">,</span><span class="w"> </span><span class="n">nth_vert</span>: <span class="kt">usize</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">glm</span>::<span class="n">Vec4</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">i_vert</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">model</span><span class="p">.</span><span class="n">indices</span><span class="p">[</span><span class="n">i_face</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">nth_vert</span><span class="p">];</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">vert</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">model</span><span class="p">.</span><span class="n">vertices</span><span class="p">[</span><span class="n">i_vert</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">];</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">normal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Vec3</span>::<span class="n">from_array</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vert</span><span class="p">.</span><span class="n">normal</span><span class="p">);</span><span class="w"> </span><span class="c1">// 顶点法向量
+</span><span class="c1"></span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Vec3</span>::<span class="n">from_array</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vert</span><span class="p">.</span><span class="n">position</span><span class="p">);</span><span class="w"> </span><span class="c1">// 顶点位置
+</span><span class="c1"></span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">uv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Vec3</span>::<span class="n">from_array</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vert</span><span class="p">.</span><span class="n">texture</span><span class="p">);</span><span class="w"> </span><span class="c1">// 纹理坐标
+</span><span class="c1"></span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">gl_v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">view_port</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">projection</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">model_view</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">v</span><span class="p">.</span><span class="n">extend</span><span class="p">(</span><span class="mf">1.</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="bp">self</span><span class="p">.</span><span class="n">varying_intensity</span><span class="p">[</span><span class="n">nth_vert</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">dot</span><span class="p">(</span><span class="o">*</span><span class="n">normal</span><span class="p">,</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">light_dir</span><span class="p">).</span><span class="n">max</span><span class="p">(</span><span class="mf">0.</span><span class="p">);</span><span class="w"> </span><span class="c1">// 计算每个顶点的光照强度
+</span><span class="c1"></span><span class="w">        </span><span class="bp">self</span><span class="p">.</span><span class="n">varying_uv</span><span class="p">.</span><span class="n">as_array_mut</span><span class="p">()[</span><span class="n">nth_vert</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uv</span><span class="p">.</span><span class="n">clone</span><span class="p">();</span><span class="w"> </span><span class="c1">// 每一列是一个顶点出的纹理坐标
+</span><span class="c1"></span><span class="w">        </span><span class="n">gl_v</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="k">fn</span> <span class="nf">fragment</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">bar</span>: <span class="nc">glm</span>::<span class="n">Vec3</span><span class="p">,</span><span class="w"> </span><span class="n">color</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">image</span>::<span class="n">Rgba</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">bool</span> <span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">intensity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">varying_intensity</span><span class="p">,</span><span class="w"> </span><span class="n">bar</span><span class="p">);</span><span class="w"> </span><span class="c1">// 当前像素的插值强度，重心坐标计算相对三个顶点的强度
+</span><span class="c1"></span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">uv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">varying_uv</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">bar</span><span class="p">;</span><span class="w"> </span><span class="c1">// 用重心坐标插值当前点的纹理坐标
+</span><span class="c1"></span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">px</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">diffuse</span><span class="p">.</span><span class="n">get_pixel</span><span class="p">(</span><span class="w">
+</span><span class="w">            </span><span class="p">(</span><span class="n">uv</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">diffuse</span><span class="p">.</span><span class="n">width</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w">
+</span><span class="w">            </span><span class="p">(</span><span class="n">uv</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">diffuse</span><span class="p">.</span><span class="n">height</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">px</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">intensity</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u8</span><span class="p">;</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">px</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">intensity</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u8</span><span class="p">;</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">px</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">intensity</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u8</span><span class="p">;</span><span class="w">
+</span><span class="w">        </span><span class="o">*</span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">image</span>::<span class="n">Rgba</span><span class="p">([</span><span class="n">r</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="p">]);</span><span class="w">
+</span><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w"> </span><span class="c1">// 不丢弃任何像素
+</span><span class="c1"></span><span class="w">    </span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>查看结果：<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-25.png" title="TinyRenderer笔记4：着色器-25.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-25.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-25.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-25.png, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-25.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-25.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-25.png">
+    </a></figure><br>
+代码：<a href="https://github.com/kirito41dd/tinyrenderer/tree/81b8c2ae2d04f70036f8ef4227f9bb2ffd5a519a" target="_blank" rel="noopener noreferrer">81b8c2ae2d04f70036f8ef4227f9bb2ffd5a519a</a></p>
+<h2 id="几种着色方法介绍" class="headerLink">
+    <a href="#%e5%87%a0%e7%a7%8d%e7%9d%80%e8%89%b2%e6%96%b9%e6%b3%95%e4%bb%8b%e7%bb%8d" class="header-mark"></a>几种着色方法介绍</h2><ul>
+<li>平面(Flat)着色： 每个三角形只计算一个光照</li>
+<li>Gouraud着色： 每个三角形计算三个顶点的光照，使用三个顶点的光照对三角形中每个点做线性插值</li>
+<li>Phong着色： 我们把三角形的每个点的法向量都插值出来，然后再计算光照<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-26.png" title="TinyRenderer笔记4：着色器-26.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-26.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-26.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-26.png, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-26.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-26.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-26.png">
+    </a></figure></li>
+</ul>
+<h2 id="法线贴图normal-mapping" class="headerLink">
+    <a href="#%e6%b3%95%e7%ba%bf%e8%b4%b4%e5%9b%benormal-mapping" class="header-mark"></a>法线贴图(Normal Mapping)</h2><p>我们有纹理坐标，和这样的纹理贴图。<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-27.png" title="TinyRenderer笔记4：着色器-27.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-27.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-27.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-27.png, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-27.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-27.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-27.png">
+    </a></figure><br>
+除了纹理，也可以把几乎任何东西存进纹理图像中。它可以是颜色、方向、温度等等。<br>
+让我们加载这个纹理：<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8.png" title="TinyRenderer笔记4：着色器.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8.png, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8.png">
+    </a></figure><br>
+如果我们将RGB值解释为xyz方向，该图像为我们提供了每个渲染像素的法向量，这样我们就不用靠三个顶点的法向量来插值法向量了。<br>
+需要注意，如果对模型进行了仿射变换，那么法向量需要做映射才能使用，上篇有讲，结论：法向量的变换矩阵为模型变换矩阵的逆转置矩阵。<br>
+也有一些表示方式能直接描述切空间中的法向量。在达布坐标系中，z向量垂直于物体，x是主曲率方向，y是它们的叉积。</p>
+<p>下面是使用纹理映射的例子：<br>
+从这里新建了一个<strong>Phong着色器</strong>的实现</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="n">diffuse_nm</span>: <span class="kp">&amp;</span><span class="na">&#39;a</span><span class="w"> </span><span class="n">ImageBuffer</span><span class="o">&lt;</span><span class="n">Rgba</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="c1">// 法线贴图
+</span><span class="c1"></span><span class="n">uniform_m</span>: <span class="nc">Mat4</span><span class="p">,</span><span class="w">              </span><span class="c1">// 模型的变换矩阵m projection*model_view
+</span><span class="c1"></span><span class="n">uniform_mit</span>: <span class="nc">Mat4</span><span class="p">,</span><span class="w">            </span><span class="c1">// m的逆转置矩阵 m.inverse().transpose()
+</span><span class="c1"></span><span class="w">
+</span><span class="w"></span><span class="k">fn</span> <span class="nf">vertex</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">i_face</span>: <span class="kt">usize</span><span class="p">,</span><span class="w"> </span><span class="n">nth_vert</span>: <span class="kt">usize</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">glm</span>::<span class="n">Vec4</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">i_vert</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">model</span><span class="p">.</span><span class="n">indices</span><span class="p">[</span><span class="n">i_face</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">nth_vert</span><span class="p">];</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">vert</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">model</span><span class="p">.</span><span class="n">vertices</span><span class="p">[</span><span class="n">i_vert</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">];</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">normal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Vec3</span>::<span class="n">from_array</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vert</span><span class="p">.</span><span class="n">normal</span><span class="p">);</span><span class="w"> </span><span class="c1">// 顶点法向量
+</span><span class="c1"></span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Vec3</span>::<span class="n">from_array</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vert</span><span class="p">.</span><span class="n">position</span><span class="p">);</span><span class="w"> </span><span class="c1">// 顶点位置
+</span><span class="c1"></span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">uv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Vec3</span>::<span class="n">from_array</span><span class="p">(</span><span class="o">&amp;</span><span class="n">vert</span><span class="p">.</span><span class="n">texture</span><span class="p">);</span><span class="w"> </span><span class="c1">// 纹理坐标
+</span><span class="c1"></span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">gl_v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">uniform_m</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">v</span><span class="p">.</span><span class="n">extend</span><span class="p">(</span><span class="mf">1.</span><span class="p">);</span><span class="w">
+</span><span class="w">	</span><span class="bp">self</span><span class="p">.</span><span class="n">varying_uv</span><span class="p">.</span><span class="n">as_array_mut</span><span class="p">()[</span><span class="n">nth_vert</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uv</span><span class="p">.</span><span class="n">clone</span><span class="p">();</span><span class="w"> </span><span class="c1">// 每一列是一个顶点出的纹理坐标
+</span><span class="c1"></span><span class="w">	</span><span class="n">gl_v</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">fn</span> <span class="nf">fragment</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">bar</span>: <span class="nc">glm</span>::<span class="n">Vec3</span><span class="p">,</span><span class="w"> </span><span class="n">color</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">image</span>::<span class="n">Rgba</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">bool</span> <span class="p">{</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">uv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">varying_uv</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">bar</span><span class="p">;</span><span class="w"> </span><span class="c1">// 用重心坐标插值当前点的纹理坐标
+</span><span class="c1"></span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">px</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">diffuse</span><span class="p">.</span><span class="n">get_pixel</span><span class="p">(</span><span class="w">
+</span><span class="w">		</span><span class="p">(</span><span class="n">uv</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">diffuse</span><span class="p">.</span><span class="n">width</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w">
+</span><span class="w">		</span><span class="p">(</span><span class="n">uv</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">diffuse</span><span class="p">.</span><span class="n">height</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w">
+</span><span class="w">	</span><span class="p">);</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">nm_px</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">diffuse_nm</span><span class="p">.</span><span class="n">get_pixel</span><span class="p">(</span><span class="w">
+</span><span class="w">		</span><span class="p">(</span><span class="n">uv</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">diffuse</span><span class="p">.</span><span class="n">width</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w">
+</span><span class="w">		</span><span class="p">(</span><span class="n">uv</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">diffuse</span><span class="p">.</span><span class="n">height</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w">
+</span><span class="w">	</span><span class="p">);</span><span class="w">
+</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Vec3</span>::<span class="n">from_array</span><span class="p">(</span><span class="o">&amp;</span><span class="p">[</span><span class="n">nm_px</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="n">nm_px</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="n">nm_px</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">_</span><span class="p">]).</span><span class="n">clone</span><span class="p">();</span><span class="w"> </span><span class="c1">// 从贴图中加载法向量
+</span><span class="c1"></span><span class="w">	</span><span class="n">n</span><span class="p">.</span><span class="n">as_array_mut</span><span class="p">()</span><span class="w">
+</span><span class="w">		</span><span class="p">.</span><span class="n">iter_mut</span><span class="p">()</span><span class="w">
+</span><span class="w">		</span><span class="p">.</span><span class="n">for_each</span><span class="p">(</span><span class="o">|</span><span class="n">v</span><span class="o">|</span><span class="w"> </span><span class="o">*</span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">v</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">255.</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">2.</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">1.</span><span class="p">);</span><span class="w"> </span><span class="c1">// tga图像中[0,255], 转换到[-1,-1]
+</span><span class="c1"></span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">uniform_mit</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">n</span><span class="p">.</span><span class="n">extend</span><span class="p">(</span><span class="mf">0.</span><span class="p">);</span><span class="w"> </span><span class="c1">// 法线映射 注意向量转换位齐次坐标是填0
+</span><span class="c1"></span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">normalize</span><span class="p">(</span><span class="n">vec4_to_3</span><span class="p">(</span><span class="n">n</span><span class="p">));</span><span class="w"> </span><span class="c1">// 齐次坐标投影回3d 注意向量不需要除w分量
+</span><span class="c1"></span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">uniform_m</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">light_dir</span><span class="p">.</span><span class="n">extend</span><span class="p">(</span><span class="mf">0.</span><span class="p">);</span><span class="w"> </span><span class="c1">// 之前是在顶点作色器中计算光照，现在要在切空间计算
+</span><span class="c1"></span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">normalize</span><span class="p">(</span><span class="n">vec4_to_3</span><span class="p">(</span><span class="n">l</span><span class="p">));</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">intensity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">dot</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">l</span><span class="p">);</span><span class="w">
+</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">px</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">intensity</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u8</span><span class="p">;</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">px</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">intensity</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u8</span><span class="p">;</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">px</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">intensity</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u8</span><span class="p">;</span><span class="w">
+</span><span class="w">	</span><span class="o">*</span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">image</span>::<span class="n">Rgba</span><span class="p">([</span><span class="n">r</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="p">]);</span><span class="w">
+</span><span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w"> </span><span class="c1">// 不丢弃任何像素
+</span><span class="c1"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>需要注意的点是向量再参与齐次坐标运算时，w分量需要是0，计算后投影回3d时xyz不需要除以w分量。<br>
+这里再贴下点和向量映射回来时的区别：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="sd">/// 齐次坐标系中的点投影到3d
+</span><span class="sd">/// 点坐标需要除以w
+</span><span class="sd"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">v4p2v3</span><span class="p">(</span><span class="n">v</span>: <span class="nc">glm</span>::<span class="n">Vec4</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">glm</span>::<span class="n">Vec3</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="n">v</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">v</span><span class="p">.</span><span class="n">w</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">v</span><span class="p">.</span><span class="n">w</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">.</span><span class="n">z</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">v</span><span class="p">.</span><span class="n">w</span><span class="p">)</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="sd">/// 齐次坐标系中的向量投影到3d
+</span><span class="sd">/// 向量坐标不需要除以w
+</span><span class="sd"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">vec4_to_3</span><span class="p">(</span><span class="n">v</span>: <span class="nc">glm</span>::<span class="n">Vec4</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">glm</span>::<span class="n">Vec3</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">glm</span>::<span class="n">vec3</span><span class="p">(</span><span class="n">v</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">.</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">.</span><span class="n">z</span><span class="p">)</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>结果：</p>
+<p><figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-28.png" title="TinyRenderer笔记4：着色器-28.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-28.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-28.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-28.png, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-28.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-28.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-28.png">
+    </a></figure><br>
+可以看到皮肤的起伏细节相较于只用三个顶点的法向量插值要好的多。</p>
+<p>代码：<a href="https://github.com/kirito41dd/tinyrenderer/tree/951f42ea125a28c4f7e7aa83573d68fd43cef472" target="_blank" rel="noopener noreferrer">951f42ea125a28c4f7e7aa83573d68fd43cef472</a></p>
+<p>上面得到的图片比作者的亮，后来发现是全局光照进不进行矩阵变换的区别。再次修改代码</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="c1">// let l = self.light_dir.extend(0.); // 之前是在顶点作色器中计算光照，现在要在切空间计算
+</span><span class="c1">// let l = glm::normalize(vec4_to_3(l));
+</span><span class="c1"></span><span class="kd">let</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">light_dir</span><span class="p">;</span><span class="w"> </span><span class="c1">// 全局光照不进行矩阵变换
+</span><span class="c1"></span><span class="kd">let</span><span class="w"> </span><span class="n">intensity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">dot</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">l</span><span class="p">);</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>结果：<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-29.png" title="TinyRenderer笔记4：着色器-29.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-29.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-29.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-29.png, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-29.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-29.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-29.png">
+    </a></figure></p>
+<p>代码：<a href="https://github.com/kirito41dd/tinyrenderer/tree/64d58b1c6d0569db3db1eefaead38443d05b9ac9" target="_blank" rel="noopener noreferrer">64d58b1c6d0569db3db1eefaead38443d05b9ac9</a></p>
+<h2 id="高光贴图specular-mapping" class="headerLink">
+    <a href="#%e9%ab%98%e5%85%89%e8%b4%b4%e5%9b%bespecular-mapping" class="header-mark"></a>高光贴图(Specular Mapping)</h2><p><strong>Phong光照模型：</strong><br>
+Phong提议将最终照明视为三个光强度的加权总和：环境光(ambient lighting)、漫反射光(diffuse lighting)、镜面光(specular lighting)<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-30.png" title="TinyRenderer笔记4：着色器-30.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-30.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-30.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-30.png, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-30.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-30.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-30.png">
+    </a></figure><br>
+我们前面计算的光都是漫反射光，计算了光方向向量和法线向量的余弦值。这假设了光在各个方向上均匀反射。如果是光滑的表面比如镜面，光反射范围会更小，只有反射到了我们的眼睛内我们才能看见。<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-31.png" title="TinyRenderer笔记4：着色器-31.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-31.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-31.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-31.png, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-31.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-31.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-31.png">
+    </a></figure></p>
+<p>对于漫反射光我们关心的是向量$n$和向量$l$的余弦值，现在我们要开始关注反射光$r$和视角方向$v$之间的夹角。<br>
+给出$n$和$l$如何求$r$：<code>glm::normalize(n * (glm::dot(n, l) * 2.) - l)</code></p>
+<div>
+$$
+r=2n(n\cdot l)-l
+$$
+</div>
+<p>光滑的表面在一个方向上的反射比在其他方向上的反射要多，如果我们使用余弦值的$n$次方会怎样${\cos \theta }^{n}$，所有小于1的数在进行幂运算时都会减小，这意味这余弦的$n$次方会使反射光的半径变小。不同材质的反射表现，这个信息可以存在高光贴图中。他告诉我们每个点是否有光泽。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="n">diffuse_spec</span>: <span class="kp">&amp;</span><span class="na">&#39;a</span><span class="w"> </span><span class="n">ImageBuffer</span><span class="o">&lt;</span><span class="n">Rgba</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="c1">// 高光贴图
+</span><span class="c1"></span><span class="w">
+</span><span class="w"></span><span class="k">fn</span> <span class="nf">fragment</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">bar</span>: <span class="nc">glm</span>::<span class="n">Vec3</span><span class="p">,</span><span class="w"> </span><span class="n">color</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">image</span>::<span class="n">Rgba</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">bool</span> <span class="p">{</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">uv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">varying_uv</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">bar</span><span class="p">;</span><span class="w"> </span><span class="c1">// 用重心坐标插值当前点的纹理坐标
+</span><span class="c1"></span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">px</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">diffuse</span><span class="p">.</span><span class="n">get_pixel</span><span class="p">(</span><span class="w">
+</span><span class="w">		</span><span class="p">(</span><span class="n">uv</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">diffuse</span><span class="p">.</span><span class="n">width</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w">
+</span><span class="w">		</span><span class="p">(</span><span class="n">uv</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">diffuse</span><span class="p">.</span><span class="n">height</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w">
+</span><span class="w">	</span><span class="p">);</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">nm_px</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">diffuse_nm</span><span class="p">.</span><span class="n">get_pixel</span><span class="p">(</span><span class="w">
+</span><span class="w">		</span><span class="p">(</span><span class="n">uv</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">diffuse_nm</span><span class="p">.</span><span class="n">width</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w">
+</span><span class="w">		</span><span class="p">(</span><span class="n">uv</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">diffuse_nm</span><span class="p">.</span><span class="n">height</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w">
+</span><span class="w">	</span><span class="p">);</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">spec_px</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">diffuse_spec</span><span class="p">.</span><span class="n">get_pixel</span><span class="p">(</span><span class="w">
+</span><span class="w">		</span><span class="p">(</span><span class="n">uv</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">diffuse_spec</span><span class="p">.</span><span class="n">width</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w">
+</span><span class="w">		</span><span class="p">(</span><span class="n">uv</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">diffuse_spec</span><span class="p">.</span><span class="n">height</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w">
+</span><span class="w">	</span><span class="p">);</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">spec_v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">spec_px</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1.</span><span class="p">;</span><span class="w"> </span><span class="c1">// 光泽值, 这个值越小越反射范围越大，越不光泽，越大越有光泽
+</span><span class="c1"></span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Vec3</span>::<span class="n">from_array</span><span class="p">(</span><span class="o">&amp;</span><span class="p">[</span><span class="n">nm_px</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="n">nm_px</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="n">nm_px</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">_</span><span class="p">]).</span><span class="n">clone</span><span class="p">();</span><span class="w"> </span><span class="c1">// 从贴图中加载法向量
+</span><span class="c1"></span><span class="w">	</span><span class="n">n</span><span class="p">.</span><span class="n">as_array_mut</span><span class="p">()</span><span class="w">
+</span><span class="w">		</span><span class="p">.</span><span class="n">iter_mut</span><span class="p">()</span><span class="w">
+</span><span class="w">		</span><span class="p">.</span><span class="n">for_each</span><span class="p">(</span><span class="o">|</span><span class="n">v</span><span class="o">|</span><span class="w"> </span><span class="o">*</span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">v</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">255.</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">2.</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">1.</span><span class="p">);</span><span class="w"> </span><span class="c1">// tga图像中[0,255], 转换到[-1,-1]
+</span><span class="c1"></span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">uniform_mit</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">n</span><span class="p">.</span><span class="n">extend</span><span class="p">(</span><span class="mf">0.</span><span class="p">);</span><span class="w"> </span><span class="c1">// 法线映射 注意向量转换位齐次坐标是填0
+</span><span class="c1"></span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">normalize</span><span class="p">(</span><span class="n">vec4_to_3</span><span class="p">(</span><span class="n">n</span><span class="p">));</span><span class="w"> </span><span class="c1">// 齐次坐标投影回3d 注意向量不需要除w分量
+</span><span class="c1"></span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">uniform_m</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">light_dir</span><span class="p">.</span><span class="n">extend</span><span class="p">(</span><span class="mf">0.</span><span class="p">);</span><span class="w"> </span><span class="c1">// 映射光照方向
+</span><span class="c1"></span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">normalize</span><span class="p">(</span><span class="n">vec4_to_3</span><span class="p">(</span><span class="n">l</span><span class="p">));</span><span class="w">
+</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">normalize</span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">glm</span>::<span class="n">dot</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">l</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">2.</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">l</span><span class="p">);</span><span class="w"> </span><span class="c1">// 反射光方向
+</span><span class="c1"></span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">spec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">pow</span><span class="p">(</span><span class="n">r</span><span class="p">.</span><span class="n">z</span><span class="p">.</span><span class="n">max</span><span class="p">(</span><span class="mf">0.</span><span class="p">),</span><span class="w"> </span><span class="n">spec_v</span><span class="p">);</span><span class="w"> </span><span class="c1">// 我们从z轴看, dot(v,r)
+</span><span class="c1"></span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">diff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">dot</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">l</span><span class="p">).</span><span class="n">max</span><span class="p">(</span><span class="mf">0.</span><span class="p">);</span><span class="w">
+</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">arg_ambient</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">5.</span><span class="p">;</span><span class="w"> </span><span class="c1">// 环境光
+</span><span class="c1"></span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">arg_diffuse</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.</span><span class="p">;</span><span class="w"> </span><span class="c1">// 漫反射光
+</span><span class="c1"></span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">arg_specular</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.6</span><span class="p">;</span><span class="w"> </span><span class="c1">// 镜面反射光
+</span><span class="c1"></span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">intensity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">glm</span>::<span class="n">dot</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">l</span><span class="p">);</span><span class="w">
+</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">arg_ambient</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">px</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">arg_diffuse</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">diff</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">arg_specular</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">spec</span><span class="p">))</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u8</span><span class="p">;</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">arg_ambient</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">px</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">arg_diffuse</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">diff</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">arg_specular</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">spec</span><span class="p">))</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u8</span><span class="p">;</span><span class="w">
+</span><span class="w">	</span><span class="kd">let</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">arg_ambient</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">px</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f32</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">arg_diffuse</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">diff</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">arg_specular</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">spec</span><span class="p">))</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u8</span><span class="p">;</span><span class="w">
+</span><span class="w">	</span><span class="o">*</span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">image</span>::<span class="n">Rgba</span><span class="p">([</span><span class="n">r</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="p">]);</span><span class="w">
+</span><span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w"> </span><span class="c1">// 不丢弃任何像素
+</span><span class="c1"></span><span class="p">}</span><span class="w">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>这些参数都是可以调整的,不同的选择会给对象带来不同的外观</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">arg_ambient</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">5.</span><span class="p">;</span><span class="w"> </span><span class="c1">// 环境光
+</span><span class="c1"></span><span class="kd">let</span><span class="w"> </span><span class="n">arg_diffuse</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.</span><span class="p">;</span><span class="w"> </span><span class="c1">// 漫反射光
+</span><span class="c1"></span><span class="kd">let</span><span class="w"> </span><span class="n">arg_specular</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.6</span><span class="p">;</span><span class="w"> </span><span class="c1">// 镜面反射光
+</span></code></pre></td></tr></table>
+</div>
+</div><p>结果如下：<br>
+<figure><a class="lightgallery" href="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-32.png" title="TinyRenderer笔记4：着色器-32.png" data-thumbnail="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-32.png">
+        <img
+            
+            loading="lazy"
+            src="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-32.png"
+            srcset="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-32.png, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-32.png 1.5x, /ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-32.png 2x"
+            sizes="auto"
+            alt="/ob/z%E9%99%84%E4%BB%B6/TinyRenderer%E7%AC%94%E8%AE%B04%EF%BC%9A%E7%9D%80%E8%89%B2%E5%99%A8-32.png">
+    </a></figure></p>
+<p>代码：<a href="https://github.com/kirito41dd/tinyrenderer/tree/175d0b61c92a55d08ca9b349b77dfb245d7a1d2e" target="_blank" rel="noopener noreferrer">175d0b61c92a55d08ca9b349b77dfb245d7a1d2e</a></p>
+</div>
+
+        <div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2025-01-15</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/blog/">blog</a>,&nbsp;<a href="/tags/tinyrenderer/">tinyrenderer</a>,&nbsp;<a href="/tags/graphics/">graphics</a></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/tinyrenderer%E7%AC%94%E8%AE%B03%E7%A7%BB%E5%8A%A8%E6%91%84%E5%83%8F%E6%9C%BA/" class="prev" rel="prev" title="TinyRenderer笔记3：移动摄像机"><i class="fas fa-angle-left fa-fw"></i>TinyRenderer笔记3：移动摄像机</a></div>
+</div>
+<div id="comments"><div id="twikoo"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://twikoo.js.org/">Twikoo</a>.
+            </noscript></div></article></div>
+        </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">      <a href="https://www.travellings.cn/go.html" target="_blank" rel="noopener" title="开往-友链接力"><img src="https://www.travellings.cn/assets/logo.gif" alt="开往-友链接力" width="120"></a><a href="https://www.foreverblog.cn/go.html" target="_blank" > <img src="https://img.foreverblog.cn/wormhole_3.gif" alt="" style="width:auto;height:32px;" title="穿梭虫洞-随机访问十年之约友链博客"> </a>
+      </br><small>1KiritobkMPpaWBjTDHSoiP5icv8PEFNdR</small>
+      </br><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+      </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2020 - 2025</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank" rel="noopener noreferrer">kirito</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+            <div class="footer-line"></div>
+            <div class="footer-line">
+            </div>
+        </div></footer></div>
+
+    <div id="fixed-buttons"><a href="#back-to-top" id="back-to-top-button" class="fixed-button" title="回到顶部">
+            <i class="fas fa-arrow-up fa-fw"></i>
+        </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+            <i class="fas fa-comment fa-fw"></i>
+        </a>
+    </div><div class="assets"><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="/lib/katex/copy-tex.min.css">
+        <noscript><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"></noscript><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":30},"comment":{"twikoo":{"commentCount":true,"el":"#twikoo","envId":"https://comment-liard.vercel.app/","lang":"zh-cn"}},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"distance":null,"findAllMatches":null,"fuseIndexURL":"/index.json","highlightTag":"em","ignoreFieldNorm":null,"ignoreLocation":null,"isCaseSensitive":null,"location":null,"maxResultLength":10,"minMatchCharLength":null,"noResultsFound":"没有找到结果","snippetLength":50,"threshold":null,"type":"fuse","useExtendedSearch":null}};</script><script type="text/javascript" src="/lib/twikoo/twikoo.all.min.js" defer></script><script type="text/javascript" src="/js/twikoo.min.js" defer></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js" defer></script><script type="text/javascript" src="/lib/katex/auto-render.min.js" defer></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js" defer></script><script type="text/javascript" src="/lib/katex/mhchem.min.js" defer></script><script type="text/javascript" src="/js/katex.min.js" defer></script><script type="text/javascript" src="/js/theme.min.js" defer></script><script type="text/javascript">
+            window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());
+            gtag('config', 'G-ZKPP127E4F');
+        </script><script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id=G-ZKPP127E4F" async></script><script>
+			var _hmt = _hmt || [];
+			(function() {
+			  var hm = document.createElement("script");
+			  hm.src = "https://hm.baidu.com/hm.js?2004ef75aa13d757f75bf6f1f3add242";
+			  var s = document.getElementsByTagName("script")[0]; 
+			  s.parentNode.insertBefore(hm, s);
+			})();
+		</script><script>
+         
+         
+        var $cdnPrefix = "https://blog-1256556944.file.myqcloud.com";
+    </script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@2.1.3/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-backstretch@2.1.18/jquery.backstretch.min.js"></script>
+    <script type="text/javascript" src="/js/custom.js"></script>
+</div>
+</body>
+
+</html>
