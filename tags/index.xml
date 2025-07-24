@@ -1,0 +1,77 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>Tags - 标签 - kirito&#39;s blog</title>
+        <link>https://www.kirito.info/tags/</link>
+        <description>Tags - 标签 - kirito&#39;s blog</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Thu, 24 Jul 2025 02:01:41 &#43;0000</lastBuildDate><atom:link href="https://www.kirito.info/tags/" rel="self" type="application/rss+xml" /><item>
+    <title>Blog</title>
+    <link>https://www.kirito.info/tags/blog/</link>
+    <pubDate>Thu, 24 Jul 2025 02:01:41 &#43;0000</pubDate><author>
+        <name>kirito</name>
+    </author><guid>https://www.kirito.info/tags/blog/</guid>
+    <description><![CDATA[]]></description>
+</item><item>
+    <title>Graphics</title>
+    <link>https://www.kirito.info/tags/graphics/</link>
+    <pubDate>Thu, 24 Jul 2025 02:01:41 &#43;0000</pubDate><author>
+        <name>kirito</name>
+    </author><guid>https://www.kirito.info/tags/graphics/</guid>
+    <description><![CDATA[]]></description>
+</item><item>
+    <title>Tinyrenderer</title>
+    <link>https://www.kirito.info/tags/tinyrenderer/</link>
+    <pubDate>Thu, 24 Jul 2025 02:01:41 &#43;0000</pubDate><author>
+        <name>kirito</name>
+    </author><guid>https://www.kirito.info/tags/tinyrenderer/</guid>
+    <description><![CDATA[]]></description>
+</item><item>
+    <title>神经网络</title>
+    <link>https://www.kirito.info/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/</link>
+    <pubDate>Mon, 06 May 2024 11:12:24 &#43;0000</pubDate><author>
+        <name>kirito</name>
+    </author><guid>https://www.kirito.info/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/</guid>
+    <description><![CDATA[]]></description>
+</item><item>
+    <title>Damus</title>
+    <link>https://www.kirito.info/tags/damus/</link>
+    <pubDate>Sat, 04 Feb 2023 11:57:58 &#43;0800</pubDate><author>
+        <name>kirito</name>
+    </author><guid>https://www.kirito.info/tags/damus/</guid>
+    <description><![CDATA[]]></description>
+</item><item>
+    <title>Nostr</title>
+    <link>https://www.kirito.info/tags/nostr/</link>
+    <pubDate>Sat, 04 Feb 2023 11:57:58 &#43;0800</pubDate><author>
+        <name>kirito</name>
+    </author><guid>https://www.kirito.info/tags/nostr/</guid>
+    <description><![CDATA[]]></description>
+</item><item>
+    <title>Vercel</title>
+    <link>https://www.kirito.info/tags/vercel/</link>
+    <pubDate>Sat, 04 Feb 2023 11:57:58 &#43;0800</pubDate><author>
+        <name>kirito</name>
+    </author><guid>https://www.kirito.info/tags/vercel/</guid>
+    <description><![CDATA[]]></description>
+</item><item>
+    <title>Rust</title>
+    <link>https://www.kirito.info/tags/rust/</link>
+    <pubDate>Thu, 08 Dec 2022 12:04:54 &#43;0800</pubDate><author>
+        <name>kirito</name>
+    </author><guid>https://www.kirito.info/tags/rust/</guid>
+    <description><![CDATA[]]></description>
+</item><item>
+    <title>OpenGL</title>
+    <link>https://www.kirito.info/tags/opengl/</link>
+    <pubDate>Sun, 12 Dec 2021 14:40:51 &#43;0800</pubDate><author>
+        <name>kirito</name>
+    </author><guid>https://www.kirito.info/tags/opengl/</guid>
+    <description><![CDATA[]]></description>
+</item><item>
+    <title>Compiler</title>
+    <link>https://www.kirito.info/tags/compiler/</link>
+    <pubDate>Sun, 15 Aug 2021 11:09:34 &#43;0800</pubDate><author>
+        <name>kirito</name>
+    </author><guid>https://www.kirito.info/tags/compiler/</guid>
+    <description><![CDATA[]]></description>
+</item></channel>
+</rss>

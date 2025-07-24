@@ -1,0 +1,692 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>OpenGL - 标签 - kirito&#39;s blog</title>
+        <link>https://www.kirito.info/tags/opengl/</link>
+        <description>OpenGL - 标签 - kirito&#39;s blog</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sun, 12 Dec 2021 14:40:51 &#43;0800</lastBuildDate><atom:link href="https://www.kirito.info/tags/opengl/" rel="self" type="application/rss+xml" /><item>
+    <title>LearnOpenGL环境搭建</title>
+    <link>https://www.kirito.info/learn-opengl-env/</link>
+    <pubDate>Sun, 12 Dec 2021 14:40:51 &#43;0800</pubDate><author>
+        <name>kirito</name>
+    </author><guid>https://www.kirito.info/learn-opengl-env/</guid>
+    <description><![CDATA[<p>2020年2月春节期间我刷完过一遍<a href="https://learnopengl-cn.github.io/intro/" target="_blank" rel="noopener noreferrer">LearnOpenGL</a>，这是一个很好的入门openGL良心教程，一直没时间记录。最近打游戏荒废了好久，刚好换了电脑，重新装下环境顺便记录下LearnOpenGL的环境搭建。</p>
+<p>教程中使用的环境是Visual Studios + CMake + MSVC，我没用过也没安装过Visual Studio。所以我选择的环境是vscode + CMake + MinGW-w64，在linux直接gcc就行了，mac用gcc、clang都可以。这样的好处是在win、linux、mac上都能搭建这套环境。</p>
+<h2 id="工具安装" class="headerLink">
+    <a href="#%e5%b7%a5%e5%85%b7%e5%ae%89%e8%a3%85" class="header-mark"></a>工具安装</h2><p>我的系统是win，因为要打游戏（</p>
+<ul>
+<li><a href="https://code.visualstudio.com/" target="_blank" rel="noopener noreferrer">vscode</a> 就不多说了，用其他编辑器/IDE也行</li>
+</ul>
+<h3 id="mingw-w64" class="headerLink">
+    <a href="#mingw-w64" class="header-mark"></a>mingw-w64</h3><p>编译器肯定是必须的，我没用过msvc，只用过gcc，mingw-w64就是win上的gcc。</p>
+<ul>
+<li>
+<p>下载地址：<a href="https://www.mingw-w64.org/downloads/" target="_blank" rel="noopener noreferrer">https://www.mingw-w64.org/downloads/</a></p>
+</li>
+<li>
+<p>双击打开，选择native windows，x86_64，如果是32位系统则选i686。设置好安装目录</br>
+<img class="tw-inline" loading="lazy" src='https://blog-1256556944.file.myqcloud.com/public/mingw-install.png'     ></p>
+</li>
+<li>
+<p>直接点process安装</br>
+<img class="tw-inline" loading="lazy" src='https://blog-1256556944.file.myqcloud.com/public/mingw-install2.png'     ></p>
+</li>
+<li>
+<p>完成后，安装目录的bin文件夹里就有gcc了</br>
+<img class="tw-inline" loading="lazy" src='https://blog-1256556944.file.myqcloud.com/public/mingw-install3.png'     ></p>
+</li>
+<li>
+<p>最后吧bin目录添加到系统环境变量PATH里：此电脑-属性-高级系统设置-环境变量-PATH-添加<code>D:\app\mingw-w64\bin</code></p>
+</li>
+</ul>
+<h3 id="cmake" class="headerLink">
+    <a href="#cmake" class="header-mark"></a>cmake</h3><p>c++在编译的时候，需要引用各种头文件，链接这个那个的各种动态库、静态库。项目复杂的时候编译会很麻烦，cmake相当于一个构建系统，用不怎么简洁的语法，描述如何编译目标，帮我们生成makefile文件，自动编译项目。</p>
+<ul>
+<li>下载地址：<a href="https://cmake.org/download/" target="_blank" rel="noopener noreferrer">https://cmake.org/download/</a>，选择<code>.msi</code>安装</li>
+<li>一路点next，安装路径无所谓，记得加入PATH就行</br>
+<img class="tw-inline" loading="lazy" src='https://blog-1256556944.file.myqcloud.com/public/cmake-install.png'     ></li>
+<li>完事检查下安装成功</br>
+<img class="tw-inline" loading="lazy" src='https://blog-1256556944.file.myqcloud.com/public/cmake-install2.png'     ></li>
+</ul>
+<h2 id="依赖库安装" class="headerLink">
+    <a href="#%e4%be%9d%e8%b5%96%e5%ba%93%e5%ae%89%e8%a3%85" class="header-mark"></a>依赖库安装</h2><p>需要用到以下库：</p>
+<ul>
+<li>GLFW - 负责创建OpenGL上下文并显示窗口</li>
+<li>GLAD - 查找openGL函数指针</li>
+</ul>
+<h3 id="glfw" class="headerLink">
+    <a href="#glfw" class="header-mark"></a>GLFW</h3><blockquote>
+  <p>在画出出色的效果之前，首先要做的就是创建一个OpenGL上下文(Context)和一个用于显示的窗口。然而，这些操作在每个系统上都是不一样的，OpenGL有目的地从这些操作抽象(Abstract)出去。这意味着我们不得不自己处理创建窗口，定义OpenGL上下文以及处理用户输入。</p>
+
+</blockquote><p>GLFW就是帮我们在不同平台做这个事情</p>
+<ul>
+<li>获取源代码：<a href="www.glfw.org/download.html" rel="">www.glfw.org/download.html</a>，下载source package</li>
+<li>记得看看官方编译指南<a href="https://www.glfw.org/docs/latest/compile.html" target="_blank" rel="noopener noreferrer">https://www.glfw.org/docs/latest/compile.html</a></li>
+<li>解压后进入目录</br>
+<img class="tw-inline" loading="lazy" src='https://blog-1256556944.file.myqcloud.com/public/GLFW-install.png'     ></li>
+<li>在此目录执行<code>cmake -S . -B build -G &quot;MinGW Makefiles&quot; -DBUILD_SHARED_LIBS=ON</code>，其中<code>-S</code>指定源码所在目录，<code>-B</code>指定构建/输出目录，<code>-G</code>指定我们是给MinGW生产makefile，最后一个参数是告诉CMake，我们要动态库</br>
+<img class="tw-inline" loading="lazy" src='https://blog-1256556944.file.myqcloud.com/public/GLFW-install2.png'     ></li>
+<li>最后，进入<code>build/</code>目录，执行<code>mingw32-make.exe -j4</code>，<code>-j4</code>指定我们用4个cpu核心，注意由于我们装的mingw，所以<code>make</code>命令变成了<code>mingw32-make.exe</code></br>
+<img class="tw-inline" loading="lazy" src='https://blog-1256556944.file.myqcloud.com/public/GLFW-install3.png'     ></li>
+<li>完事后我们就得到了lib文件</br>
+<img class="tw-inline" loading="lazy" src='https://blog-1256556944.file.myqcloud.com/public/GLFW-install4.png'     ></li>
+<li>GLFW就编译完了，关键目录只有两个
+<ul>
+<li>头文件<code>path\to\glfw-3.3.6\include</code></li>
+<li>lib文件<code>path\to\glfw-3.3.6\build\src</code></li>
+</ul>
+</li>
+<li>在<code>path\to\glfw-3.3.6\build</code>目录执行<code>mingw32-make.exe install</code>(需要管理员权限)，文件会被安装到<code>C:/Program Files (x86)/GLFW/</code>下</li>
+<li>最后手动复制<code>glfw3.dll</code>到<code>C:\Windows\System32</code>下，不然运行程序会报找不到dll，其他库类似</li>
+</ul>
+<h3 id="glad" class="headerLink">
+    <a href="#glad" class="header-mark"></a>GLAD</h3><blockquote>
+  <p>OpenGL只是一个标准/规范，具体的实现是由驱动开发商针对特定显卡实现的。由于OpenGL驱动版本众多，它大多数函数的位置都无法在编译时确定下来，需要在运行时查询。</p>
+
+</blockquote><p>GLAD会帮我们找到函数位置</p>
+<ul>
+<li>使用在线服务定制我们需要的源代码：<a href="https://glad.dav1d.de/" target="_blank" rel="noopener noreferrer">https://glad.dav1d.de/</a></br>
+<img class="tw-inline" loading="lazy" src='https://blog-1256556944.file.myqcloud.com/public/GLAD.png'     ></li>
+<li>下载解压后，<code>include</code>目录里是俩头文件，<code>src</code>目录里面就一个<code>glad.c</code></li>
+<li>这个<code>glad.c</code>后面会直接和程序一起参与编译</li>
+</ul>
+<p>到这里就可以创建项目了</p>
+<h2 id="创建项目" class="headerLink">
+    <a href="#%e5%88%9b%e5%bb%ba%e9%a1%b9%e7%9b%ae" class="header-mark"></a>创建项目</h2><p>建立一个名为<code>LearnOpenGL</code>的文件夹作为项目根目录。整个项目结构是这样的：</p>
+<ul>
+<li>root(LearnOpenGL)
+<ul>
+<li><code>CMakeLists.txt</code> - cmake构建文件</li>
+<li>cmake/modules/ - 存放cmake自动查找库的find文件</li>
+<li>include/ - 存放头文件</li>
+<li>src/ - 存放源代码</li>
+</ul>
+</li>
+</ul>
+<p>可以参考：<a href="https://github.com/kirito41dd/LearnOpenGL" target="_blank" rel="noopener noreferrer">https://github.com/kirito41dd/LearnOpenGL</a></p>
+<h3 id="创建窗口" class="headerLink">
+    <a href="#%e5%88%9b%e5%bb%ba%e7%aa%97%e5%8f%a3" class="header-mark"></a>创建窗口</h3><p>先给出目录细节再详细说，所有参与文件如下：</p>
+<ul>
+<li><code>CMakeLists.txt</code> - cmake构建文件</li>
+<li>cmake/modules/ - 存放cmake自动查找库的find文件
+<ul>
+<li><code>FindGLFW3.cmake</code> - 负责自动查找glfw的头文件路径和lib路径</li>
+</ul>
+</li>
+<li>include/ - 存放头文件
+<ul>
+<li><code>glad.c</code> - 把安装GLAD时的文件复制过来</li>
+<li>glad/ - 安装GLAD时的头文件目录，复制过来
+<ul>
+<li><code>glad.h</code></li>
+</ul>
+</li>
+<li>KHR/ - 安装GLAD时的头文件目录，复制过来
+<ul>
+<li><code>khrplatform.h</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>src/ - 存放源代码
+<ul>
+<li>start/ - 存放LearnOpenGL教程第一部分源码
+<ul>
+<li><code>CMakeLists.txt</code> - 子目录构建文件</li>
+<li><code>HelloWindow.cpp</code> - 创建窗口示例程序</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="1主cmakeliststxt" class="headerLink">
+    <a href="#1%e4%b8%bbcmakeliststxt" class="header-mark"></a>1.主CMakeLists.txt</h4><p>根目录下的<code>CMakeLists.txt</code>文件是引导cmake的入口，主要做一些项目设置，和头文件，lib等查找工作，详细如下：</p>
+<div class="code-block highlight is-open show-line-numbers  tw-group tw-my-2">
+  <div class="
+    code-block-title 
+    
+    tw-flex 
+    tw-flex-row 
+    tw-justify-between 
+    tw-w-full tw-bg-bgColor-secondary
+    ">      
+    <button 
+      class="
+        tw-select-none 
+        tw-mx-2 
+        tw-block
+        group-[.is-open]:tw-rotate-90
+        tw-transition-[transform] 
+        tw-duration-500 
+        tw-ease-in-out
+        print:!tw-hidden"
+      disabled
+      aria-hidden="true"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z"/></svg></button>
+
+    <div class="code-block-title-bar tw-w-full">
+      <p class="tw-select-none !tw-my-1">cmake</p>
+    </div>
+    <div class="tw-flex">
+      <button 
+        class="
+          line-number-button
+          tw-select-none 
+          tw-mx-2 
+          tw-hidden 
+          group-[.is-open]:tw-block 
+          group-[.show-line-numbers]:tw-text-fgColor-link 
+          print:!tw-hidden" 
+        title="Toggle line numbers"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M61.77 401l17.5-20.15a19.92 19.92 0 0 0 5.07-14.19v-3.31C84.34 356 80.5 352 73 352H16a8 8 0 0 0-8 8v16a8 8 0 0 0 8 8h22.83a157.41 157.41 0 0 0-11 12.31l-5.61 7c-4 5.07-5.25 10.13-2.8 14.88l1.05 1.93c3 5.76 6.29 7.88 12.25 7.88h4.73c10.33 0 15.94 2.44 15.94 9.09 0 4.72-4.2 8.22-14.36 8.22a41.54 41.54 0 0 1-15.47-3.12c-6.49-3.88-11.74-3.5-15.6 3.12l-5.59 9.31c-3.72 6.13-3.19 11.72 2.63 15.94 7.71 4.69 20.38 9.44 37 9.44 34.16 0 48.5-22.75 48.5-44.12-.03-14.38-9.12-29.76-28.73-34.88zM496 224H176a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16zm0-160H176a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16V80a16 16 0 0 0-16-16zm0 320H176a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16zM16 160h64a8 8 0 0 0 8-8v-16a8 8 0 0 0-8-8H64V40a8 8 0 0 0-8-8H32a8 8 0 0 0-7.14 4.42l-8 16A8 8 0 0 0 24 64h8v64H16a8 8 0 0 0-8 8v16a8 8 0 0 0 8 8zm-3.91 160H80a8 8 0 0 0 8-8v-16a8 8 0 0 0-8-8H41.32c3.29-10.29 48.34-18.68 48.34-56.44 0-29.06-25-39.56-44.47-39.56-21.36 0-33.8 10-40.46 18.75-4.37 5.59-3 10.84 2.8 15.37l8.58 6.88c5.61 4.56 11 2.47 16.12-2.44a13.44 13.44 0 0 1 9.46-3.84c3.33 0 9.28 1.56 9.28 8.75C51 248.19 0 257.31 0 304.59v4C0 316 5.08 320 12.09 320z"/></svg></button>
+
+      <button 
+        class="
+          wrap-code-button
+          tw-select-none 
+          tw-mx-2 
+          tw-hidden 
+          group-[.is-open]:tw-block 
+          group-[.is-wrap]:tw-text-fgColor-link 
+          print:!tw-hidden" 
+        title="Toggle code wrap"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M16 132h416c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H16C7.163 60 0 67.163 0 76v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"/></svg></button>
+      
+      <button 
+        class="
+          copy-code-button
+          tw-select-none
+          tw-mx-2 
+          tw-hidden
+          group-[.is-open]:tw-block
+          hover:tw-text-fgColor-link 
+          print:!tw-hidden"
+        title="Copy code">
+          <span class="copy-icon tw-block"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M433.941 65.941l-51.882-51.882A48 48 0 0 0 348.118 0H176c-26.51 0-48 21.49-48 48v48H48c-26.51 0-48 21.49-48 48v320c0 26.51 21.49 48 48 48h224c26.51 0 48-21.49 48-48v-48h80c26.51 0 48-21.49 48-48V99.882a48 48 0 0 0-14.059-33.941zM266 464H54a6 6 0 0 1-6-6V150a6 6 0 0 1 6-6h74v224c0 26.51 21.49 48 48 48h96v42a6 6 0 0 1-6 6zm128-96H182a6 6 0 0 1-6-6V54a6 6 0 0 1 6-6h106v88c0 13.255 10.745 24 24 24h88v202a6 6 0 0 1-6 6zm6-256h-64V48h9.632c1.591 0 3.117.632 4.243 1.757l48.368 48.368a6 6 0 0 1 1.757 4.243V112z"/></svg></span>
+          <span class="check-icon tw-hidden"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M173.898 439.404l-166.4-166.4c-9.997-9.997-9.997-26.206 0-36.204l36.203-36.204c9.997-9.998 26.207-9.998 36.204 0L192 312.69 432.095 72.596c9.997-9.997 26.207-9.997 36.204 0l36.203 36.204c9.997 9.997 9.997 26.206 0 36.204l-294.4 294.401c-9.998 9.997-26.207 9.997-36.204-.001z"/></svg></span>
+      </button>
+        
+      <button 
+        class="
+          tw-select-none 
+          tw-mx-2 
+          tw-block 
+          group-[.is-open]:tw-hidden 
+          print:!tw-hidden" 
+        disabled
+        aria-hidden="true"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M328 256c0 39.8-32.2 72-72 72s-72-32.2-72-72 32.2-72 72-72 72 32.2 72 72zm104-72c-39.8 0-72 32.2-72 72s32.2 72 72 72 72-32.2 72-72-32.2-72-72-72zm-352 0c-39.8 0-72 32.2-72 72s32.2 72 72 72 72-32.2 72-72-32.2-72-72-72z"/></svg></button>
+    </div>
+  </div>
+  <pre style="counter-reset: codeblock;" class="tw-block tw-m-0 tw-p-0"><code 
+    id="codeblock-id-1" 
+    class="
+      chroma 
+      !tw-block 
+      tw-p-0
+      tw-m-0
+      tw-transition-[max-height] 
+      tw-duration-500 
+      tw-ease-in-out 
+      group-[.is-closed]:!tw-max-h-0 
+      group-[.is-wrap]:tw-text-wrap
+      tw-overflow-y-hidden
+      tw-overflow-x-auto
+      tw-scrollbar-thin
+      "><span class="line"><span class="cl"><span class="nb">cmake_minimum_required</span><span class="p">(</span><span class="s">VERSION</span> <span class="s">2.9</span><span class="p">)</span> <span class="c"># 指定cmake最小版本
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">project</span><span class="p">(</span><span class="s">learnopengl</span><span class="p">)</span> <span class="c"># 设置项目名
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="c"># 依赖环境
+</span></span></span><span class="line"><span class="cl"><span class="c"># ------------------------------------------------------------------------------
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="nb">set</span><span class="p">(</span><span class="s">CMAKE_MODULE_PATH</span> <span class="o">${</span><span class="nv">CMAKE_MODULE_PATH</span><span class="o">}</span> <span class="s2">&#34;${CMAKE_SOURCE_DIR}/cmake/modules/&#34;</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">find_package</span><span class="p">(</span><span class="s">GLFW3</span> <span class="s">REQUIRED</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">include_directories</span><span class="p">(</span><span class="o">${</span><span class="nv">GLFW3_INCLUDE_DIR</span><span class="o">}</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">add_library</span><span class="p">(</span><span class="s">glad</span> <span class="s">include/glad.c</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="c"># ------------------------------------------------------------------------------
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">include_directories</span><span class="p">(</span><span class="s">./include</span><span class="p">)</span> <span class="c"># 添加头文件搜索目录
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="c"># 子目录
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="nb">add_subdirectory</span><span class="p">(</span><span class="s">src/start</span><span class="p">)</span> <span class="err">#</span> <span class="err">子目录也会有CMakeLists.txt文件，环境是相通的</span></span></span></code></pre>
+</div>
+<p>主要来看依赖环境部分：</p>
+<p><code>set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} &quot;${CMAKE_SOURCE_DIR}/cmake/modules/&quot;)</code> 这句是往<code>CMAKE_MODULE_PATH</code>里追加一个目录，
+这些目录里存放着各种find文件，命名为<code>Find${LIB}.cmake</code></p>
+<p><code>find_package(GLFW3 REQUIRED)</code>表示调用<code>FindGLFW3.cmake</code>查找GLFW3的头文件和lib，而且是必须找到，否则构建终止。
+如果找到了，会设置<code>GLFW3_XXX</code>等一系列变量</p>
+<p><code>include_directories(${GLFW3_INCLUDE_DIR})</code>，find执行成功才会执行这句，变量<code>GLFW3_INCLUDE_DIR</code>里存放着GLFW头文件的路径，然后添加头文件搜索目录</p>
+<p><code>add_library(glad include/glad.c)</code>声明一个名为<code>glad</code>的lib，后面可以指定链接它，<code>glad.c</code>就会参与编译</p>
+<h4 id="2findglfwcmake" class="headerLink">
+    <a href="#2findglfwcmake" class="header-mark"></a>2.FindGLFW.cmake</h4><p>看下项目里GLFW的搜索文件<code>cmake/modules/FindGLFW3.cmake</code>，这个文件可以在网上找到很多例子，cmake本身也会预装很多find文件。</p>
+<div class="code-block highlight is-closed show-line-numbers  tw-group tw-my-2">
+  <div class="
+    code-block-title 
+    
+    tw-flex 
+    tw-flex-row 
+    tw-justify-between 
+    tw-w-full tw-bg-bgColor-secondary
+    ">      
+    <button 
+      class="
+        tw-select-none 
+        tw-mx-2 
+        tw-block
+        group-[.is-open]:tw-rotate-90
+        tw-transition-[transform] 
+        tw-duration-500 
+        tw-ease-in-out
+        print:!tw-hidden"
+      disabled
+      aria-hidden="true"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z"/></svg></button>
+
+    <div class="code-block-title-bar tw-w-full">
+      <p class="tw-select-none !tw-my-1">cmake</p>
+    </div>
+    <div class="tw-flex">
+      <button 
+        class="
+          line-number-button
+          tw-select-none 
+          tw-mx-2 
+          tw-hidden 
+          group-[.is-open]:tw-block 
+          group-[.show-line-numbers]:tw-text-fgColor-link 
+          print:!tw-hidden" 
+        title="Toggle line numbers"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M61.77 401l17.5-20.15a19.92 19.92 0 0 0 5.07-14.19v-3.31C84.34 356 80.5 352 73 352H16a8 8 0 0 0-8 8v16a8 8 0 0 0 8 8h22.83a157.41 157.41 0 0 0-11 12.31l-5.61 7c-4 5.07-5.25 10.13-2.8 14.88l1.05 1.93c3 5.76 6.29 7.88 12.25 7.88h4.73c10.33 0 15.94 2.44 15.94 9.09 0 4.72-4.2 8.22-14.36 8.22a41.54 41.54 0 0 1-15.47-3.12c-6.49-3.88-11.74-3.5-15.6 3.12l-5.59 9.31c-3.72 6.13-3.19 11.72 2.63 15.94 7.71 4.69 20.38 9.44 37 9.44 34.16 0 48.5-22.75 48.5-44.12-.03-14.38-9.12-29.76-28.73-34.88zM496 224H176a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16zm0-160H176a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16V80a16 16 0 0 0-16-16zm0 320H176a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16zM16 160h64a8 8 0 0 0 8-8v-16a8 8 0 0 0-8-8H64V40a8 8 0 0 0-8-8H32a8 8 0 0 0-7.14 4.42l-8 16A8 8 0 0 0 24 64h8v64H16a8 8 0 0 0-8 8v16a8 8 0 0 0 8 8zm-3.91 160H80a8 8 0 0 0 8-8v-16a8 8 0 0 0-8-8H41.32c3.29-10.29 48.34-18.68 48.34-56.44 0-29.06-25-39.56-44.47-39.56-21.36 0-33.8 10-40.46 18.75-4.37 5.59-3 10.84 2.8 15.37l8.58 6.88c5.61 4.56 11 2.47 16.12-2.44a13.44 13.44 0 0 1 9.46-3.84c3.33 0 9.28 1.56 9.28 8.75C51 248.19 0 257.31 0 304.59v4C0 316 5.08 320 12.09 320z"/></svg></button>
+
+      <button 
+        class="
+          wrap-code-button
+          tw-select-none 
+          tw-mx-2 
+          tw-hidden 
+          group-[.is-open]:tw-block 
+          group-[.is-wrap]:tw-text-fgColor-link 
+          print:!tw-hidden" 
+        title="Toggle code wrap"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M16 132h416c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H16C7.163 60 0 67.163 0 76v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"/></svg></button>
+      
+      <button 
+        class="
+          copy-code-button
+          tw-select-none
+          tw-mx-2 
+          tw-hidden
+          group-[.is-open]:tw-block
+          hover:tw-text-fgColor-link 
+          print:!tw-hidden"
+        title="Copy code">
+          <span class="copy-icon tw-block"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M433.941 65.941l-51.882-51.882A48 48 0 0 0 348.118 0H176c-26.51 0-48 21.49-48 48v48H48c-26.51 0-48 21.49-48 48v320c0 26.51 21.49 48 48 48h224c26.51 0 48-21.49 48-48v-48h80c26.51 0 48-21.49 48-48V99.882a48 48 0 0 0-14.059-33.941zM266 464H54a6 6 0 0 1-6-6V150a6 6 0 0 1 6-6h74v224c0 26.51 21.49 48 48 48h96v42a6 6 0 0 1-6 6zm128-96H182a6 6 0 0 1-6-6V54a6 6 0 0 1 6-6h106v88c0 13.255 10.745 24 24 24h88v202a6 6 0 0 1-6 6zm6-256h-64V48h9.632c1.591 0 3.117.632 4.243 1.757l48.368 48.368a6 6 0 0 1 1.757 4.243V112z"/></svg></span>
+          <span class="check-icon tw-hidden"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M173.898 439.404l-166.4-166.4c-9.997-9.997-9.997-26.206 0-36.204l36.203-36.204c9.997-9.998 26.207-9.998 36.204 0L192 312.69 432.095 72.596c9.997-9.997 26.207-9.997 36.204 0l36.203 36.204c9.997 9.997 9.997 26.206 0 36.204l-294.4 294.401c-9.998 9.997-26.207 9.997-36.204-.001z"/></svg></span>
+      </button>
+        
+      <button 
+        class="
+          tw-select-none 
+          tw-mx-2 
+          tw-block 
+          group-[.is-open]:tw-hidden 
+          print:!tw-hidden" 
+        disabled
+        aria-hidden="true"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M328 256c0 39.8-32.2 72-72 72s-72-32.2-72-72 32.2-72 72-72 72 32.2 72 72zm104-72c-39.8 0-72 32.2-72 72s32.2 72 72 72 72-32.2 72-72-32.2-72-72-72zm-352 0c-39.8 0-72 32.2-72 72s32.2 72 72 72 72-32.2 72-72-32.2-72-72-72z"/></svg></button>
+    </div>
+  </div>
+  <pre style="counter-reset: codeblock;" class="tw-block tw-m-0 tw-p-0"><code 
+    id="codeblock-id-2" 
+    class="
+      chroma 
+      !tw-block 
+      tw-p-0
+      tw-m-0
+      tw-transition-[max-height] 
+      tw-duration-500 
+      tw-ease-in-out 
+      group-[.is-closed]:!tw-max-h-0 
+      group-[.is-wrap]:tw-text-wrap
+      tw-overflow-y-hidden
+      tw-overflow-x-auto
+      tw-scrollbar-thin
+      "><span class="line"><span class="cl"><span class="nb">set</span><span class="p">(</span> <span class="s">_glfw3_HEADER_SEARCH_DIRS</span>
+</span></span><span class="line"><span class="cl"><span class="s2">&#34;/usr/include&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="s2">&#34;/usr/local/include&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="s2">&#34;${CMAKE_SOURCE_DIR}/includes&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="s2">&#34;C:/Program Files (x86)/glfw/include&#34;</span> 
+</span></span><span class="line"><span class="cl"><span class="s2">&#34;C:/Program Files (x86)/GLFW/include&#34;</span><span class="p">)</span> <span class="c"># 注意这里，就是我们安装的目录
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="nb">set</span><span class="p">(</span> <span class="s">_glfw3_LIB_SEARCH_DIRS</span>
+</span></span><span class="line"><span class="cl"><span class="s2">&#34;/usr/lib&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="s2">&#34;/usr/local/lib&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="s2">&#34;${CMAKE_SOURCE_DIR}/lib&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="s2">&#34;C:/Program Files (x86)/glfw/lib-msvc110&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="s2">&#34;C:/Program Files (x86)/GLFW/lib&#34;</span><span class="p">)</span> <span class="c"># 注意这里
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="c"># Check environment for root search directory
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="nb">set</span><span class="p">(</span> <span class="s">_glfw3_ENV_ROOT</span> <span class="o">$ENV{</span><span class="nv">GLFW3_ROOT</span><span class="o">}</span> <span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">if</span><span class="p">(</span> <span class="s">NOT</span> <span class="s">GLFW3_ROOT</span> <span class="s">AND</span> <span class="s">_glfw3_ENV_ROOT</span> <span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>	<span class="nb">set</span><span class="p">(</span><span class="s">GLFW3_ROOT</span> <span class="o">${</span><span class="nv">_glfw3_ENV_ROOT</span><span class="o">}</span> <span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">endif</span><span class="p">()</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="c"># Put user specified location at beginning of search
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="nb">if</span><span class="p">(</span> <span class="s">GLFW3_ROOT</span> <span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>	<span class="nb">list</span><span class="p">(</span> <span class="s">INSERT</span> <span class="s">_glfw3_HEADER_SEARCH_DIRS</span> <span class="s">0</span> <span class="s2">&#34;${GLFW3_ROOT}/include&#34;</span> <span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>	<span class="nb">list</span><span class="p">(</span> <span class="s">INSERT</span> <span class="s">_glfw3_LIB_SEARCH_DIRS</span> <span class="s">0</span> <span class="s2">&#34;${GLFW3_ROOT}/lib&#34;</span> <span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">endif</span><span class="p">()</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="c"># Search for the header
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="nb">FIND_PATH</span><span class="p">(</span><span class="s">GLFW3_INCLUDE_DIR</span> <span class="s2">&#34;GLFW/glfw3.h&#34;</span> <span class="c"># 头文件目录的变量
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="s">PATHS</span> <span class="o">${</span><span class="nv">_glfw3_HEADER_SEARCH_DIRS</span><span class="o">}</span> <span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="c"># Search for the library
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="nb">FIND_LIBRARY</span><span class="p">(</span><span class="s">GLFW3_LIBRARY</span> <span class="s">NAMES</span> <span class="s">glfw3</span> <span class="s">glfw</span> <span class="s">glfw3dll</span>
+</span></span><span class="line"><span class="cl"><span class="s">PATHS</span> <span class="o">${</span><span class="nv">_glfw3_LIB_SEARCH_DIRS</span><span class="o">}</span> <span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">INCLUDE</span><span class="p">(</span><span class="s">FindPackageHandleStandardArgs</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">FIND_PACKAGE_HANDLE_STANDARD_ARGS</span><span class="p">(</span><span class="s">GLFW3</span> <span class="s">DEFAULT_MSG</span>
+</span></span><span class="line"><span class="cl"><span class="s">GLFW3_LIBRARY</span> <span class="s">GLFW3_INCLUDE_DIR</span><span class="p">)</span> <span class="c"># 注意这里
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">IF</span><span class="p">(</span><span class="s">GLFW3_FOUND</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>	<span class="nb">IF</span><span class="p">(</span><span class="s">NOT</span> <span class="s">GLFW3_FIND_QUIETLY</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>	<span class="nb">MESSAGE</span><span class="p">(</span><span class="s">STATUS</span> <span class="s2">&#34;Found ASSIMP: ${GLFW3_LIBRARY}&#34;</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>	<span class="nb">ENDIF</span><span class="p">(</span><span class="s">NOT</span> <span class="s">GLFW3_FIND_QUIETLY</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">ELSE</span><span class="p">(</span><span class="s">GLFW3_FOUND</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>	<span class="nb">IF</span><span class="p">(</span><span class="s">GLFW3_FIND_REQUIRED</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>	<span class="nb">MESSAGE</span><span class="p">(</span><span class="s">FATAL_ERROR</span> <span class="s2">&#34;Could not find GLFW3&#34;</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>	<span class="nb">ENDIF</span><span class="p">(</span><span class="s">GLFW3_FIND_REQUIRED</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">ENDIF</span><span class="p">(</span><span class="s">GLFW3_FOUND</span><span class="p">)</span></span></span></code></pre>
+</div>
+<h4 id="3创建窗口" class="headerLink">
+    <a href="#3%e5%88%9b%e5%bb%ba%e7%aa%97%e5%8f%a3" class="header-mark"></a>3.创建窗口</h4><p>这里和LearnOpenGL里教的一样了就，<code>src/start/HelloWindow.cpp</code></p>
+<div class="code-block highlight is-closed show-line-numbers  tw-group tw-my-2">
+  <div class="
+    code-block-title 
+    
+    tw-flex 
+    tw-flex-row 
+    tw-justify-between 
+    tw-w-full tw-bg-bgColor-secondary
+    ">      
+    <button 
+      class="
+        tw-select-none 
+        tw-mx-2 
+        tw-block
+        group-[.is-open]:tw-rotate-90
+        tw-transition-[transform] 
+        tw-duration-500 
+        tw-ease-in-out
+        print:!tw-hidden"
+      disabled
+      aria-hidden="true"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z"/></svg></button>
+
+    <div class="code-block-title-bar tw-w-full">
+      <p class="tw-select-none !tw-my-1">cpp</p>
+    </div>
+    <div class="tw-flex">
+      <button 
+        class="
+          line-number-button
+          tw-select-none 
+          tw-mx-2 
+          tw-hidden 
+          group-[.is-open]:tw-block 
+          group-[.show-line-numbers]:tw-text-fgColor-link 
+          print:!tw-hidden" 
+        title="Toggle line numbers"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M61.77 401l17.5-20.15a19.92 19.92 0 0 0 5.07-14.19v-3.31C84.34 356 80.5 352 73 352H16a8 8 0 0 0-8 8v16a8 8 0 0 0 8 8h22.83a157.41 157.41 0 0 0-11 12.31l-5.61 7c-4 5.07-5.25 10.13-2.8 14.88l1.05 1.93c3 5.76 6.29 7.88 12.25 7.88h4.73c10.33 0 15.94 2.44 15.94 9.09 0 4.72-4.2 8.22-14.36 8.22a41.54 41.54 0 0 1-15.47-3.12c-6.49-3.88-11.74-3.5-15.6 3.12l-5.59 9.31c-3.72 6.13-3.19 11.72 2.63 15.94 7.71 4.69 20.38 9.44 37 9.44 34.16 0 48.5-22.75 48.5-44.12-.03-14.38-9.12-29.76-28.73-34.88zM496 224H176a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16zm0-160H176a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16V80a16 16 0 0 0-16-16zm0 320H176a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16zM16 160h64a8 8 0 0 0 8-8v-16a8 8 0 0 0-8-8H64V40a8 8 0 0 0-8-8H32a8 8 0 0 0-7.14 4.42l-8 16A8 8 0 0 0 24 64h8v64H16a8 8 0 0 0-8 8v16a8 8 0 0 0 8 8zm-3.91 160H80a8 8 0 0 0 8-8v-16a8 8 0 0 0-8-8H41.32c3.29-10.29 48.34-18.68 48.34-56.44 0-29.06-25-39.56-44.47-39.56-21.36 0-33.8 10-40.46 18.75-4.37 5.59-3 10.84 2.8 15.37l8.58 6.88c5.61 4.56 11 2.47 16.12-2.44a13.44 13.44 0 0 1 9.46-3.84c3.33 0 9.28 1.56 9.28 8.75C51 248.19 0 257.31 0 304.59v4C0 316 5.08 320 12.09 320z"/></svg></button>
+
+      <button 
+        class="
+          wrap-code-button
+          tw-select-none 
+          tw-mx-2 
+          tw-hidden 
+          group-[.is-open]:tw-block 
+          group-[.is-wrap]:tw-text-fgColor-link 
+          print:!tw-hidden" 
+        title="Toggle code wrap"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M16 132h416c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H16C7.163 60 0 67.163 0 76v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"/></svg></button>
+      
+      <button 
+        class="
+          copy-code-button
+          tw-select-none
+          tw-mx-2 
+          tw-hidden
+          group-[.is-open]:tw-block
+          hover:tw-text-fgColor-link 
+          print:!tw-hidden"
+        title="Copy code">
+          <span class="copy-icon tw-block"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M433.941 65.941l-51.882-51.882A48 48 0 0 0 348.118 0H176c-26.51 0-48 21.49-48 48v48H48c-26.51 0-48 21.49-48 48v320c0 26.51 21.49 48 48 48h224c26.51 0 48-21.49 48-48v-48h80c26.51 0 48-21.49 48-48V99.882a48 48 0 0 0-14.059-33.941zM266 464H54a6 6 0 0 1-6-6V150a6 6 0 0 1 6-6h74v224c0 26.51 21.49 48 48 48h96v42a6 6 0 0 1-6 6zm128-96H182a6 6 0 0 1-6-6V54a6 6 0 0 1 6-6h106v88c0 13.255 10.745 24 24 24h88v202a6 6 0 0 1-6 6zm6-256h-64V48h9.632c1.591 0 3.117.632 4.243 1.757l48.368 48.368a6 6 0 0 1 1.757 4.243V112z"/></svg></span>
+          <span class="check-icon tw-hidden"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M173.898 439.404l-166.4-166.4c-9.997-9.997-9.997-26.206 0-36.204l36.203-36.204c9.997-9.998 26.207-9.998 36.204 0L192 312.69 432.095 72.596c9.997-9.997 26.207-9.997 36.204 0l36.203 36.204c9.997 9.997 9.997 26.206 0 36.204l-294.4 294.401c-9.998 9.997-26.207 9.997-36.204-.001z"/></svg></span>
+      </button>
+        
+      <button 
+        class="
+          tw-select-none 
+          tw-mx-2 
+          tw-block 
+          group-[.is-open]:tw-hidden 
+          print:!tw-hidden" 
+        disabled
+        aria-hidden="true"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M328 256c0 39.8-32.2 72-72 72s-72-32.2-72-72 32.2-72 72-72 72 32.2 72 72zm104-72c-39.8 0-72 32.2-72 72s32.2 72 72 72 72-32.2 72-72-32.2-72-72-72zm-352 0c-39.8 0-72 32.2-72 72s32.2 72 72 72 72-32.2 72-72-32.2-72-72-72z"/></svg></button>
+    </div>
+  </div>
+  <pre style="counter-reset: codeblock;" class="tw-block tw-m-0 tw-p-0"><code 
+    id="codeblock-id-3" 
+    class="
+      chroma 
+      !tw-block 
+      tw-p-0
+      tw-m-0
+      tw-transition-[max-height] 
+      tw-duration-500 
+      tw-ease-in-out 
+      group-[.is-closed]:!tw-max-h-0 
+      group-[.is-wrap]:tw-text-wrap
+      tw-overflow-y-hidden
+      tw-overflow-x-auto
+      tw-scrollbar-thin
+      "><span class="line"><span class="cl"><span class="c1">// 你好，窗口
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;glad/glad.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;GLFW/glfw3.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">framebuffer_size_callback</span><span class="p">(</span><span class="n">GLFWwindow</span><span class="o">*</span> <span class="n">window</span><span class="p">,</span> <span class="kt">int</span> <span class="n">width</span><span class="p">,</span> <span class="kt">int</span> <span class="n">height</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">processInput</span><span class="p">(</span><span class="n">GLFWwindow</span> <span class="o">*</span><span class="n">window</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;hellow&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">glfwInit</span><span class="p">();</span> <span class="c1">// 初始化库
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">glfwWindowHint</span><span class="p">(</span><span class="n">GLFW_CONTEXT_VERSION_MAJOR</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span> <span class="c1">// 配置主版本号
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">glfwWindowHint</span><span class="p">(</span><span class="n">GLFW_CONTEXT_VERSION_MINOR</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span> <span class="c1">// 配置次版本号
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">glfwWindowHint</span><span class="p">(</span><span class="n">GLFW_OPENGL_PROFILE</span><span class="p">,</span> <span class="n">GLFW_OPENGL_CORE_PROFILE</span><span class="p">);</span> <span class="c1">// 使用核心模式
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // Mac OS X 使用
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 创建一个窗口
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">GLFWwindow</span><span class="o">*</span> <span class="n">window</span> <span class="o">=</span> <span class="n">glfwCreateWindow</span><span class="p">(</span><span class="mi">800</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span> <span class="s">&#34;LearnOpenGL&#34;</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">window</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Failed to create GLFW window&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">glfwTerminate</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">glfwMakeContextCurrent</span><span class="p">(</span><span class="n">window</span><span class="p">);</span> <span class="c1">// 设置为当前上下文
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// glad
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// GLAD是用来管理OpenGL的函数指针的，所以在调用任何OpenGL的函数之前我们需要初始化GLAD。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">gladLoadGLLoader</span><span class="p">((</span><span class="n">GLADloadproc</span><span class="p">)</span><span class="n">glfwGetProcAddress</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&#34;Failed to initialize GLAD&#34;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 设置窗口的维度
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// glViewport函数前两个参数控制窗口左下角的位置。第三个和第四个参数控制渲染窗口的宽度和高度（像素）。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">glViewport</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">800</span><span class="p">,</span> <span class="mi">600</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 设置一个回调，当用户改变窗口的大小的时候，视口也应该被调整。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">glfwSetFramebufferSizeCallback</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">framebuffer_size_callback</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 渲染循环 render loop
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">while</span><span class="p">(</span><span class="o">!</span><span class="n">glfwWindowShouldClose</span><span class="p">(</span><span class="n">window</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">processInput</span><span class="p">(</span><span class="n">window</span><span class="p">);</span> <span class="c1">// 处理输入
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">        <span class="n">glClearColor</span><span class="p">(</span><span class="mf">0.2f</span><span class="p">,</span> <span class="mf">0.3f</span><span class="p">,</span> <span class="mf">0.3f</span><span class="p">,</span> <span class="mf">1.0f</span><span class="p">);</span> <span class="c1">// 设置清空屏幕所用的颜色
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">glClear</span><span class="p">(</span><span class="n">GL_COLOR_BUFFER_BIT</span><span class="p">);</span> <span class="c1">// 清除颜色缓冲之后，整个颜色缓冲都会被填充为glClearColor里所设置的颜色
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">        <span class="n">glfwSwapBuffers</span><span class="p">(</span><span class="n">window</span><span class="p">);</span> <span class="c1">// 交换颜色缓冲（它是一个储存着GLFW窗口每一个像素颜色值的大缓冲）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">glfwPollEvents</span><span class="p">();</span> <span class="c1">// 函数检查有没有触发什么事件（比如键盘输入、鼠标移动等）、更新窗口状态，并调用对应的回调函数（可以通过回调方法手动设置）。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">// 释放之前分配的资源
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">glfwTerminate</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">framebuffer_size_callback</span><span class="p">(</span><span class="n">GLFWwindow</span><span class="o">*</span> <span class="n">window</span><span class="p">,</span> <span class="kt">int</span> <span class="n">width</span><span class="p">,</span> <span class="kt">int</span> <span class="n">height</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">glViewport</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">processInput</span><span class="p">(</span><span class="n">GLFWwindow</span> <span class="o">*</span><span class="n">window</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 如果按下 esc ， 窗口在下次循环将会退出
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span><span class="p">(</span><span class="n">glfwGetKey</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">GLFW_KEY_ESCAPE</span><span class="p">)</span> <span class="o">==</span> <span class="n">GLFW_PRESS</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">glfwSetWindowShouldClose</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="nb">true</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre>
+</div>
+<h4 id="4子cmakeliststxt" class="headerLink">
+    <a href="#4%e5%ad%90cmakeliststxt" class="header-mark"></a>4.子CMakeLists.txt</h4><p>最后来写下<code>src/start</code>目录里的<code>CMakeLists.txt</code>，来告诉cmake如何编译上面的cpp文件:</p>
+<div class="code-block highlight is-open show-line-numbers  tw-group tw-my-2">
+  <div class="
+    code-block-title 
+    
+    tw-flex 
+    tw-flex-row 
+    tw-justify-between 
+    tw-w-full tw-bg-bgColor-secondary
+    ">      
+    <button 
+      class="
+        tw-select-none 
+        tw-mx-2 
+        tw-block
+        group-[.is-open]:tw-rotate-90
+        tw-transition-[transform] 
+        tw-duration-500 
+        tw-ease-in-out
+        print:!tw-hidden"
+      disabled
+      aria-hidden="true"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z"/></svg></button>
+
+    <div class="code-block-title-bar tw-w-full">
+      <p class="tw-select-none !tw-my-1">cmake</p>
+    </div>
+    <div class="tw-flex">
+      <button 
+        class="
+          line-number-button
+          tw-select-none 
+          tw-mx-2 
+          tw-hidden 
+          group-[.is-open]:tw-block 
+          group-[.show-line-numbers]:tw-text-fgColor-link 
+          print:!tw-hidden" 
+        title="Toggle line numbers"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M61.77 401l17.5-20.15a19.92 19.92 0 0 0 5.07-14.19v-3.31C84.34 356 80.5 352 73 352H16a8 8 0 0 0-8 8v16a8 8 0 0 0 8 8h22.83a157.41 157.41 0 0 0-11 12.31l-5.61 7c-4 5.07-5.25 10.13-2.8 14.88l1.05 1.93c3 5.76 6.29 7.88 12.25 7.88h4.73c10.33 0 15.94 2.44 15.94 9.09 0 4.72-4.2 8.22-14.36 8.22a41.54 41.54 0 0 1-15.47-3.12c-6.49-3.88-11.74-3.5-15.6 3.12l-5.59 9.31c-3.72 6.13-3.19 11.72 2.63 15.94 7.71 4.69 20.38 9.44 37 9.44 34.16 0 48.5-22.75 48.5-44.12-.03-14.38-9.12-29.76-28.73-34.88zM496 224H176a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16zm0-160H176a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16V80a16 16 0 0 0-16-16zm0 320H176a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16zM16 160h64a8 8 0 0 0 8-8v-16a8 8 0 0 0-8-8H64V40a8 8 0 0 0-8-8H32a8 8 0 0 0-7.14 4.42l-8 16A8 8 0 0 0 24 64h8v64H16a8 8 0 0 0-8 8v16a8 8 0 0 0 8 8zm-3.91 160H80a8 8 0 0 0 8-8v-16a8 8 0 0 0-8-8H41.32c3.29-10.29 48.34-18.68 48.34-56.44 0-29.06-25-39.56-44.47-39.56-21.36 0-33.8 10-40.46 18.75-4.37 5.59-3 10.84 2.8 15.37l8.58 6.88c5.61 4.56 11 2.47 16.12-2.44a13.44 13.44 0 0 1 9.46-3.84c3.33 0 9.28 1.56 9.28 8.75C51 248.19 0 257.31 0 304.59v4C0 316 5.08 320 12.09 320z"/></svg></button>
+
+      <button 
+        class="
+          wrap-code-button
+          tw-select-none 
+          tw-mx-2 
+          tw-hidden 
+          group-[.is-open]:tw-block 
+          group-[.is-wrap]:tw-text-fgColor-link 
+          print:!tw-hidden" 
+        title="Toggle code wrap"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M16 132h416c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H16C7.163 60 0 67.163 0 76v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"/></svg></button>
+      
+      <button 
+        class="
+          copy-code-button
+          tw-select-none
+          tw-mx-2 
+          tw-hidden
+          group-[.is-open]:tw-block
+          hover:tw-text-fgColor-link 
+          print:!tw-hidden"
+        title="Copy code">
+          <span class="copy-icon tw-block"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M433.941 65.941l-51.882-51.882A48 48 0 0 0 348.118 0H176c-26.51 0-48 21.49-48 48v48H48c-26.51 0-48 21.49-48 48v320c0 26.51 21.49 48 48 48h224c26.51 0 48-21.49 48-48v-48h80c26.51 0 48-21.49 48-48V99.882a48 48 0 0 0-14.059-33.941zM266 464H54a6 6 0 0 1-6-6V150a6 6 0 0 1 6-6h74v224c0 26.51 21.49 48 48 48h96v42a6 6 0 0 1-6 6zm128-96H182a6 6 0 0 1-6-6V54a6 6 0 0 1 6-6h106v88c0 13.255 10.745 24 24 24h88v202a6 6 0 0 1-6 6zm6-256h-64V48h9.632c1.591 0 3.117.632 4.243 1.757l48.368 48.368a6 6 0 0 1 1.757 4.243V112z"/></svg></span>
+          <span class="check-icon tw-hidden"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M173.898 439.404l-166.4-166.4c-9.997-9.997-9.997-26.206 0-36.204l36.203-36.204c9.997-9.998 26.207-9.998 36.204 0L192 312.69 432.095 72.596c9.997-9.997 26.207-9.997 36.204 0l36.203 36.204c9.997 9.997 9.997 26.206 0 36.204l-294.4 294.401c-9.998 9.997-26.207 9.997-36.204-.001z"/></svg></span>
+      </button>
+        
+      <button 
+        class="
+          tw-select-none 
+          tw-mx-2 
+          tw-block 
+          group-[.is-open]:tw-hidden 
+          print:!tw-hidden" 
+        disabled
+        aria-hidden="true"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M328 256c0 39.8-32.2 72-72 72s-72-32.2-72-72 32.2-72 72-72 72 32.2 72 72zm104-72c-39.8 0-72 32.2-72 72s32.2 72 72 72 72-32.2 72-72-32.2-72-72-72zm-352 0c-39.8 0-72 32.2-72 72s32.2 72 72 72 72-32.2 72-72-32.2-72-72-72z"/></svg></button>
+    </div>
+  </div>
+  <pre style="counter-reset: codeblock;" class="tw-block tw-m-0 tw-p-0"><code 
+    id="codeblock-id-4" 
+    class="
+      chroma 
+      !tw-block 
+      tw-p-0
+      tw-m-0
+      tw-transition-[max-height] 
+      tw-duration-500 
+      tw-ease-in-out 
+      group-[.is-closed]:!tw-max-h-0 
+      group-[.is-wrap]:tw-text-wrap
+      tw-overflow-y-hidden
+      tw-overflow-x-auto
+      tw-scrollbar-thin
+      "><span class="line"><span class="cl"><span class="c"># 你好，窗口
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="nb">add_executable</span><span class="p">(</span><span class="s">HelloWindow</span> <span class="s">HelloWindow.cpp</span><span class="p">)</span> <span class="c"># 添加可执行程序
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="nb">target_link_libraries</span><span class="p">(</span><span class="s">HelloWindow</span> <span class="o">${</span><span class="nv">GLFW3_LIBRARY</span><span class="o">}</span> <span class="s">glad</span><span class="p">)</span> <span class="err">#</span> <span class="err">链接lib</span> <span class="err">glfw</span> <span class="err">glad.c</span></span></span></code></pre>
+</div>
+<h4 id="5编译" class="headerLink">
+    <a href="#5%e7%bc%96%e8%af%91" class="header-mark"></a>5.编译</h4><p>回到项目根目录执行：<code>cmake -S . -B build/ -G&quot;MinGW Makefiles&quot;</code></p>
+<p>进入build目录执行：<code>mingw32-make.exe</code></p>
+<p>编译结束后，在<code>build/src/start/</code>目录里能看到名为<code>HelloWindow.exe</code>的可执行程序，恭喜</p>
+<p><img class="tw-inline" loading="lazy" src='https://blog-1256556944.file.myqcloud.com/public/HelloWindow.png'     ></p>
+<p>三角形也可以画出来了，具体跟着教程走吧</p>
+<p><img class="tw-inline" loading="lazy" src='https://blog-1256556944.file.myqcloud.com/public/HelloTrigger.png'     ></p>
+<h2 id="终" class="headerLink">
+    <a href="#%e7%bb%88" class="header-mark"></a>终</h2><ul>
+<li><a href="https://learnopengl-cn.github.io/06%20In%20Practice/2D-Game/11%20Final%20thoughts/" target="_blank" rel="noopener noreferrer">LearnOpenGL</a></li>
+<li>我的通关记录<a href="https://github.com/kirito41dd/LearnOpenGL" target="_blank" rel="noopener noreferrer">github</a></li>
+</ul>
+<p>希望你也能通关，终点等你。</p>
+<p>（依赖库安装还没写完，待续。。。</p>
+]]></description>
+</item></channel>
+</rss>

@@ -1,0 +1,94 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>Vim - 标签 - kirito&#39;s blog</title>
+        <link>https://www.kirito.info/tags/vim/</link>
+        <description>Vim - 标签 - kirito&#39;s blog</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Wed, 14 Jul 2021 10:54:48 &#43;0800</lastBuildDate><atom:link href="https://www.kirito.info/tags/vim/" rel="self" type="application/rss+xml" /><item>
+    <title>vim装逼要点</title>
+    <link>https://www.kirito.info/zhuangbi-with-vim/</link>
+    <pubDate>Wed, 14 Jul 2021 10:54:48 &#43;0800</pubDate><author>
+        <name>kirito</name>
+    </author><guid>https://www.kirito.info/zhuangbi-with-vim/</guid>
+    <description><![CDATA[<p>最近给IDE装了vim插件(ideaVim)，因为觉得写代码时候老是要去按上下左右，效率很低，更主要是low，不够装逼（</p>
+<p>但不建议独立使用vim，因为要大量练习才行，和IDE配合使用，可以把重点放在光标移动上，其余功能让IDE来负责。<del>低成本装逼</del></p>
+<h2 id="move" class="headerLink">
+    <a href="#move" class="header-mark"></a>move</h2><p><code>h</code> <code>j</code> <code>k</code> <code>l</code> - <code>⬅️</code> <code>⬇️</code> <code>⬆️</code> <code>➡️</code></p>
+<p><code>w</code>/<code>e</code> - 跳转到下一个词 开头/末尾（按符号或空白分词）</p>
+<ul>
+<li>助记 word / end</li>
+</ul>
+<p><code>W</code>/<code>E</code> - 同上（按空白分词）</p>
+<p><code>b</code>/<code>ge</code> - 跳转到上一个词 开头/末尾（按符号或空白分词）</p>
+<p><code>B</code>/<code>gE</code> - 同上（按空白分词）</p>
+<p><code>f&lt;?&gt;</code>/<code>t&lt;?&gt;</code> - 跳转到光标位置后指定 字符上/字符前，不跨行</p>
+<ul>
+<li>比如 <small>1</small><strong>2</strong><small>345</small>，使用<code>f4</code>后变为 <small>123</small><strong>4</strong><small>5</small>，使用<code>t4</code>则为 <small>12</small><strong>3</strong><small>45</small></li>
+<li>助记 find / to，<code>;</code>可以重复执行</li>
+</ul>
+<p><code>F&lt;?&gt;</code>/<code>T&lt;?&gt;</code> - 跳转到光标位置前指定 字符上/字符前，不夸行</p>
+<p><code>%</code> - 当前行如果有括号，移动到它的另一半</p>
+<p><code>gg</code>/<code>G</code> - 跳转到文件 开头/结尾</p>
+<p><code>&lt;n&gt;gg</code>/<code>&lt;n&gt;G</code> - 跳转到指定行号</p>
+<p><code>0</code>/<code>&amp;</code> - 移动到 行开头/末尾</p>
+<p><code>^</code>、<code>_</code>/<code>g_</code> - 移动到 行开头/末尾 第一个非空白字符</p>
+<p><code>&lt;Ctrl+b&gt;</code>/<code>&lt;Ctrl+f&gt;</code> - 向 上/下 滚一个屏幕</p>
+<ul>
+<li>助记 back front</li>
+</ul>
+<p><code>&lt;Ctrl+u&gt;</code>/<code>&lt;Ctrl+d&gt;</code> - 向 上/下 滚半个屏幕</p>
+<ul>
+<li>助记 up down</li>
+</ul>
+<p><code>zz</code>/<code>zt</code>/<code>zb</code> - 令光标行处于屏幕 中间/顶部/底部</p>
+<ul>
+<li>助记 zoom zoom/top/bottom</li>
+</ul>
+<p><code>&lt;Ctrl+o&gt;</code>/<code>&lt;Ctrl+i&gt;</code> - 光标跳转到jump list的 上一个位置/下一个位置</p>
+<ul>
+<li>jump list里只记录跳转历史，简单移动光标不会被记录</li>
+<li><code>:jump</code>可以查看所有位置</li>
+</ul>
+<p><code>m&lt;a-zA-Z&gt;</code> - 如<code>ma</code>，标记当前光标位置，并起名为<code>a</code></p>
+<ul>
+<li>小写的名字只在当前缓冲区可见，大写可以跨缓冲区</li>
+<li><code>:marks</code>查看所有标记位置，你也会看到其他非字母的标记</li>
+</ul>
+<p><code>'&lt;a-zA-Z&gt;</code>/<code> `&lt;a-zA-Z&gt;</code> - 如<code>'a</code>回到<code>a</code>位置所在在行首/<code> `a</code>回到<code>a</code>位置</p>
+<ul>
+<li>一个是单引号，一个是反引号，<code>''</code>永远返回上一个位置</li>
+</ul>
+<p><code>zo</code>/<code>zc</code> - 打开折叠/关闭折叠</p>
+<p><code>zO</code>/<code>zC</code> - 打开折叠/关闭折叠，递归</p>
+<p><code>zM</code>/<code>zR</code> - 关闭/打开 所有折叠</p>
+<p><code>gd</code>、<code>&lt;Ctrl+]&gt;</code> - 跳转到定义，<code>&lt;Ctrl+t&gt;</code>返回(用的是tag stack)</p>
+<ul>
+<li><a href="https://stackoverflow.com/questions/8381415/what-is-the-difference-between-ctrl-t-and-ctrl-o-in-vim" target="_blank" rel="noopener noreferrer">Crtl+t 与 Ctrl+o 区别</a></li>
+</ul>
+<h2 id="编辑" class="headerLink">
+    <a href="#%e7%bc%96%e8%be%91" class="header-mark"></a>编辑</h2><p><code>dd</code>/ <code>&lt;n&gt;dd</code> - 删除当前行 / 删除n行</p>
+<p><code>df&lt;?&gt;</code>/<code>dt&lt;?&gt;</code> - 向后删除光标位置到指定字符 / 删除到指定字符前，不跨行</p>
+<p><code>dF&lt;?&gt;</code>/<code>dT&lt;?&gt;</code> - 反向，向前删除，同上</p>
+<p><code>d$</code>/<code>d^</code> - 从光标删除到 行尾/行开头，用其他位置符也行</p>
+<p><code>yy</code>/<code>&lt;n&gt;yy</code> - 复制当前行/复制n行</p>
+<p><code>p</code>/<code>P</code> - 粘贴到当前 行后/行前，<code>&lt;n&gt;p</code>就是重复做n次</p>
+<p><code>&quot;&lt;reg&gt;y</code>/<code>&quot;&lt;reg&gt;p</code> - 复制到指定寄存器/从指定寄存器粘贴</p>
+<ul>
+<li>命令模式<code>:reg</code> 可以看各个<a href="https://harttle.land/2016/07/25/vim-registers.html" target="_blank" rel="noopener noreferrer">寄存器</a>的内容</li>
+<li><code>+</code>寄存器通常与系统剪切板互通</li>
+</ul>
+<p><code>di&quot;</code>/<code>da&quot;</code> - 删除引号内的内容/连引号一起删，必须单行</p>
+<ul>
+<li>助记 delete in &quot;&quot; /  delete all &quot;&quot;</li>
+<li>还有<code>di(</code>、<code>di{</code>等</li>
+</ul>
+<p><code>x</code> - 删除光标字符</p>
+<p><code>r&lt;?&gt;</code> - 用指定字符替换光标字符</p>
+<h2 id="入场" class="headerLink">
+    <a href="#%e5%85%a5%e5%9c%ba" class="header-mark"></a>入场</h2><p>三连入场，神清气爽。从normal模式进入编辑模式</p>
+<p><code>i</code>/<code>a</code> - 在当前光标字符 前/后 插入</p>
+<p><code>I</code>/<code>A</code> - 在当前行 开头第一非空白字符前插入/结尾最后一个非空白字符后插入</p>
+<p><code>o</code>/<code>O</code> - 当前行 下面/上面 起新行</p>
+<p><code>s</code> - 删除当前字符并从该位置插入</p>
+]]></description>
+</item></channel>
+</rss>
