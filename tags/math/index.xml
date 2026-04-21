@@ -1,0 +1,940 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>Math - 标签 - kirito&#39;s blog</title>
+        <link>https://www.kirito.info/tags/math/</link>
+        <description>Math - 标签 - kirito&#39;s blog</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><lastBuildDate>Sun, 23 Jun 2019 13:25:21 &#43;0800</lastBuildDate><atom:link href="https://www.kirito.info/tags/math/" rel="self" type="application/rss+xml" /><item>
+    <title>概率论笔记</title>
+    <link>https://www.kirito.info/probability-theory-note/</link>
+    <pubDate>Sun, 23 Jun 2019 13:25:21 &#43;0800</pubDate><author>
+        <name>kirito</name>
+    </author><guid>https://www.kirito.info/probability-theory-note/</guid>
+    <description><![CDATA[<h2 id="第一章--概率论的基本概念" class="headerLink">
+    <a href="#%e7%ac%ac%e4%b8%80%e7%ab%a0--%e6%a6%82%e7%8e%87%e8%ae%ba%e7%9a%84%e5%9f%ba%e6%9c%ac%e6%a6%82%e5%bf%b5" class="header-mark"></a>第一章  概率论的基本概念</h2><h3 id="11--样本空间随机事件" class="headerLink">
+    <a href="#11--%e6%a0%b7%e6%9c%ac%e7%a9%ba%e9%97%b4%e9%9a%8f%e6%9c%ba%e4%ba%8b%e4%bb%b6" class="header-mark"></a>1.1  样本空间，随机事件</h3><ul>
+<li>样本空间</li>
+</ul>
+<p>样本空间：随机试验$E $所有可能的结果组成的集合称为样本空间，记为$S$（或者称为$Ω$）</p>
+<p>样本点：样本空间的元素, 即试验$E $的每个可能的结果, 称为样本点  (or基本事件)  常记为$e $，$S = {e1,e2…..}$</p>
+<ul>
+<li>随机事件</li>
+</ul>
+<p>随机事件： 样本空间$S$的子集,用大写字母$Ａ、Ｂ、Ｃ$等表示</p>
+<p>事件发生：所谓事件$A$发生，当且仅当这个子集中的一个样本点出现</p>
+<p>基本事件：仅含一个样本点的随机事件</p>
+<ul>
+<li>事件之间的运算</li>
+</ul>
+<p>交换律：$A\cup B=B\cup A$，$AB=BA$</p>
+<p>结合律：$(A\cup B)\cap C=A\cup (B\cup C)$</p>
+<p>分配律：$A(B\cup C)=(AB)\cup (AC)$，$A\cup(BC)=(A\cup B)(A\cup C)$</p>
+<p>德·摩根律：$\overline{AB}=\overline{A}\cup\overline{B}​$，$\overline{A\cup B}=\overline{A} \overline{B}​$</p>
+<h3 id="12-频率与概率" class="headerLink">
+    <a href="#12-%e9%a2%91%e7%8e%87%e4%b8%8e%e6%a6%82%e7%8e%87" class="header-mark"></a>1.2 频率与概率</h3><p>随机事件德频率：$f_n(A)=\frac{事件A出现的次数m}{实验总次数n}$</p>
+<p>概率性质：</p>
+<p>$P(\varnothing)=0​$</p>
+<p>有限可加性：$P(\cup^n_{i=1}A_i)=\sum^n_{i=1}P(A_i)​$，$A_i​$互不相容，$P(A \cup B)=P(A)+P(B),AB=\Phi_{零事件}​$</p>
+<p>$P(B-A)=P(B)-P(AB)$</p>
+<p>$P(A \cup B)=P(A)+P(B)-P(AB)$</p>
+<p>加法定理：$P(A \cup B\cup C)=P(A)+P(B)+P(C)-P(AB)-P(BC)-P(AC)+P(ABC)​$</p>
+<p>$P(\overline{A})=1-P(A)$</p>
+<p>一般地，设盒中有$N$个球，其中有$M$个白球，现从中任抽$n$个球，则这$n$个球中恰有$k$个白球的概率是：$P=\frac{C^k_MC^{n-k}_{N-M}}{C^n_n}​$</p>
+<h3 id="13--条件概率与贝叶斯公式" class="headerLink">
+    <a href="#13--%e6%9d%a1%e4%bb%b6%e6%a6%82%e7%8e%87%e4%b8%8e%e8%b4%9d%e5%8f%b6%e6%96%af%e5%85%ac%e5%bc%8f" class="header-mark"></a>1.3  条件概率与贝叶斯公式</h3><p>条件概率：$P(B|A)=\frac{P(AB)}{P(A)}$</p>
+<p>性质：</p>
+<p>$P(B|A)\ge0$</p>
+<p>$P(S_{整体}|A)=1​$</p>
+<p>可列可加性：$P(\cup^n_{i=1}B_i|A_i)=\sum^n_{i=1}P(B_i|A_i)$，$B_i$互不相容</p>
+<p>$P(B_1\cup B_2|A)=P(B_1|A)+P(B_2|A)-P(B_1B_2|A)$</p>
+<p>$P(\overline{B}|A)=1-P(B|A)$</p>
+<p>$P(B_1-B_2|A)=P(B_1|A)-P(B_1B_2|A)$</p>
+<p>乘法法则：$P(ABC)=P(A)P(B|A)P(C|AB)$</p>
+<ul>
+<li><strong>全概率公式</strong></li>
+</ul>
+<p>设$B_1,B_2,&hellip;,B_n$是$S$的一个划分，且$P(S_i)&gt;0$，则对于任意事件$A\in S$有：</p>
+<p>$P(A)=\sum^n_{i=1}P(B_i)P(A|B_i)$，每个划分上$A$出现的概率相加就是$A在S$上出现的概率</p>
+<ul>
+<li><strong>贝叶斯公式</strong></li>
+</ul>
+<p>设$B_1,B_2,&hellip;,B_n$是$S$的一个划分，且$P(S_i)&gt;0$，$A$为$ S$任意事件，$P(A)&gt;0$,则：</p>
+<p>$P(B_i|A)=\frac{P(B_i)P(A|B_i)}{sum^n_{j=1}P(B_j)P(A|B_j)}=\frac{P(B_i)P(A|B_i)}{P(A)}$</p>
+<p>$A$已经发生，求$A$发生在划分$B_i$上的概率，就是$A$发生在划分$B_i$上的概率除以$A$在$S$上发生的概率.</p>
+<h3 id="14--事件独立性" class="headerLink">
+    <a href="#14--%e4%ba%8b%e4%bb%b6%e7%8b%ac%e7%ab%8b%e6%80%a7" class="header-mark"></a>1.4  事件独立性</h3><p>定义：事件$A$发生对$B$发生的概率没有影响，可视为事件$A$与$B$相互独立，即：</p>
+<p>$P(B|A)=P(B),P(AB)=P(A)P(B)$</p>
+<p>性质：事件$A，B$独立  和  事件$A，B$互不相容  <strong>不能同时成立</strong>。</p>
+<p>下列四组事件，<strong>有相同独立性</strong>：一组互相独立，其他也独立</p>
+<p>$A与B$</p>
+<p>$A与\overline{B}$</p>
+<p>$\overline{A}与B$</p>
+<p>$\overline{A}与\overline{B}​$</p>
+<p>事件$A，B，C$相互独立与事件$A，B，C$两两独立不同</p>
+<h2 id="第二章--随机变量及其分布" class="headerLink">
+    <a href="#%e7%ac%ac%e4%ba%8c%e7%ab%a0--%e9%9a%8f%e6%9c%ba%e5%8f%98%e9%87%8f%e5%8f%8a%e5%85%b6%e5%88%86%e5%b8%83" class="header-mark"></a>第二章  随机变量及其分布</h2><h3 id="21-随机变量" class="headerLink">
+    <a href="#21-%e9%9a%8f%e6%9c%ba%e5%8f%98%e9%87%8f" class="header-mark"></a>2.1 随机变量</h3><p>分布律的性质：</p>
+<p>非负性：$p_k\ge0,k=1,2,&hellip;$</p>
+<p>归一性：$\sum^\infty_{k=1}p_k=1$</p>
+<h3 id="22-离散随机变量及其分布" class="headerLink">
+    <a href="#22-%e7%a6%bb%e6%95%a3%e9%9a%8f%e6%9c%ba%e5%8f%98%e9%87%8f%e5%8f%8a%e5%85%b6%e5%88%86%e5%b8%83" class="header-mark"></a>2.2 离散随机变量及其分布</h3><p>0-1分布：</p>
+
+<div class="table-wrapper">
+  <table>
+    <thead>
+        <tr>
+            <th style="text-align: ">$X$</th>
+            <th style="text-align: ">$0$</th>
+            <th style="text-align: ">$1$</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td style="text-align: ">$P$</td>
+            <td style="text-align: ">$1-p$</td>
+            <td style="text-align: ">$p$</td>
+        </tr>
+    </tbody>
+  </table>
+</div>
+<p><strong>二项分布</strong>：$X\sim b(n,p)​$</p>
+<p>$P{X=k}=C^k_np^kq^{n-k},k=0,1,2,&hellip;,n$</p>
+<p><strong>泊松定理</strong>：当二项分布$n$较大，$p$较小（一般$n&gt;20,p&lt;0.05$）,有</p>
+<p>$C^k_np^k(1-p)^{n-k}\approx\frac{e^{-\lambda}\lambda^k}{k!},k=0,1,2&hellip;$</p>
+<p>式中$\lambda=np​$</p>
+<p><strong>泊松分布</strong>：$X\sim \pi(\lambda)$</p>
+<p>$P{X=k}=e^{-\lambda}\frac{\lambda^k}{k!}$</p>
+<h3 id="23--随机变量的分布函数" class="headerLink">
+    <a href="#23--%e9%9a%8f%e6%9c%ba%e5%8f%98%e9%87%8f%e7%9a%84%e5%88%86%e5%b8%83%e5%87%bd%e6%95%b0" class="header-mark"></a>2.3  随机变量的分布函数</h3><p>定义：设$X$为随机变量，$x$是任意实数，称函数</p>
+<p>$F(x)=P{X\le x},-\infty&lt;x&lt;+\infty$</p>
+<p>为X的<strong>分布函数</strong></p>
+<p>离散型：点点计较 $F(X)=P{X\le x}=\sum_{k:x_k&lt;x}p_k$</p>
+<p>连续型：$F(X)=P{X\le x}=\int_{-\infty}^xf(t)dt$</p>
+<h3 id="24-连续随机变量及其概率密度" class="headerLink">
+    <a href="#24-%e8%bf%9e%e7%bb%ad%e9%9a%8f%e6%9c%ba%e5%8f%98%e9%87%8f%e5%8f%8a%e5%85%b6%e6%a6%82%e7%8e%87%e5%af%86%e5%ba%a6" class="header-mark"></a>2.4 连续随机变量及其概率密度</h3><p>连续型：$F(X)=P{X\le x}=\int_{-\infty}^xf(t)dt$</p>
+<p>其中$f(x)$称为$X$的<strong>概率密度函数</strong>，常写为 $X\sim f(x)$</p>
+<p>概率密度函数<strong>性质</strong>：</p>
+<p>非负性：$f(x)\ge0,\forall x\in(-\infty,+\infty)$</p>
+<p>规范性：$\int^{+\infty}_{-\infty}f(x)dx=1$</p>
+<ul>
+<li>几个常用连续性分布</li>
+</ul>
+<p><strong>均匀分布</strong>：</p>
+<div>
+$$
+X\sim f(x)= \left \{
+\begin{aligned}
+{\frac{1}{b-a}} ,a\lt x\lt b\\
+0,其他 
+\end{aligned}
+\right. 
+$$
+</div>
+<p><strong>指数分布</strong>：$X\sim E(\theta)$</p>
+<div>
+$$
+f(x)=\left\{
+\begin{aligned}
+{\frac{1}{\theta}}e^{-\frac{x}{\theta}},x>0\\
+0,x\le 0
+\end{aligned}
+\right.
+$$
+</div>
+<p>分布函数</p>
+<div>
+$$
+f(x)=\left\{
+\begin{aligned}
+{1-}e^{-\frac{x}{\theta}},x>0\\
+0,x\le 0
+\end{aligned}
+\right.
+$$
+</div>
+<p>指数分布无记忆性：$P{X&gt;s+t|X&gt;s}=P{X&gt;t}$</p>
+<p><strong>正态分布</strong>：$X\sim N(\mu,\sigma^2)$</p>
+<div>
+$$
+f(X)=\frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{(x-u)^2}{2\sigma^2}}
+$$
+</div>
+<p>定义 $X\sim N(0,1)$为标准正太分布，密度函数$\varphi(x)=\frac{1}{\sqrt{2\pi}}e^{-\frac{x^2}{2}}$，分布函数$\Phi(x)$</p>
+<p>一般正太分布标准化：$Z=\frac{x-\mu}{\sigma}\sim N(0,1)$</p>
+<h3 id="25--随机变量的函数的分布" class="headerLink">
+    <a href="#25--%e9%9a%8f%e6%9c%ba%e5%8f%98%e9%87%8f%e7%9a%84%e5%87%bd%e6%95%b0%e7%9a%84%e5%88%86%e5%b8%83" class="header-mark"></a>2.5  随机变量的函数的分布</h3><p>对于离散型，用分布表</p>
+<ul>
+<li>连续型随机变量的函数的分布</li>
+</ul>
+<p>设X为一个连续型随机变量，其概率密度函数为$f(X)$，$y=g(x)$为一个连续函数，求随机变量$Y=g(X)$的概率密度函数</p>
+<ol>
+<li>
+<p>求$Y$的分布函数$F_Y(y)$</p>
+<p>$F_Y(y)=P(Y\le y)=P{g(X)&lt;=y}=\int_{g(x)\le y}f(x)dx​$</p>
+</li>
+<li>
+<p>对$F_Y(y)$求导，得到$f_Y(y)$</p>
+<p>$f_Y(y)=(F_Y(y))&lsquo;​$</p>
+</li>
+</ol>
+<p><strong>定理</strong>：正态分布的线性函数仍服从正态分布</p>
+<p>设$X \sim N(\mu,\sigma^2),Y=aX+bY(a\ne 0)$，则$Y \sim N(a\mu+b,(a\sigma)^2)$</p>
+<h2 id="第三章--二维随机变量及其分布" class="headerLink">
+    <a href="#%e7%ac%ac%e4%b8%89%e7%ab%a0--%e4%ba%8c%e7%bb%b4%e9%9a%8f%e6%9c%ba%e5%8f%98%e9%87%8f%e5%8f%8a%e5%85%b6%e5%88%86%e5%b8%83" class="header-mark"></a>第三章  二维随机变量及其分布</h2><h3 id="31--二维随机变量" class="headerLink">
+    <a href="#31--%e4%ba%8c%e7%bb%b4%e9%9a%8f%e6%9c%ba%e5%8f%98%e9%87%8f" class="header-mark"></a>3.1  二维随机变量</h3><p>定义：设$X、Y$ 为定义在同一样本空间$Ω$上的随机变量，则称向量$(X,Y)$为$Ω$上的一个二维随机变量。</p>
+<p>二维变量<strong>联合分布</strong>函数：</p>
+<p>$F(x,y)=P{X\le x \cap Y\le y}=^{记作}P{X\le x,Y\le y}​$</p>
+<p>离散型：$F(x,y)=\sum_{x_i&lt;x}\sum_{y_j&lt;y}p_{ij}$</p>
+<p>连续型：$F(x,y)=\int_{-\infty}^x\int_{-\infty}^yf(u,v)dudv​$</p>
+<p>$f(x,y)$称为<strong>联合密度</strong>函数</p>
+<h3 id="32--边缘分布" class="headerLink">
+    <a href="#32--%e8%be%b9%e7%bc%98%e5%88%86%e5%b8%83" class="header-mark"></a>3.2  边缘分布</h3><p>设二维随机变量$(X,Y)$的分布函数为$F(x,y)$，</p>
+<p>$F_X(x)=P{X\le x}=P{X\le x,Y&lt;+\infty}=F(x,+\infty)​$</p>
+<p>$F_Y(y)=P{Y\le y}=P{X&lt; +\infty,Y\le y}=F(+\infty,y)$</p>
+<p>连续型：</p>
+<p>$F_X(x)=F(x,+\infty)=\int^x_{-\infty}[\int^{+\infty}_{-\infty}f(x,y)dy]dx$</p>
+<p>边缘概率密度函数：</p>
+<p>$f_X(x)=\int^{+\infty}_{-\infty}f(x,y)dy​$</p>
+<p>$f_Y(y)=\int^{+\infty}_{-\infty}f(x,y)dx$</p>
+<h3 id="33--条件分布" class="headerLink">
+    <a href="#33--%e6%9d%a1%e4%bb%b6%e5%88%86%e5%b8%83" class="header-mark"></a>3.3  条件分布</h3><h3 id="34--独立性" class="headerLink">
+    <a href="#34--%e7%8b%ac%e7%ab%8b%e6%80%a7" class="header-mark"></a>3.4  独立性</h3><p>若$F(x,y)=F_X(x)F_Y(y)$，则$X,y$相互独立，$f(x,y)=f_X(x)f_Y(y)$</p>
+<h2 id="第四章--随机变量的数字特征" class="headerLink">
+    <a href="#%e7%ac%ac%e5%9b%9b%e7%ab%a0--%e9%9a%8f%e6%9c%ba%e5%8f%98%e9%87%8f%e7%9a%84%e6%95%b0%e5%ad%97%e7%89%b9%e5%be%81" class="header-mark"></a>第四章  随机变量的数字特征</h2><h3 id="41--数学期望" class="headerLink">
+    <a href="#41--%e6%95%b0%e5%ad%a6%e6%9c%9f%e6%9c%9b" class="header-mark"></a>4.1  数学期望</h3><p>离散型随机变量数学期望：$E(x)=\sum^{+\infty}_{k=1}x_kp_k​$</p>
+<p>连续性随机变量数学期望：$E(X)=\int^{+\infty}_{-\infty}xf(x)dx$</p>
+<ul>
+<li>随机变量的函数的数学期望</li>
+</ul>
+<p>一维情形：设$Y=g(X)$是随机变量$X$的函数</p>
+<p>​		离散型：$E(Y)=E[g(X)]=\sum^\infty_{k=1}g(x_k)p_k$</p>
+<p>​		连续型：概率密度为$f(x)$，$E(Y)=E[g(X)]=\int^{+\infty}_{-\infty}g(x)f(x)dx$</p>
+<p>二维情形：设$Z=g(X,Y)$是随机变量$X,Y$的函数</p>
+<p>​		离散型：$P{X=x_i,Y=y_i}=p_{ij}$，$E[g(X,Y)]=\sum_i\sum_jg(x_i,y_j)p_{ij}$</p>
+<p>​		连续型：联合概率密度$f(x,y)$，$E[g(X,Y)]=\int^{+\infty}_{-\infty}\int^{+\infty} _{-\infty}g(x,y)f(x,y)dxdy$</p>
+<ul>
+<li><strong>数学期望的性质</strong></li>
+</ul>
+<p>$E(C)=C​$，$C​$为常数</p>
+<p>$E(CX)=CE(X)​$</p>
+<p>$E(X+Y)=E(X)+E(Y)​$</p>
+<p>$X,Y$相互独立时：$E(XY)=E(X)E(Y)$</p>
+<h3 id="42-方差" class="headerLink">
+    <a href="#42-%e6%96%b9%e5%b7%ae" class="header-mark"></a>4.2 方差</h3><p>定义：若$E{[X-E(X)]^2}$存在，则称其为随机变量$X$的方差，记为$D(X)$。</p>
+<p>若$X$为离散型：$D(X)=\sum^{+\infty}_{k=1}(x_k-E(X))^2p_k$</p>
+<p>若$X$为连续型：$D(X)=\int^{+\infty}_{-\infty}(x-E(X))^2f(x)dx$</p>
+<p>计算方差<strong>常用公式</strong>：$D(X)=E(X^2)-E(X)^2$</p>
+<ul>
+<li><strong>方差的性质</strong></li>
+</ul>
+<p>$D(C)=0$</p>
+<p>$D(aX+b)=a^2D(X)$</p>
+<p>$D(X\pm Y)=D(X)+D(Y)\pm 2E((X-E(X))(Y-E(Y)))​$</p>
+<p>若$X,Y$相互独立：$D(X\pm Y)=D(X)+D(Y)$</p>
+<p><strong>二维随机变量方差</strong>：</p>
+<p>$D(X,Y)=(D(X),D(Y))$</p>
+<p>$D(X)=\int^{+\infty} _{-\infty}[x-E(X)]^2f_x(x)dx=\int^{+\infty} _{-\infty}\int^{+\infty} _{-\infty}[x-E(X)]^2f(x,y)dxdy​$</p>
+<p>$D(Y)=\int^{+\infty} _{-\infty}[y-E(Y)]^2f_y(y)dx=\int^{+\infty} _{-\infty}\int^{+\infty} _{-\infty}[y-E(Y)]^2f(x,y)dxdy​$</p>
+<p><strong>常用</strong>：若$X_i\sim N(\mu_i,\sigma_i^2),i=1,2,&hellip;,n​$，且他们相互独立，他们的线性组合$C_1X_1+C_2X_2+&hellip;+C_nX_n​$仍然服从正态分布：$C_1X_1+C_2X_2+&hellip;+C_nX_n\sim N(C_1\mu_1+C_2\mu_2+&hellip;+C_n\mu_n,\sigma^2_1+\sigma^2_2+&hellip;+\sigma^2_n)​$</p>
+
+<div class="table-wrapper">
+  <table>
+    <thead>
+        <tr>
+            <th style="text-align: ">分布</th>
+            <th style="text-align: ">密度函数</th>
+            <th style="text-align: ">期望</th>
+            <th style="text-align: ">方差</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td style="text-align: ">二项分布$X\sim B(n,p)$</td>
+            <td style="text-align: ">$p{X=k}=C^k_np^k(1-p)^{n-k}$</td>
+            <td style="text-align: ">$np$</td>
+            <td style="text-align: ">$np(1-p)$</td>
+        </tr>
+        <tr>
+            <td style="text-align: ">泊松分布$X\sim P(\lambda)$</td>
+            <td style="text-align: ">$p{X=k}=\frac{\lambda^k}{k!}e^{-\lambda}$</td>
+            <td style="text-align: ">$\lambda$</td>
+            <td style="text-align: ">$\lambda$</td>
+        </tr>
+        <tr>
+            <td style="text-align: ">均匀分布</td>
+            <td style="text-align: ">
+    $f(x)=\left\{\begin{aligned}\frac{1}{b-a}，a&lt;x&lt;b\\ 0,其他\end{aligned}\right.$
+    </td>
+            <td style="text-align: ">$\frac{a+b}{2}$</td>
+            <td style="text-align: ">$\frac{1}{12}(b-a)^2$</td>
+        </tr>
+        <tr>
+            <td style="text-align: ">正态分布$X\sim N(\mu,\sigma^2)$</td>
+            <td style="text-align: ">$f(x)=\frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{(x-\mu)^2}{2\sigma^2}}$</td>
+            <td style="text-align: ">$\mu$</td>
+            <td style="text-align: ">$\sigma ^2$</td>
+        </tr>
+        <tr>
+            <td style="text-align: ">指数分布</td>
+            <td style="text-align: ">
+    $f(x)=\left\{\begin{aligned}\frac{1}{\theta}e^{-\frac{x}{\theta}}，x&gt;0\\0,x\le0\end{aligned}\right.$
+    </td>
+            <td style="text-align: ">$\theta$</td>
+            <td style="text-align: ">$\theta^2$</td>
+        </tr>
+    </tbody>
+  </table>
+</div>
+<h3 id="43--协方差及相关系数" class="headerLink">
+    <a href="#43--%e5%8d%8f%e6%96%b9%e5%b7%ae%e5%8f%8a%e7%9b%b8%e5%85%b3%e7%b3%bb%e6%95%b0" class="header-mark"></a>4.3  协方差及相关系数</h3><p>定义：称$E([X-E(X)][Y-E(Y)])​$为$X,Y​$的<strong>协方差</strong>，记为$cov(X,Y)=E([X-E(X)][Y-E(Y)])​$</p>
+<p>离散型：
+    $cov(X,Y)=\sum^{&#43;\infty}_{i=1}\sum^{&#43;\infty}_{j=1}[x_i-E(X)][y_j-E(Y)]p_{ij}$
+    </p>
+<p>连续型：
+    $cov(X,Y)=\int^{&#43;\infty}_{-\infty}\int^{&#43;\infty}_{-\infty}[x-E(X)][y-E(Y)]f(x,y)dxdy​$
+    </p>
+<p>当$COV(X,Y)&gt;0$时，称$X$与$Y$正相关；当$COV(X,Y)&lt;0$时，称$X$与$Y$负相关；当$COV(X,Y)=0$时，称$X$与$Y$不相关</p>
+<p>协方差计算：$cov(X,Y)=E(XY)-E(X)E(Y)$，或方差性质计算</p>
+<p><strong>性质</strong>：</p>
+<p>$cov(X,Y)=cov(Y,X)$</p>
+<p>$cov(aX,bY)=abcov(X,Y)$</p>
+<p>$cov(X+Y,Z)=cov(X,Z)+cov(Y,Z)$</p>
+<p>$cov(X,X)=D(X)​$</p>
+<p><strong>相关系数</strong>：$\rho_{XY}=\frac{cov(X,Y)}{\sqrt{D(X)}\sqrt{D(Y)}}$</p>
+<p>$|\rho_{XY}|\le1$</p>
+<p>$|\rho_{XY}=1|$称$X$与$Y$全相关，存在常数$a,b$,使$P{Y=aX+b}=1$</p>
+<h2 id="第五章-大数定律及中心极限定理" class="headerLink">
+    <a href="#%e7%ac%ac%e4%ba%94%e7%ab%a0-%e5%a4%a7%e6%95%b0%e5%ae%9a%e5%be%8b%e5%8f%8a%e4%b8%ad%e5%bf%83%e6%9e%81%e9%99%90%e5%ae%9a%e7%90%86" class="header-mark"></a>第五章 大数定律及中心极限定理</h2><h3 id="51--大数定律" class="headerLink">
+    <a href="#51--%e5%a4%a7%e6%95%b0%e5%ae%9a%e5%be%8b" class="header-mark"></a>5.1  大数定律</h3><ul>
+<li><strong>切比雪夫不等式</strong></li>
+</ul>
+<p>设随机变量$X$的方差$D(X)$存在，则对于任意实数$\varepsilon&gt;0$：</p>
+<p>$$P(|X-E(X)|\ge\varepsilon)\le\frac{D(X)}{\varepsilon^2}$$，等价于：$P(|X-E(X)|&lt;\varepsilon)\ge1-\frac{D(X)}{\varepsilon^2}$</p>
+<p>说明：粗鲁哦估计$X$与均值之间范围的关系，实际很少运用</p>
+<h3 id="52--中心极限定理" class="headerLink">
+    <a href="#52--%e4%b8%ad%e5%bf%83%e6%9e%81%e9%99%90%e5%ae%9a%e7%90%86" class="header-mark"></a>5.2  中心极限定理</h3><p>客观背景：客观实际中，许多随机变量是由大量 相互独立的偶然因素的综合影响所形成，每一个微小 因素，在总的影响中所起的作用是很小的，但总起来， 却对总和有显著影响，这种随机变量往往近似地服从<strong>正态分布</strong>。</p>
+<p>研究在什么条件下，大量独立随机变量和的分布以<strong>正态分布</strong>为极限，这一类定理称为<strong>中心极限定理</strong>。</p>
+<ul>
+<li><strong>定理1</strong></li>
+</ul>
+<p>应用：</p>
+<p>对于独立的随机变量序列${X_n}$，不管$X_i(i=1,2,&hellip;,n)$服从什么分布，只要他们是独立同分布，且有相同的数学期望和方差，那么，当$n$充分大时，这些<strong>随机变量之和</strong>$\sum^n_{i=1}X_i\sim^{近似}N(n\mu,n\sigma^2)$。$\bar{X} \sim N(\mu,\frac{\sigma^2}{n})$</p>
+<ul>
+<li><strong>定理2</strong></li>
+</ul>
+<p>二项分布的极限分布是<strong>正态分布</strong>：当n很大，p不是很小时，不能再用泊松定理</p>
+<p>设$Y_n \sim B(n,p)$，当$n$很大时，$Y_n \sim^{近似} N(np,np(1-p))$。</p>
+<h2 id="第六章--样本与统计量" class="headerLink">
+    <a href="#%e7%ac%ac%e5%85%ad%e7%ab%a0--%e6%a0%b7%e6%9c%ac%e4%b8%8e%e7%bb%9f%e8%ae%a1%e9%87%8f" class="header-mark"></a>第六章  样本与统计量</h2><h3 id="61--随机样本" class="headerLink">
+    <a href="#61--%e9%9a%8f%e6%9c%ba%e6%a0%b7%e6%9c%ac" class="header-mark"></a>6.1  随机样本</h3><ul>
+<li><strong>总体和样本</strong></li>
+</ul>
+<p><strong>总体</strong> <strong>——</strong> <strong>所研究的对象的某个(或某些)数量指标的全体,它是一个随机变量(或多维随机变量). 记为X.</strong></p>
+<p><strong>个体</strong> ——<strong>即总体的每个数量指标,可看作随机变量$X$ 的某个取值.用$X_i$表示.</strong></p>
+<p><strong>容量</strong> ——<strong>总体中所包含个体的个数</strong></p>
+<p><strong>有限总体</strong> ——<strong>容量为有限的总体</strong></p>
+<p><strong>无限总体</strong>—— <strong>容量为无限的总体</strong></p>
+<p><strong>样本</strong> —— 从总体中抽取的部分个体.用$(X1,X2,…Xn)​$表示,$ n​$为样本容量。在数理统计中，有意义的样本容量一般要求$n≥50​$才有统计意义</p>
+<p>设总体$X$的分布函数为$F(X)$,则样本$(X_1,X_2&hellip;X_n)$的<strong>联合分布函数</strong>为：</p>
+<p>$$ F_总(X_1,X_2,&hellip;,X_n)=\prod^n_{i=1}F(x_i)​$$</p>
+<p>若总体$X$的概率密度为$f(X)$,则样本的<strong>联合概率密度</strong>为：</p>
+<p>$$ f_总(X_1,X_2,&hellip;,X_n)=\prod^n_{i=1}f(x_i)$$</p>
+<ul>
+<li><strong>统计量</strong></li>
+</ul>
+<p>样本是统计推断的依据，但在实际问题中，往往不是直接使用样本本身，而是针对不同的问题构造不同的样本函数，利用这种样本的函数进行统计推断。这个构造出来的<strong>函数</strong>，就是统计量 ！</p>
+<p>设$(X_1,X_2,…X_n)$是取自总体$X$的一个样本，$g(X_1,X_2,…X_n)$是$(X_1,X_2,…X_n)$且步含有未知参数的实值连续函数，则称随机变量$g(X_1,X_2,…X_n)$为<strong>统计量</strong></p>
+<p>若$(x_1,x_2,…x_n)$是一个样本值，称$g(x_1,x_2,…x_n)​$为统计量的一个<strong>样本值</strong></p>
+<p>几个<strong>常用的统计量</strong>：</p>
+<p>样本均值(sample mean)：$\bar{X}=\frac{1}{n}\sum^n_{i=1}X_i​$</p>
+<p>样本方差(sample variance)：$S^2=\frac{1}{n-1}\sum^n_{i=1}(X_i-\bar{X})^2=\frac{1}{n-1}(\sum^n_{i=1}X_i^2-n\bar{X}^2)$</p>
+<p>样本均方差或标准差：$S=\sqrt{\frac{1}{n-1}\sum^n_{i=1}(X_i-\bar{X})^2}​$</p>
+<p>样本$K$阶原点矩：$A_k=\frac{1}{n}\sum^n_{i=1}X^k_i$</p>
+<p>样本$K​$阶中心距：$\frac{1}{n}\sum^n_{i=1}(X_i-\bar{X})^k​$</p>
+<p><strong>$k$阶矩</strong>的概念：</p>
+<p>定义：设$X$为随机变量，若$E(|X|^k)$存在，则称$E(X^k)$为$X$的$k$阶原点矩，记作$\mu^k=E(X^k)$</p>
+<p>样本的$k$阶原点矩，记作$A_k=\frac{1}{n}\sum^n_{i=1}X_i^k​$</p>
+<p><strong>结论</strong>：$A^k\xrightarrow{P}\mu^k,(n\rightarrow\infty),k=1,2&hellip;​$ 辛钦大数定理  矩估计法的理论依据</p>
+<h3 id="62--抽样分布" class="headerLink">
+    <a href="#62--%e6%8a%bd%e6%a0%b7%e5%88%86%e5%b8%83" class="header-mark"></a>6.2  抽样分布</h3><p>统计量的分布称为<strong>抽样分布</strong>。在使用统计量进行统计推断时常需要知道它的分布。当总体的分布函数为已知时，抽样分布是确定的，然而要求出统计量的精确分布，一般来说是困难的。</p>
+<p>由于正态总体是最常见的总体，因此这里主要讨论<strong>正态总体下的抽样分布</strong></p>
+<p>数理统计的<strong>三大分布</strong>：$\chi^2分布$   $t分布$  $F分布$，他们都与正太分布有密切的联系。</p>
+<ul>
+<li>$\chi^2分布​$</li>
+</ul>
+<p>定义：设总体$X\sim N(0,1)​$，$(X_1,X_2,&hellip;,X_n)​$是$X​$的一个样本，则称统计量$\chi^2=X_1^2+X_2^2+&hellip;+X_n^2​$服从自由度为$n​$的$\chi^2分布​$,记作$\chi^2\sim \chi^2(n)​$</p>
+<p>自由度是指独立随机变量的个数，$\chi^2分布$的密度函数为：</p>
+<div>
+$$
+f(y)=\left\{
+\begin{aligned}
+{\frac{1}{2^{n/2}\Gamma(n/2)}y^{n/2-1}e^{-y/2}},y\ge0\\
+0,y<0
+\end{aligned}
+\right.。。。\Gamma(n+1)=n!
+$$
+</div>
+其图形随自由度的不同而有所改变.也就是说，当样本量超过10的时候很接近了正态分布！
+<p><img class="tw-inline" loading="lazy" src='https://blog-1256556944.file.myqcloud.com/public//概率论/图片1.png'     ></p>
+<p>$\chi^2分布$的上$\alpha$分位点：满足$P{\chi^2(n)&gt;\chi_\alpha^2(n)}=\int_{\chi^2(n)}^{+\infty}f(y)dy=\alpha$的数$\chi^2_\alpha(n)$为$\chi^2$分布的上$\alpha$分位点。</p>
+<p><img class="tw-inline" loading="lazy" src='https://blog-1256556944.file.myqcloud.com/public//概率论/图片2.png'     ></p>
+<p><strong>性质</strong>：</p>
+<p>期望与方差：设$\chi^2 \sim \chi^2(n)​$，则$E(\chi^2)=n​$，$D(\chi^2)=2n​$</p>
+<p>$\chi^2分布$的可加性：设$\chi^2_1 \sim \chi^2(n_1)$，$\chi^2_2 \sim \chi^2(n_2)$，$\chi^2_1 $与$\chi^2_1 $ 相互独立，则$\chi^2_1+\chi^2_1 \sim \chi^2(n_1+n_2) $</p>
+<p>若$X_1,X_2,…,X_n$相互独立，都服从$N(0,1)$， 则$X_1^2+X_2^2+…+X_n^ 2~ \chi^2 (n)$，反之若$X \sim \chi^2 (n)$  ，则$X$可以分解成$ n $个相互独立的标准正态随机变量的平方和。</p>
+<ul>
+<li>$t分布​$</li>
+</ul>
+<p><strong>定义</strong>：设随机变量$X \sim N(0,1)​$，$Y \sim \chi^2(n)​$，且$X​$与$Y​$相互独立，则称统计量$T=\frac{X}{\sqrt{Y/n}}​$服从自由度为$n​$的$t​$分布或学生氏分布，记作$T \sim t(n)​$.</p>
+<p>$t$分布的概率密度为：$f(t)=\frac{\Gamma(\frac{n+1}{2})}{\sqrt{n\pi}\Gamma(\frac{n}{2})}(1+\frac{t^2}{n})^{-\frac{n+1}{2}},-\infty&lt;t&lt;+\infty$</p>
+<p>其形状类似标准正太分布，$n​$较大时，$t​$分布近似于标准正太分布，当$n&gt;30​$时，$t​$分布与标准正态分布$N(0，1)​$就非常接近.</p>
+<p><strong>性质</strong>：</p>
+<p>若$X \sim N(0,1)​$，$Y \sim \chi^2(n)​$，且$X​$与$Y​$相互独立，则$T=\frac{X}{\sqrt{Y/n}}​$。反之若$T=\frac{X}{\sqrt{Y/n}}​$，则有互相独立的$X \sim N(0,1)​$，$Y \sim \chi^2(n)​$，使得$T=\frac{X}{\sqrt{Y/n}}​$。</p>
+<p>$f(t)​$是偶函数</p>
+<p>对于给定的$\alpha(0&lt;\alpha&lt;1)​$，称满足条件$P{T&gt;t_\alpha(n)}=\int_{t_\alpha{n}}^{+\infty}f(t)dt=\alpha​$的数$t_\alpha(n)​$为$t​$分布的上$\alpha​$分位点。</p>
+<ul>
+<li>$F分布$</li>
+</ul>
+<p><strong>定义</strong>：设随机变量$X \sim \chi^2(n_1)$，$Y \sim \chi^2(n_2)$，且相互独立，则称随机变量$F=\frac{X/n_1}{Y/n_2}$服从第一自由度为$n_1$，第二自由度为$n_2$的$F$分布，记作$F \sim F(n_1,n_2)​$。</p>
+<p>性质：若$X \sim F(n_1,n_2)​$，则$\frac{1}{X} \sim F(n_2,n_1)​$。</p>
+<p>$F$ 分布的上$\alpha$分位点：对于给定的$0&lt;\alpha&lt;1$，称满足条件$P{F(n_1,n_2)&gt;F_\alpha(n_1,n_2)}=\alpha$的数$F_\alpha(n_1,n_2)$为$F$分布的上$\alpha$分位点。</p>
+<h2 id="第七章--参数估计" class="headerLink">
+    <a href="#%e7%ac%ac%e4%b8%83%e7%ab%a0--%e5%8f%82%e6%95%b0%e4%bc%b0%e8%ae%a1" class="header-mark"></a>第七章  参数估计</h2><p>数理统计问题：如何选取样本来对总体的种种统计特征作出判断。</p>
+<p>参数估计问题：知道随机变量（总体）的分布类型，但它的一个或多个<strong>参数未知</strong>，根据样本来估计总体的参数，这类问题称为参数估计(paramentric estimation)</p>
+<p>参数估计的类型——<strong>点估计</strong>、<strong>区间估计</strong></p>
+<h3 id="71---点估计方法" class="headerLink">
+    <a href="#71---%e7%82%b9%e4%bc%b0%e8%ae%a1%e6%96%b9%e6%b3%95" class="header-mark"></a>7.1   点估计方法</h3><p>设总体$X$的分布函数的形式已知，但含有一个或多个未知参数：$\theta_1,\theta_2,&hellip;,\theta_k$</p>
+<p>设$X_1,X_2,&hellip;,X_n​$为总体的一个样本，构造$k​$个统计量：</p>
+<div>
+$$
+\left.
+\begin{aligned}
+\theta_1(X_1,X_2,...,X_n)\\
+\theta_2(X_1,X_2,...,X_n)\\
+..............\\
+\theta_k(X_1,X_2,...,X_n)\\
+\end{aligned}
+\right\}随机变量
+$$
+</div>
+<p>当测得样本值$(x_1,x_2,&hellip;,x_n)$时，代入上述统计量，即可得到$k$个数：</p>
+<div>
+$$
+\left.
+\begin{aligned}
+\hat{\theta_1}(x_1,x_2,...,x_n)\\
+\hat{\theta_2}(x_1,x_2,...,x_n)\\
+..............\\
+\hat{\theta_k}(x_1,x_2,...,x_n)\\
+\end{aligned}
+\right\}数值
+$$
+</div>
+<p>称数$\hat{\theta_1}&hellip;\hat{\theta_k}$为未知参数${\theta_1}&hellip;{\theta_k}$的<strong>估计值</strong></p>
+<p>对应统计量为未知参数${\theta_1}&hellip;{\theta_k}$的<strong>估计量</strong></p>
+<h3 id="72--参数的矩法估计" class="headerLink">
+    <a href="#72--%e5%8f%82%e6%95%b0%e7%9a%84%e7%9f%a9%e6%b3%95%e4%bc%b0%e8%ae%a1" class="header-mark"></a>7.2  参数的矩法估计</h3><p>用样本的矩作为总体距的估计量，集体做法如下：</p>
+<div>
+$$
+\left\{
+\begin{aligned}
+\mu_1=\mu_1(\theta_1,...,\theta_k)\\
+\mu_2=\mu_2(\theta_1,...,\theta_k)\\
+................\\
+\mu_k=\mu_k(\theta_1,...,\theta_k)
+\end{aligned}
+\right.
+$$
+</div>
+这里总体$X$的分布函数中含有$K$个参数。从上式解出这$K$个参数可得
+$$
+\left\{
+\begin{aligned}
+\theta_1=\theta_1(\mu_1,...,\mu_k)\\
+\theta_2=\theta_2(\mu_1,...,\mu_k)\\
+................\\
+\theta_k=\theta_k(\mu_1,...,\mu_k)
+\end{aligned}
+\right.
+$$
+用$A_i$代替上式中的$\mu_i$：
+$$
+\left.
+\begin{aligned}
+\hat{\theta}_1=\theta_1(A_1,...,A_k)\\
+\hat{\theta}_2=\theta_2(A_1,...,A_k)\\
+................\\
+\hat{\theta}_k=\theta_k(A_1,...,A_k)
+\end{aligned}
+\right \}未知参数\theta_1...\theta_k的矩估计量
+$$
+<p>代入一组样本值得$k$个数，可得矩估计量的观察值<strong>矩估计值</strong></p>
+<p><strong>例题</strong>：设某总体$X$得数学期望为$E(X)=\mu$，方差$D(X)=\sigma^2$，$X_1,X_2,&hellip;,X_n$为样本，试求$\mu$和$\sigma^2$的矩估计量。</p>
+<p>解：总体的$K$阶原点矩为 $\mu_1=\mu$</p>
+<p>$\mu_2=E(X^2)=D(X)+E(X)^2=\sigma^2+\mu^2$</p>
+<p>可得：$\mu=\mu_1$    $\sigma^2=\mu_2-\mu_1^2$</p>
+<p>样本的$K​$阶原点矩为 $A_1=\bar{X}​$   $A_2=\frac{1}{n}\sum^n_{i=1}X_i^2​$</p>
+<p>由矩法估计，领$A_i$代替$\mu_i$，可得$\mu$和$\sigma^2$的矩估计量为：$\hat{u}=\bar{X}$ ，  $\hat{\sigma}^2=\frac{1}{n}\sum^n_{i=1}X_i^2-\bar{X}^2=\frac{1}{n}\sum^n_{i=1}(X_i-\bar{X})^2​$</p>
+<h3 id="73--极大似然估计" class="headerLink">
+    <a href="#73--%e6%9e%81%e5%a4%a7%e4%bc%bc%e7%84%b6%e4%bc%b0%e8%ae%a1" class="header-mark"></a>7.3  极大似然估计</h3><h3 id="74--区间估计" class="headerLink">
+    <a href="#74--%e5%8c%ba%e9%97%b4%e4%bc%b0%e8%ae%a1" class="header-mark"></a>7.4  区间估计</h3>]]></description>
+</item><item>
+    <title>矩阵快速幂</title>
+    <link>https://www.kirito.info/matrix-fast-power/</link>
+    <pubDate>Mon, 25 Mar 2019 12:23:42 &#43;0800</pubDate><author>
+        <name>kirito</name>
+    </author><guid>https://www.kirito.info/matrix-fast-power/</guid>
+    <description><![CDATA[<p>大一还是大二学线性代数的时候，感觉这玩意怎么这么无聊，这破矩阵能干啥？老师讲课跟催眠一样。后来学习OpenGL的时候才感受到矩阵的魅力，原来3D世界的平移、旋转、缩放都可以用一个小小的四阶矩阵的运算来完成，AMAZING 啊！！！(比老师上课有意思多了)</p>
+<p>矩阵快速幂也是打ACM期间学到的，思想上和整数的快速幂一样，操作替换成了矩阵运算而已。</p>
+<p><del>没错，课堂上的时间都用来睡觉、刷手机了</del></p>
+<h2 id="解决哪些问题" class="headerLink">
+    <a href="#%e8%a7%a3%e5%86%b3%e5%93%aa%e4%ba%9b%e9%97%ae%e9%a2%98" class="header-mark"></a>解决哪些问题</h2><p>求解一些递推公式的第n项的时候，通过递推公式构造转移矩阵，并用矩阵快速幂可以快速得到第n项的值。特别对于n很大的时候不能循环迭代，可用矩阵快速幂解决。</p>
+<p>比如斐波那契数列： $F_0=0,F_1=1,F_n=F_n-1+F_n-2,(n \ge2,n \in N^*)$</p>
+<p>0 1 1 2 3 5 8&hellip;</p>
+<p>如果要求第n项，n比较小的话，可以直接循环迭代出来。</p>
+<p>如果n比较大，第一亿个是多少，用循环就太慢了，矩阵快速幂更快更适合。</p>
+<p>根据矩阵乘法性质，构造转移矩阵</p>
+<div>
+$$
+\begin{bmatrix}
+1&1\\
+1&0\end{bmatrix} \times\begin{bmatrix}
+F_{n-1}\\
+F_{n-2}
+\end{bmatrix} = \begin{bmatrix}
+F_{n}\\
+F_{n-1}
+\end{bmatrix}
+$$
+</div>
+<p>那么</p>
+<div>
+$$
+\begin{bmatrix}
+1&1\\
+1&0\end{bmatrix}^{n-1} \times\begin{bmatrix}
+F_{1}\\
+F_{0}
+\end{bmatrix} = \begin{bmatrix}
+F_{n}\\
+F_{n-1}
+\end{bmatrix}
+$$
+</div>
+<p>这样问题就变成了求转移矩阵的幂。这个转移矩阵一定构造成方阵。</p>
+<h2 id="矩阵快速幂" class="headerLink">
+    <a href="#%e7%9f%a9%e9%98%b5%e5%bf%ab%e9%80%9f%e5%b9%82" class="header-mark"></a>矩阵快速幂</h2><div class="code-block highlight is-closed show-line-numbers  tw-group tw-my-2">
+  <div class="
+    code-block-title 
+    
+    tw-flex 
+    tw-flex-row 
+    tw-justify-between 
+    tw-w-full tw-bg-bgColor-secondary
+    ">      
+    <button 
+      class="
+        tw-select-none 
+        tw-mx-2 
+        tw-block
+        group-[.is-open]:tw-rotate-90
+        tw-transition-[transform] 
+        tw-duration-500 
+        tw-ease-in-out
+        print:!tw-hidden"
+      disabled
+      aria-hidden="true"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z"/></svg></button>
+
+    <div class="code-block-title-bar tw-w-full">
+      <p class="tw-select-none !tw-my-1">cpp</p>
+    </div>
+    <div class="tw-flex">
+      <button 
+        class="
+          line-number-button
+          tw-select-none 
+          tw-mx-2 
+          tw-hidden 
+          group-[.is-open]:tw-block 
+          group-[.show-line-numbers]:tw-text-fgColor-link 
+          print:!tw-hidden" 
+        title="Toggle line numbers"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M61.77 401l17.5-20.15a19.92 19.92 0 0 0 5.07-14.19v-3.31C84.34 356 80.5 352 73 352H16a8 8 0 0 0-8 8v16a8 8 0 0 0 8 8h22.83a157.41 157.41 0 0 0-11 12.31l-5.61 7c-4 5.07-5.25 10.13-2.8 14.88l1.05 1.93c3 5.76 6.29 7.88 12.25 7.88h4.73c10.33 0 15.94 2.44 15.94 9.09 0 4.72-4.2 8.22-14.36 8.22a41.54 41.54 0 0 1-15.47-3.12c-6.49-3.88-11.74-3.5-15.6 3.12l-5.59 9.31c-3.72 6.13-3.19 11.72 2.63 15.94 7.71 4.69 20.38 9.44 37 9.44 34.16 0 48.5-22.75 48.5-44.12-.03-14.38-9.12-29.76-28.73-34.88zM496 224H176a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16zm0-160H176a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16V80a16 16 0 0 0-16-16zm0 320H176a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16zM16 160h64a8 8 0 0 0 8-8v-16a8 8 0 0 0-8-8H64V40a8 8 0 0 0-8-8H32a8 8 0 0 0-7.14 4.42l-8 16A8 8 0 0 0 24 64h8v64H16a8 8 0 0 0-8 8v16a8 8 0 0 0 8 8zm-3.91 160H80a8 8 0 0 0 8-8v-16a8 8 0 0 0-8-8H41.32c3.29-10.29 48.34-18.68 48.34-56.44 0-29.06-25-39.56-44.47-39.56-21.36 0-33.8 10-40.46 18.75-4.37 5.59-3 10.84 2.8 15.37l8.58 6.88c5.61 4.56 11 2.47 16.12-2.44a13.44 13.44 0 0 1 9.46-3.84c3.33 0 9.28 1.56 9.28 8.75C51 248.19 0 257.31 0 304.59v4C0 316 5.08 320 12.09 320z"/></svg></button>
+
+      <button 
+        class="
+          wrap-code-button
+          tw-select-none 
+          tw-mx-2 
+          tw-hidden 
+          group-[.is-open]:tw-block 
+          group-[.is-wrap]:tw-text-fgColor-link 
+          print:!tw-hidden" 
+        title="Toggle code wrap"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M16 132h416c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H16C7.163 60 0 67.163 0 76v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"/></svg></button>
+      
+      <button 
+        class="
+          copy-code-button
+          tw-select-none
+          tw-mx-2 
+          tw-hidden
+          group-[.is-open]:tw-block
+          hover:tw-text-fgColor-link 
+          print:!tw-hidden"
+        title="Copy code">
+          <span class="copy-icon tw-block"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M433.941 65.941l-51.882-51.882A48 48 0 0 0 348.118 0H176c-26.51 0-48 21.49-48 48v48H48c-26.51 0-48 21.49-48 48v320c0 26.51 21.49 48 48 48h224c26.51 0 48-21.49 48-48v-48h80c26.51 0 48-21.49 48-48V99.882a48 48 0 0 0-14.059-33.941zM266 464H54a6 6 0 0 1-6-6V150a6 6 0 0 1 6-6h74v224c0 26.51 21.49 48 48 48h96v42a6 6 0 0 1-6 6zm128-96H182a6 6 0 0 1-6-6V54a6 6 0 0 1 6-6h106v88c0 13.255 10.745 24 24 24h88v202a6 6 0 0 1-6 6zm6-256h-64V48h9.632c1.591 0 3.117.632 4.243 1.757l48.368 48.368a6 6 0 0 1 1.757 4.243V112z"/></svg></span>
+          <span class="check-icon tw-hidden"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M173.898 439.404l-166.4-166.4c-9.997-9.997-9.997-26.206 0-36.204l36.203-36.204c9.997-9.998 26.207-9.998 36.204 0L192 312.69 432.095 72.596c9.997-9.997 26.207-9.997 36.204 0l36.203 36.204c9.997 9.997 9.997 26.206 0 36.204l-294.4 294.401c-9.998 9.997-26.207 9.997-36.204-.001z"/></svg></span>
+      </button>
+        
+      <button 
+        class="
+          tw-select-none 
+          tw-mx-2 
+          tw-block 
+          group-[.is-open]:tw-hidden 
+          print:!tw-hidden" 
+        disabled
+        aria-hidden="true"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M328 256c0 39.8-32.2 72-72 72s-72-32.2-72-72 32.2-72 72-72 72 32.2 72 72zm104-72c-39.8 0-72 32.2-72 72s32.2 72 72 72 72-32.2 72-72-32.2-72-72-72zm-352 0c-39.8 0-72 32.2-72 72s32.2 72 72 72 72-32.2 72-72-32.2-72-72-72z"/></svg></button>
+    </div>
+  </div>
+  <pre style="counter-reset: codeblock;" class="tw-block tw-m-0 tw-p-0"><code 
+    id="codeblock-id-1" 
+    class="
+      chroma 
+      !tw-block 
+      tw-p-0
+      tw-m-0
+      tw-transition-[max-height] 
+      tw-duration-500 
+      tw-ease-in-out 
+      group-[.is-closed]:!tw-max-h-0 
+      group-[.is-wrap]:tw-text-wrap
+      tw-overflow-y-hidden
+      tw-overflow-x-auto
+      tw-scrollbar-thin
+      "><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define MATRIX_SIZE 2
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="k">const</span> <span class="kt">int</span> <span class="n">mod</span> <span class="o">=</span> <span class="mf">1e9</span><span class="o">+</span><span class="mi">7</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">struct</span> <span class="nc">Matrix</span> <span class="c1">//构造一个方阵
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">data</span><span class="p">[</span><span class="n">MATRIX_SIZE</span><span class="p">][</span><span class="n">MATRIX_SIZE</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Matrix</span><span class="p">(){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">memset</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">data</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">            <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span> <span class="c1">// 初始化为单位矩阵
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Matrix</span> <span class="k">operator</span> <span class="o">+</span> <span class="p">(</span><span class="n">Matrix</span>  <span class="n">o</span><span class="p">)</span><span class="k">const</span><span class="p">{</span> <span class="c1">//(a+b)%mod
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">Matrix</span> <span class="n">re</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">            <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">j</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">                <span class="n">re</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="n">o</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])</span> <span class="o">%</span> <span class="n">mod</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">re</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Matrix</span> <span class="k">operator</span> <span class="o">*</span> <span class="p">(</span><span class="n">Matrix</span>  <span class="n">o</span><span class="p">)</span><span class="k">const</span><span class="p">{</span> <span class="c1">//(a*b)%mod
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">Matrix</span> <span class="n">re</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">            <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">j</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">                <span class="n">re</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">k</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">k</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">re</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">re</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="p">((</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">o</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">])</span> <span class="o">%</span> <span class="n">mod</span><span class="p">))</span> <span class="o">%</span> <span class="n">mod</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">re</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Matrix</span> <span class="k">operator</span> <span class="o">^</span> <span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">)</span><span class="k">const</span><span class="p">{</span> <span class="c1">// (a^n)%mod
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">Matrix</span> <span class="n">re</span><span class="p">,</span><span class="n">base</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">base</span> <span class="o">=</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">while</span><span class="p">(</span><span class="n">n</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span><span class="p">(</span><span class="n">n</span><span class="o">&amp;</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                <span class="n">re</span> <span class="o">=</span> <span class="n">re</span> <span class="o">*</span> <span class="n">base</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">n</span><span class="o">&gt;&gt;=</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">base</span> <span class="o">=</span> <span class="n">base</span> <span class="o">*</span> <span class="n">base</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">re</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Matrix</span> <span class="nf">Psum</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">)</span><span class="k">const</span><span class="p">{</span> <span class="c1">//(a+a^2+a^3.....+a^n)%mod
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">Matrix</span> <span class="n">a</span><span class="p">,</span><span class="n">ans</span><span class="p">,</span><span class="n">pre</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">m</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">a</span> <span class="o">=</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span><span class="p">(</span><span class="n">n</span><span class="o">==</span><span class="mi">1</span><span class="p">)</span> <span class="k">return</span> <span class="n">a</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">m</span> <span class="o">=</span> <span class="n">n</span><span class="o">/</span><span class="mi">2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">pre</span> <span class="o">=</span> <span class="n">a</span><span class="p">.</span><span class="n">Psum</span><span class="p">(</span><span class="n">m</span><span class="p">);</span> <span class="c1">// a^[1,n/2] 相加
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">ans</span> <span class="o">=</span> <span class="n">pre</span> <span class="o">+</span> <span class="p">(</span><span class="n">pre</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span><span class="o">^</span><span class="n">m</span><span class="p">));</span> <span class="c1">// ans = [1,n/2] + a^(n/2)*[1,n/2]
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span><span class="p">(</span><span class="n">n</span><span class="o">&amp;</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">ans</span> <span class="o">=</span> <span class="n">ans</span> <span class="o">+</span> <span class="p">(</span><span class="n">a</span><span class="o">^</span><span class="n">n</span><span class="p">);</span>    <span class="c1">//n为奇数时候a^n会漏掉，补上
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">return</span> <span class="n">ans</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="nf">out</span><span class="p">(){</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">            <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">j</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">                <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%d &#34;</span><span class="p">,</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span><span class="n">printf</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(){</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Matrix</span> <span class="n">ma</span><span class="p">,</span><span class="n">swa</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ma</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ma</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ma</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ma</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">n</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ma</span><span class="p">.</span><span class="n">out</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="n">scanf</span><span class="p">(</span><span class="s">&#34;%d&#34;</span> <span class="p">,</span> <span class="o">&amp;</span><span class="n">n</span><span class="p">)</span> <span class="p">,</span> <span class="n">n</span><span class="o">&gt;=</span><span class="mi">1</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">swa</span> <span class="o">=</span> <span class="n">ma</span><span class="o">^</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">//swa.out();
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">printf</span><span class="p">(</span><span class="s">&#34;is %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">swa</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">1</span> <span class="o">+</span> <span class="n">swa</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">0</span> <span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre>
+</div>
+<h2 id="构造矩阵例题" class="headerLink">
+    <a href="#%e6%9e%84%e9%80%a0%e7%9f%a9%e9%98%b5%e4%be%8b%e9%a2%98" class="header-mark"></a>构造矩阵例题</h2><p><a href="http://acm.hdu.edu.cn/showproblem.php?pid=6470" target="_blank" rel="noopener noreferrer">hdu6470</a></p>
+<blockquote>
+  <p>Farmer John有n头奶牛.</p>
+<p>某天奶牛想要数一数有多少头奶牛,以一种特殊的方式:</p>
+<p>第一头奶牛为1号,第二头奶牛为2号,第三头奶牛之后,假如当前奶牛是第n头,那么他的编号就是2倍的第n-2头奶牛的编号加上第n-1头奶牛的编号再加上自己当前的n的三次方为自己的编号.</p>
+<p>现在Farmer John想知道,第n头奶牛的编号是多少,估计答案会很大,你只要输出答案对于123456789取模.</p>
+
+</blockquote><p>根据题意可以得到递推公式：</p>
+<div>
+$$
+F_n=\begin{cases}
+1& n=1\\
+2& n=2\\
+2\times F_{n-2} + F_{n-1}+n^3& n\ge3
+\end{cases}
+$$
+</div>
+<p>由于$n^3$的存在，这个递推公式并不是线性的，所以要想办法把$n^3$展开：</p>
+<div>
+$$
+n^3=(n-1+1)^3=C^0_3(n-1)^3+C^1_3(n-1)^2+C^2_3(n-1)^1+C^3_3(n-1)^0 \\=1\times(n-1)^3+3\times (n-1)^2+3\times(n-1)^1+1\times(n-1)^0
+$$
+</div>
+<p>那么转移矩阵$M$为：</p>
+<div>
+$$
+\begin{bmatrix}
+0&1&0&0&0&0\\
+2&1&C_3^0&C_3^1&C_3^2&C_3^3\\
+0&0&C_3^0&C_3^1&C_3^2&C_3^3\\
+0&0&0&C_2^0&C_2^1&C_2^2\\
+0&0&0&0&C_1^0 &C_1^1\\
+0&0&0&0&0&1
+\end{bmatrix}\times
+\begin{bmatrix}
+F_{n-2}\\F_{n-1}\\(n-1)^3\\(n-1)^2\\(n-1)^1\\(n-1)^0
+\end{bmatrix}
+ = 
+\begin{bmatrix}
+F_{n-1}\\F_{n}\\(n)^3\\(n)^2\\(n)^1\\(n)^0
+\end{bmatrix}
+$$
+</div>
+<p>取$n=3$：</p>
+<div>
+$$
+\begin{bmatrix}
+F_{n-2}\\F_{n-1}\\(n-1)^3\\(n-1)^2\\(n-1)^1\\(n-1)^0
+\end{bmatrix}=\begin{bmatrix}
+F_{1}\\F_{2 }\\2^3\\ 2^2\\ 2^1\\ 2^0
+\end{bmatrix}
+$$
+</div>
+<p>所以：</p>
+<div>
+$$
+F_n = M^{n-2 } \times \begin{bmatrix}
+F_{1}\\F_{2 }\\2^3\\ 2^2\\ 2^1\\ 2^0
+\end{bmatrix},n \ge 2
+$$
+</div>
+AC代码：
+<div class="code-block highlight is-closed show-line-numbers  tw-group tw-my-2">
+  <div class="
+    code-block-title 
+    
+    tw-flex 
+    tw-flex-row 
+    tw-justify-between 
+    tw-w-full tw-bg-bgColor-secondary
+    ">      
+    <button 
+      class="
+        tw-select-none 
+        tw-mx-2 
+        tw-block
+        group-[.is-open]:tw-rotate-90
+        tw-transition-[transform] 
+        tw-duration-500 
+        tw-ease-in-out
+        print:!tw-hidden"
+      disabled
+      aria-hidden="true"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z"/></svg></button>
+
+    <div class="code-block-title-bar tw-w-full">
+      <p class="tw-select-none !tw-my-1">cpp</p>
+    </div>
+    <div class="tw-flex">
+      <button 
+        class="
+          line-number-button
+          tw-select-none 
+          tw-mx-2 
+          tw-hidden 
+          group-[.is-open]:tw-block 
+          group-[.show-line-numbers]:tw-text-fgColor-link 
+          print:!tw-hidden" 
+        title="Toggle line numbers"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M61.77 401l17.5-20.15a19.92 19.92 0 0 0 5.07-14.19v-3.31C84.34 356 80.5 352 73 352H16a8 8 0 0 0-8 8v16a8 8 0 0 0 8 8h22.83a157.41 157.41 0 0 0-11 12.31l-5.61 7c-4 5.07-5.25 10.13-2.8 14.88l1.05 1.93c3 5.76 6.29 7.88 12.25 7.88h4.73c10.33 0 15.94 2.44 15.94 9.09 0 4.72-4.2 8.22-14.36 8.22a41.54 41.54 0 0 1-15.47-3.12c-6.49-3.88-11.74-3.5-15.6 3.12l-5.59 9.31c-3.72 6.13-3.19 11.72 2.63 15.94 7.71 4.69 20.38 9.44 37 9.44 34.16 0 48.5-22.75 48.5-44.12-.03-14.38-9.12-29.76-28.73-34.88zM496 224H176a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16zm0-160H176a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16V80a16 16 0 0 0-16-16zm0 320H176a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h320a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16zM16 160h64a8 8 0 0 0 8-8v-16a8 8 0 0 0-8-8H64V40a8 8 0 0 0-8-8H32a8 8 0 0 0-7.14 4.42l-8 16A8 8 0 0 0 24 64h8v64H16a8 8 0 0 0-8 8v16a8 8 0 0 0 8 8zm-3.91 160H80a8 8 0 0 0 8-8v-16a8 8 0 0 0-8-8H41.32c3.29-10.29 48.34-18.68 48.34-56.44 0-29.06-25-39.56-44.47-39.56-21.36 0-33.8 10-40.46 18.75-4.37 5.59-3 10.84 2.8 15.37l8.58 6.88c5.61 4.56 11 2.47 16.12-2.44a13.44 13.44 0 0 1 9.46-3.84c3.33 0 9.28 1.56 9.28 8.75C51 248.19 0 257.31 0 304.59v4C0 316 5.08 320 12.09 320z"/></svg></button>
+
+      <button 
+        class="
+          wrap-code-button
+          tw-select-none 
+          tw-mx-2 
+          tw-hidden 
+          group-[.is-open]:tw-block 
+          group-[.is-wrap]:tw-text-fgColor-link 
+          print:!tw-hidden" 
+        title="Toggle code wrap"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M16 132h416c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H16C7.163 60 0 67.163 0 76v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"/></svg></button>
+      
+      <button 
+        class="
+          copy-code-button
+          tw-select-none
+          tw-mx-2 
+          tw-hidden
+          group-[.is-open]:tw-block
+          hover:tw-text-fgColor-link 
+          print:!tw-hidden"
+        title="Copy code">
+          <span class="copy-icon tw-block"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M433.941 65.941l-51.882-51.882A48 48 0 0 0 348.118 0H176c-26.51 0-48 21.49-48 48v48H48c-26.51 0-48 21.49-48 48v320c0 26.51 21.49 48 48 48h224c26.51 0 48-21.49 48-48v-48h80c26.51 0 48-21.49 48-48V99.882a48 48 0 0 0-14.059-33.941zM266 464H54a6 6 0 0 1-6-6V150a6 6 0 0 1 6-6h74v224c0 26.51 21.49 48 48 48h96v42a6 6 0 0 1-6 6zm128-96H182a6 6 0 0 1-6-6V54a6 6 0 0 1 6-6h106v88c0 13.255 10.745 24 24 24h88v202a6 6 0 0 1-6 6zm6-256h-64V48h9.632c1.591 0 3.117.632 4.243 1.757l48.368 48.368a6 6 0 0 1 1.757 4.243V112z"/></svg></span>
+          <span class="check-icon tw-hidden"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M173.898 439.404l-166.4-166.4c-9.997-9.997-9.997-26.206 0-36.204l36.203-36.204c9.997-9.998 26.207-9.998 36.204 0L192 312.69 432.095 72.596c9.997-9.997 26.207-9.997 36.204 0l36.203 36.204c9.997 9.997 9.997 26.206 0 36.204l-294.4 294.401c-9.998 9.997-26.207 9.997-36.204-.001z"/></svg></span>
+      </button>
+        
+      <button 
+        class="
+          tw-select-none 
+          tw-mx-2 
+          tw-block 
+          group-[.is-open]:tw-hidden 
+          print:!tw-hidden" 
+        disabled
+        aria-hidden="true"><svg class="icon"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M328 256c0 39.8-32.2 72-72 72s-72-32.2-72-72 32.2-72 72-72 72 32.2 72 72zm104-72c-39.8 0-72 32.2-72 72s32.2 72 72 72 72-32.2 72-72-32.2-72-72-72zm-352 0c-39.8 0-72 32.2-72 72s32.2 72 72 72 72-32.2 72-72-32.2-72-72-72z"/></svg></button>
+    </div>
+  </div>
+  <pre style="counter-reset: codeblock;" class="tw-block tw-m-0 tw-p-0"><code 
+    id="codeblock-id-2" 
+    class="
+      chroma 
+      !tw-block 
+      tw-p-0
+      tw-m-0
+      tw-transition-[max-height] 
+      tw-duration-500 
+      tw-ease-in-out 
+      group-[.is-closed]:!tw-max-h-0 
+      group-[.is-wrap]:tw-text-wrap
+      tw-overflow-y-hidden
+      tw-overflow-x-auto
+      tw-scrollbar-thin
+      "><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#define MATRIX_SIZE 6
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">const</span> <span class="kt">int</span> <span class="n">mod</span> <span class="o">=</span> <span class="mi">123456789</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">struct</span> <span class="nc">Matrix</span> <span class="c1">//构造一个方阵
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">long</span> <span class="kt">long</span> <span class="n">data</span><span class="p">[</span><span class="n">MATRIX_SIZE</span><span class="p">][</span><span class="n">MATRIX_SIZE</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Matrix</span><span class="p">(){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">memset</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">data</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">            <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span> <span class="c1">// 初始化为单位矩阵
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Matrix</span> <span class="k">operator</span> <span class="o">*</span> <span class="p">(</span><span class="n">Matrix</span>  <span class="n">o</span><span class="p">)</span><span class="k">const</span><span class="p">{</span> <span class="c1">//(a*b)%mod
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">Matrix</span> <span class="n">re</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">            <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">j</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">                <span class="n">re</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">                <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">k</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">k</span><span class="o">&lt;</span><span class="n">MATRIX_SIZE</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">re</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">re</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="p">((</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">o</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">])</span> <span class="o">%</span> <span class="n">mod</span><span class="p">))</span> <span class="o">%</span> <span class="n">mod</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">re</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Matrix</span> <span class="k">operator</span> <span class="o">^</span> <span class="p">(</span><span class="kt">long</span> <span class="kt">long</span> <span class="n">n</span><span class="p">)</span><span class="k">const</span><span class="p">{</span> <span class="c1">// (a^n)%mod
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">Matrix</span> <span class="n">re</span><span class="p">,</span><span class="n">base</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">base</span> <span class="o">=</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">while</span><span class="p">(</span><span class="n">n</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span><span class="p">(</span><span class="n">n</span><span class="o">&amp;</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                <span class="n">re</span> <span class="o">=</span> <span class="n">re</span> <span class="o">*</span> <span class="n">base</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">n</span><span class="o">&gt;&gt;=</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">base</span> <span class="o">=</span> <span class="n">base</span> <span class="o">*</span> <span class="n">base</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">re</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="n">Matrix</span> <span class="n">ma</span><span class="p">,</span><span class="n">swa</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(){</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">mm</span><span class="p">[</span><span class="mi">6</span><span class="p">][</span><span class="mi">6</span><span class="p">]</span><span class="o">=</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">};</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="n">i</span><span class="o">&lt;</span><span class="mi">6</span><span class="p">;</span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="n">j</span><span class="o">&lt;</span><span class="mi">6</span><span class="p">;</span><span class="n">j</span><span class="o">++</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">ma</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">=</span><span class="n">mm</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">long</span> <span class="kt">long</span> <span class="n">t</span><span class="p">,</span><span class="n">a</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">cin</span><span class="o">&gt;&gt;</span><span class="n">t</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">while</span><span class="p">(</span><span class="n">t</span><span class="o">--</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">        <span class="n">cin</span><span class="o">&gt;&gt;</span><span class="n">a</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">swa</span> <span class="o">=</span> <span class="n">ma</span><span class="o">^</span><span class="p">(</span><span class="n">a</span><span class="o">-</span><span class="mi">2</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">long</span> <span class="kt">long</span> <span class="n">ac</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ac</span><span class="o">=</span> <span class="n">swa</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ac</span><span class="o">+=</span><span class="n">swa</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ac</span><span class="o">+=</span><span class="n">swa</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="mi">8</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ac</span><span class="o">+=</span><span class="n">swa</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span><span class="o">*</span><span class="mi">4</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ac</span><span class="o">+=</span><span class="n">swa</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ac</span><span class="o">+=</span><span class="n">swa</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">5</span><span class="p">]</span><span class="o">*</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">ac</span><span class="o">%</span><span class="n">mod</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span></span></span></code></pre>
+</div>
+<h2 id="附赠" class="headerLink">
+    <a href="#%e9%99%84%e8%b5%a0" class="header-mark"></a>附赠！</h2><p>这个方程怎么用矩阵计算，可以试着练练手。</p>
+<div>
+$$
+f(x)=
+\begin{cases}
+1& x=0 \\
+1& x=1 \\
+9\times f(x-1) + 9\times f(x-2) + 6& x>1
+\end{cases}
+$$
+</div>
+]]></description>
+</item></channel>
+</rss>
